@@ -8,20 +8,37 @@ import pandas as pd
 
 class PESTbase(object):
     """
-    base class for PEST run:
-    * reads run information from PEST control file
-    * goal is to have something that can be inherited by other classes, similar to flopy base classes
-    * could also add write method, which would write out a new PEST control file
+    base class for PEST run
+    besides containing the run name, could also be a container for other global settings
+    (a longer run name to use in plot titles,
     """
 
     def __init__(self, basename, run_folder=None):
 
-        self.__name = basename
-        self.pstfile = self.__name + '.pst'
+        self.basename = basename
+        self.pstfile = self.basename + '.pst'
         if run_folder is None: run_folder = os.getcwd()
         self.run_folder = run_folder
 
-        # PEST variables (should there be a separate object for these?)
+
+class Pst(PESTbase):
+    """
+    Class for PEST control file
+    * has method to read in run information from PEST control file
+
+    * could also add write method, which would write out a new PEST control file
+
+    """
+    def __init__(self, basename, run_folder=None):
+
+        # example of how to initialize code from parent class, and have an __init__ method specific to the child class
+        PESTbase.__init__(self, basename, run_folder)
+
+        # PEST variables
+        # note: these could also be included before the __init__ method, in which case they would retain their values
+        # in the Pst class (if it was called directly), but could be updated in instances of the Pst class. Not sure if we
+        # need this, but it is an option.
+
         self.RSTFLE = 'restart'
         self.PESTMODE = 'estimation'
 
