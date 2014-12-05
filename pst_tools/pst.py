@@ -14,13 +14,18 @@ class Pest(object):
 
     could also be a container for other global settings
     (a longer run name to use in plot titles, etc)
+
+    basename : string
+    pest basename or pest control file (includes path)
     """
 
-    def __init__(self, basename, run_folder=None):
+    def __init__(self, basename):
 
-        self.basename = basename
-        if run_folder is None: run_folder = os.getcwd()
-        self.run_folder = run_folder
+        self.basename = os.path.split(basename)[-1].split('.')[0]
+        self.run_folder = os.path.split(basename)[0]
+        if len(self.run_folder) == 0:
+            self.run_folder = os.getcwd()
+
         self.pstfile = os.path.join(self.run_folder, self.basename + '.pst')
 
         # list of information from PEST control file
