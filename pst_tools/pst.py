@@ -6,22 +6,104 @@ import numpy as np
 import pandas as pd
 
 
-class PESTbase(object):
+class Pest(object):
     """
     base class for PEST run
-    besides containing the run name, could also be a container for other global settings
-    (a longer run name to use in plot titles,
+    contains run name, folder and some control data from PEST control file
+    also has methods to read in parameter and observation data from PEST control file
+
+    could also be a container for other global settings
+    (a longer run name to use in plot titles, etc)
     """
 
     def __init__(self, basename, run_folder=None):
 
         self.basename = basename
-        self.pstfile = self.basename + '.pst'
         if run_folder is None: run_folder = os.getcwd()
         self.run_folder = run_folder
+        self.pstfile = os.path.join(self.run_folder, self.basename + '.pst')
+
+        # list of information from PEST control file
+        self.pst = []
+
+        # control data
+        self.RSTFLE = 'restart'
+        self.PESTMODE = 'estimation'
+
+        self.NPAR = 1
+        self.NOBS = 1
+        self.NPARGP = 1
+        self.NPRIOR = 0
+        self.NOBSGP = 1
+
+        # parameter data
+        self.paradata = pd.DataFrame()
+        self.pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
+                             'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
+
+        # observation data
+        self.obsdata = pd.DataFrame()
+        self.obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
 
 
-class Pst(PESTbase):
+    def read_top_control_data(self):
+        """
+        reads basic run information from control data section of PEST control file
+        """
+        print 'control data...'
+        self.RSTFLE, self.PESTMODE = self.pst[2].strip().split()
+        self.NPAR, self.NOBS, self.NPARGP, self.NPRIOR, self.NOBSGP \
+        = [int(s) for s in self.pst[3].strip().split()[0:5]]
+
+
+    def read_par_data(self):
+        """
+        convenience function to read parameter information into a dataframe
+        """
+        knt = 0
+        for line in self.pst:
+            knt +=1
+            if 'parameter data' in line:
+                break
+
+        print 'parameter data...'
+        tmp = {}
+        for i in np.arange(self.NPAR) + knt:
+
+            l = self.pst[i].strip().split()
+            pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
+                       l[6], int(l[7]), int(l[8]), int(l[9])]
+
+            tmp[pardata[0]] = dict(zip(self.pardata_attr, pardata))
+
+        self.pardata = pd.DataFrame.from_dict(tmp, orient='index')
+        self.pardata = self.pardata[self.pardata_attr] # preserve column order
+
+
+    def read_obs_data(self):
+        """
+        convenience function to read observation information into a dataframe
+        """
+        knt = 0
+        for line in self.pst:
+            knt +=1
+            if 'observation data' in line:
+                break
+
+        print 'observation data...'
+        tmp = {}
+        for i in np.arange(self.NOBS) + knt:
+
+            l = self.pst[i].strip().split()
+            obsdata = [l[0], float(l[1]), float(l[2]), l[3]]
+
+            tmp[obsdata[0]] = dict(zip(self.obsdata_attr, obsdata))
+
+        self.obsdata = pd.DataFrame.from_dict(tmp, orient='index')
+        self.obsdata = self.obsdata[self.obsdata_attr] # preserve column order
+
+
+class Pst(Pest):
     """
     Class for PEST control file
     * has method to read in run information from PEST control file
@@ -32,23 +114,14 @@ class Pst(PESTbase):
     def __init__(self, basename, run_folder=None):
 
         # example of how to initialize code from parent class, and have an __init__ method specific to the child class
-        PESTbase.__init__(self, basename, run_folder)
+        Pest.__init__(self, basename, run_folder)
 
         # PEST variables
         # note: these could also be included before the __init__ method, in which case they would retain their values
         # in the Pst class (if it was called directly), but could be updated in instances of the Pst class. Not sure if we
         # need this, but it is an option.
 
-        self.RSTFLE = 'restart'
-        self.PESTMODE = 'estimation'
-
-        # control data
-        self.NPAR = 1
-        self.NOBS = 1
-        self.NPARGP = 1
-        self.NPRIOR = 0
-        self.NOBSGP = 1
-
+        # control data not in base class
         self.NTPLFLE = 1
         self.NINSFLE = 1
         self.PRECIS = 'double'
@@ -99,20 +172,9 @@ class Pst(PESTbase):
         self.pargroups_attr = ['PARGPNME', 'INCTYP', 'DERINC', 'DERINCLB', 'FORCEN',
                                'DERINCMUL', 'DERMTHD']
 
-        # parameter data
-        self.pardata_ind = int()
-        self.paradata = pd.DataFrame()
-        self.pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
-                             'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
-
         # observation groups
         self.obsgroups_ind = int()
         self.obsgroups = []
-
-        # observation data
-        self.obsdata_ind = int()
-        self.obsdata = pd.DataFrame()
-        self.obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
 
         # model command line
         self.batchfile = ''
@@ -141,19 +203,15 @@ class Pst(PESTbase):
 
     def read_pst(self):
         """
-        Read run information from the PEST control file
+        Read all run information from the PEST control file
         """
 
-        f = os.path.join(self.run_folder, self.pstfile)
-        print 'reading {}...'.format(f)
+        print 'reading {}...'.format(self.pstfile)
 
-        self.pst = open(f).readlines()
+        self.pst = open(self.pstfile).readlines()
 
-        self.RSTFLE, self.PESTMODE = self.pst[2].strip().split()
-
-        print 'control data...'
-        self.NPAR, self.NOBS, self.NPARGP, self.NPRIOR, self.NOBSGP \
-        = [int(s) for s in self.pst[3].strip().split()[0:5]]
+        # control data
+        self.read_top_control_data()
 
         self.NTPLFLE, self.NINSFLE = [int(s) for s in self.pst[4].strip().split()[0:2]]
         self.PRECIS, self.DPOINT = self.pst[4].strip().split()[2:4]
@@ -193,6 +251,13 @@ class Pst(PESTbase):
         if not 'parsaveitn' in self.pst[9].lower():
             self.PARSAVEITN = ''
 
+
+        # read parameter data
+        self.read_par_data()
+
+        # read observation data
+        self.read_obs_data()
+
         # read rest of pst file
         knt = 10
         for line in self.pst[10:]:
@@ -210,20 +275,10 @@ class Pst(PESTbase):
                 for i in np.arange(self.NPARGP) + 1:
                     self.read_par_group(self.pst[knt + i])
 
-            if 'parameter data' in line:
-                print 'parameter data...'
-                self.pardata_ind = knt + 1
-                self.read_par_data()
-
             if 'observation groups' in line:
                 print 'observation groups...'
                 self.obsgroups_ind = knt + 1
                 self.read_obs_groups()
-
-            if 'observation data' in line:
-                print 'observation data...'
-                self.obsdata_ind = knt + 1
-                self.read_obs_data()
 
             if 'model command line' in line:
                 print 'batch file...'
@@ -263,24 +318,6 @@ class Pst(PESTbase):
         self.pargroups[pargp[0]] = dict(zip(self.pargroups_attr, pargp))
 
 
-    def read_par_data(self):
-        """
-        convenience function to read parameter information into a dataframe
-        """
-        knt = self.pardata_ind
-        tmp = {}
-        for i in np.arange(self.NPAR) + knt:
-
-            l = self.pst[i].strip().split()
-            pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
-                       l[6], int(l[7]), int(l[8]), int(l[9])]
-
-            tmp[pardata[0]] = dict(zip(self.pardata_attr, pardata))
-
-        self.pardata = pd.DataFrame.from_dict(tmp, orient='index')
-        self.pardata = self.pardata[self.pardata_attr] # preserve column order
-
-
     def read_obs_groups(self):
         """
         convenience function to read observation groups into a list
@@ -288,23 +325,6 @@ class Pst(PESTbase):
         knt = self.obsgroups_ind
         for i in np.arange(self.NOBSGP) + knt:
             self.obsgroups.append(self.pst[i].strip())
-
-
-    def read_obs_data(self):
-        """
-        convenience function to read observation information into a dataframe
-        """
-        knt = self.obsdata_ind
-        tmp = {}
-        for i in np.arange(self.NOBS) + knt:
-
-            l = self.pst[i].strip().split()
-            obsdata = [l[0], float(l[1]), float(l[2]), l[3]]
-
-            tmp[obsdata[0]] = dict(zip(self.obsdata_attr, obsdata))
-
-        self.obsdata = pd.DataFrame.from_dict(tmp, orient='index')
-        self.obsdata = self.obsdata[self.obsdata_attr] # preserve column order
 
 
     def read_instpl(self):
