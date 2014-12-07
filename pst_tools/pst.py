@@ -28,84 +28,117 @@ class Pest(object):
 
         self.pstfile = os.path.join(self.run_folder, self.basename + '.pst')
 
-        # list of information from PEST control file
-        self.pst = []
-
-        # control data
-        self.RSTFLE = 'restart'
-        self.PESTMODE = 'estimation'
-
-        self.NPAR = 1
-        self.NOBS = 1
-        self.NPARGP = 1
-        self.NPRIOR = 0
-        self.NOBSGP = 1
+        # basic control data
+        # Don't really need this here.  Use Pst() class 
+#        with open(self.pstfile) as pstfile:
+#            top_control_data = [next(pstfile) for x in xrange(4)]
+#        #RSTFLE and PESTMODE aren't really helpful in this class
+#        self.RSTFLE, self.PESTMODE = top_control_data[2].strip().split()
+#        self.NPAR, self.NOBS, self.NPARGP, self.NPRIOR, self.NOBSGP \
+#        = [int(s) for s in top_control_data[3].strip().split()[0:5]]
 
         # parameter data
-        self.paradata = pd.DataFrame()
-        self.pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
-                             'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
+        self._read_par_data()
 
         # observation data
-        self.obsdata = pd.DataFrame()
-        self.obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
+        self._read_obs_data()
+        
 
-
-    def read_top_control_data(self):
-        """
-        reads basic run information from control data section of PEST control file
-        """
-        print 'control data...'
-        self.RSTFLE, self.PESTMODE = self.pst[2].strip().split()
-        self.NPAR, self.NOBS, self.NPARGP, self.NPRIOR, self.NOBSGP \
-        = [int(s) for s in self.pst[3].strip().split()[0:5]]
-
-
-    def read_par_data(self):
+    def _read_par_data(self):
         """
         convenience function to read parameter information into a dataframe
         """
+        pst = open(self.pstfile).readlines()
+        NPAR = [int(s) for s in pst[3].strip().split()[0]]
+        pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
+        'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
         knt = 0
-        for line in self.pst:
+        for line in pst:
             knt +=1
             if 'parameter data' in line:
                 break
-
-        print 'parameter data...'
         tmp = {}
-        for i in np.arange(self.NPAR) + knt:
+        for i in np.arange(NPAR) + knt:
 
-            l = self.pst[i].strip().split()
+            l = pst[i].strip().split()
             pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
                        l[6], int(l[7]), int(l[8]), int(l[9])]
 
-            tmp[pardata[0]] = dict(zip(self.pardata_attr, pardata))
+            tmp[pardata[0]] = dict(zip(pardata_attr, pardata))
 
         self.pardata = pd.DataFrame.from_dict(tmp, orient='index')
-        self.pardata = self.pardata[self.pardata_attr] # preserve column order
+        self.pardata = self.pardata[pardata_attr] # preserve column order
 
 
-    def read_obs_data(self):
+    def _read_obs_data(self):
         """
         convenience function to read observation information into a dataframe
         """
+        pst = open(self.pstfile).readlines()
+        NOBS = [int(s) for s in pst[3].strip().split()[1]]
+        obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
         knt = 0
-        for line in self.pst:
+        for line in pst:
             knt +=1
             if 'observation data' in line:
                 break
-
-        print 'observation data...'
         tmp = {}
-        for i in np.arange(self.NOBS) + knt:
+        for i in np.arange(NOBS) + knt:
 
-            l = self.pst[i].strip().split()
+            l = pst[i].strip().split()
             obsdata = [l[0], float(l[1]), float(l[2]), l[3]]
 
-            tmp[obsdata[0]] = dict(zip(self.obsdata_attr, obsdata))
+            tmp[obsdata[0]] = dict(zip(obsdata_attr, obsdata))
 
         self.obsdata = pd.DataFrame.from_dict(tmp, orient='index')
-        self.obsdata = self.obsdata[self.obsdata_attr] # preserve column order
+        self.obsdata = self.obsdata[obsdata_attr] # preserve column order
+        
+    def _load_jco(self):
+        import struct
+        '''
+        Read PEST Jacobian matrix file (binary) into Pandas data frame
+        
+        Returns
+        -------
+        jco_df : Pandas DataFrame of jco
+        
+        Notes:
+        Method is is the Pest class because it will be used for several other 
+        classes; including Jco, ParSen, Cor
+        '''
+        f = open(self.pstfile.rstrip('.pst')+'.jco','rb')
+        # Header info of .jco file
+        npar = abs(struct.unpack('i', f.read(4))[0])
+        nobs = abs(struct.unpack('i', f.read(4))[0])
+        nrecords = abs(struct.unpack('i', f.read(4))[0])
+                                       
+        tmp = np.zeros((nobs, npar))    
+            
+        for record in range(nrecords):
+            j = struct.unpack('i', f.read(4))[0]
+            col = ((j-1) / nobs) + 1
+            row = j - ((col - 1) * nobs)
+            data = struct.unpack('d', f.read(8))[0]
+            tmp[row-1, col-1] = data
+           
+        pars = []
+        for i in range(npar):
+            par_name = struct.unpack('12s', f.read(12))[0].strip().lower() 
+            pars.append(par_name)
+    
+        obs = []
+        for i in range(nobs):
+            ob_name = struct.unpack('20s', f.read(20))[0].strip().lower()
+            obs.append(ob_name)
+        
+        f.close()
+        
+        
+        jco_df = pd.DataFrame(tmp, index = obs, columns = pars)
+        # Clean Up
+        del(tmp)
+        
+        return jco_df
 
 
 class Pst(Pest):
@@ -116,97 +149,24 @@ class Pst(Pest):
     * could also add write method, which would write out a new PEST control file
 
     """
-    def __init__(self, basename, run_folder=None):
+    def __init__(self, basename):
 
         # example of how to initialize code from parent class, and have an __init__ method specific to the child class
-        Pest.__init__(self, basename, run_folder)
+        Pest.__init__(self, basename)
 
         # PEST variables
         # note: these could also be included before the __init__ method, in which case they would retain their values
         # in the Pst class (if it was called directly), but could be updated in instances of the Pst class. Not sure if we
         # need this, but it is an option.
 
-        # control data not in base class
-        self.NTPLFLE = 1
-        self.NINSFLE = 1
-        self.PRECIS = 'double'
-        self.DPOINT = 'point'
-
-        self.RLAMBDA1 = 20
-        self.RLAMFAC = -3
-        self.PHIRATSUF = 0.3
-        self.PHIREDLAM = 0.01
-        self.NUMLAM = -10
-        self.JACUPDATE = 999
-        self.LAMFORGIVE = 'lamforgive'
-        self.DERFORGIVE = ''
-
-        self.RELPARMAX = 10
-        self.FACPARMAX = 10
-        self.FACORIG = 0.001
-
-        self.PHIREDSWH = 0.1
-        self.NOPTSWITCH = 1
-        self.DOAUI = 'noaui'
-
-        self.NOPTMAX = 0
-        self.PHIREDSTP = 0.01
-        self.NPHISTP = 3
-        self.NPHINORED = 3
-        self.RELPARSTP = 0.01
-        self.NRELPAR = 3
-
-        self.ICOV = 0
-        self.ICOR = 0
-        self.IEIG = 0
-        self.REISAVEITN = 'REISAVEITN'
-        self.PARSAVEITN = 'PARSAVEITN'
-
-        # singular value decomposition
-        self.SVD = False
-        self.SVDMODE = 1,
-        self.MAXSING = 1
-        self.EIGTHRESH = 5e-7
-        self.EIGWRITE = 1
-
         # svd assist
+        # Not sure what this is for?
         self.svda = {}
+        
+        # Read in all the PEST variables
+        self._read_pst()
 
-        # parameter groups
-        self.pargroups = {}
-        self.pargroups_attr = ['PARGPNME', 'INCTYP', 'DERINC', 'DERINCLB', 'FORCEN',
-                               'DERINCMUL', 'DERMTHD']
-
-        # observation groups
-        self.obsgroups_ind = int()
-        self.obsgroups = []
-
-        # model command line
-        self.batchfile = ''
-
-        # model input/output
-        model_io_ind = int()
-        self.ins = {}
-        self.tpl = {}
-
-        # prior information
-        self.prior_ind = ()
-        self.prior = []
-
-        # regularisation
-        self.PHIMLIM = self.NOBS
-        self.PHIMACCEPT = self.PHIMLIM * 1.05
-        self.FRACPHIM = 0.10
-        self.WFINIT = 1.0
-        self.WFMIN = 1e-10
-        self.WFMAX = 1e10
-        self.REGCONTINUE = ''
-        self.WFFAC = 1.3
-        self.WFTOL = 0.01
-        self.IREGADJ = 1
-
-
-    def read_pst(self):
+    def _read_pst(self):
         """
         Read all run information from the PEST control file
         """
@@ -214,9 +174,13 @@ class Pst(Pest):
         print 'reading {}...'.format(self.pstfile)
 
         self.pst = open(self.pstfile).readlines()
+        
+        # initialize attributes
 
         # control data
-        self.read_top_control_data()
+        self.RSTFLE, self.PESTMODE = self.pst[2].strip().split()
+        self.NPAR, self.NOBS, self.NPARGP, self.NPRIOR, self.NOBSGP \
+        = [int(s) for s in self.pst[3].strip().split()[0:5]]
 
         self.NTPLFLE, self.NINSFLE = [int(s) for s in self.pst[4].strip().split()[0:2]]
         self.PRECIS, self.DPOINT = self.pst[4].strip().split()[2:4]
@@ -258,85 +222,101 @@ class Pst(Pest):
 
 
         # read parameter data
-        self.read_par_data()
+        self._read_par_data()
 
         # read observation data
-        self.read_obs_data()
+        self._read_obs_data()
 
         # read rest of pst file
         knt = 10
         for line in self.pst[10:]:
 
             if 'singular value decompostion' in line:
-                print 'singular value decompostion...'
+                #print 'singular value decompostion...'
                 self.SVD = True
                 self.SVDMODE = int(self.pst[knt + 1].strip().split()[0])
                 self.MAXSING = int(self.pst[knt + 2].strip().split()[0])
                 self.EIGTHRESH = float(self.pst[knt + 2].strip().split()[1])
                 self.EIGWRITE = int(self.pst[knt + 3].strip().split()[0])
+            else:
+                self.SVD = False
 
             if 'parameter groups' in line:
-                print 'parameter groups...'
+                #print 'parameter groups...'
                 for i in np.arange(self.NPARGP) + 1:
-                    self.read_par_group(self.pst[knt + i])
+                    self._read_par_group(self.pst[knt + i])
 
             if 'observation groups' in line:
-                print 'observation groups...'
-                self.obsgroups_ind = knt + 1
-                self.read_obs_groups()
+                #print 'observation groups...'
+                self._obsgroups_ind = knt + 1
+                self._read_obs_groups()
 
             if 'model command line' in line:
-                print 'batch file...'
+                #print 'batch file...'
                 self.batchfile = self.pst[knt+1].strip()
 
             if 'model input/output' in line:
-                print 'template and instruction files...'
-                self.model_io_ind = knt + 1
-                self.read_instpl()
+                #print 'template and instruction files...'
+                self._model_io_ind = knt + 1
+                self._read_instpl()
 
             if 'prior information' in line:
-                print 'prior information...'
-                self.prior_ind = knt + 1
-                self.read_prior()
+                #print 'prior information...'
+                self._prior_ind = knt + 1
+                self._read_prior()
 
             if 'regularisation' in line:
-                print 'regularisation...'
+                #print 'regularisation...'
                 self.PHIMLIM, self.PHIMACCEPT = [float(s) for s in self.pst[knt + 1].strip().split()[0:2]]
                 try:
                     self.FRACPHIM = float(self.pst[knt + 1].strip().split()[2])
                 except:
                     pass
                 self.WFINIT, self.WFMIN, self.WFMAX = [float(s) for s in self.pst[knt + 2].strip().split()[0:3]]
+                if 'linreg' in self.pst[knt + 2].lower():
+                    self.LINREG = 'linreg'
+                else:
+                    self.LINREG = 'nonlinreg'
+                if 'continue' in self.pst[knt + 2].lower():
+                    self.REGCONTINUE = 'continue'
+                else:
+                    self.REGCONTINUE = 'nocontinue'
                 self.WFFAC, self.WFTOL = [float(s) for s in self.pst[knt + 3].strip().split()[0:2]]
                 self.IREGADJ = int(self.pst[knt + 3].strip().split()[2])
 
             knt += 1
 
 
-    def read_par_group(self, l):
+    def _read_par_group(self, l):
         """
         convenience function to read par group information into a dictionary
         """
+        self.pargroups = {}
+        pargroups_attr = ['PARGPNME', 'INCTYP', 'DERINC', 'DERINCLB', 'FORCEN',
+        'DERINCMUL', 'DERMTHD']        
         l = l.strip().split()
         pargp = [l[0], l[1], float(l[2]), float(l[3]), l[4], float(l[5]), l[6]]
 
-        self.pargroups[pargp[0]] = dict(zip(self.pargroups_attr, pargp))
+        self.pargroups[pargp[0]] = dict(zip(pargroups_attr, pargp))
 
 
-    def read_obs_groups(self):
+    def _read_obs_groups(self):
         """
         convenience function to read observation groups into a list
         """
-        knt = self.obsgroups_ind
+        self.obsgroups = []
+        knt = self._obsgroups_ind
         for i in np.arange(self.NOBSGP) + knt:
             self.obsgroups.append(self.pst[i].strip())
 
 
-    def read_instpl(self):
+    def _read_instpl(self):
         """
         convenience function to read instruction and template file information into dictionaries
         """
-        knt = self.model_io_ind
+        knt = self._model_io_ind
+        self.ins = {}
+        self.tpl = {}
         for i in np.arange(self.NTPLFLE) + knt:
 
             tpl, dat = self.pst[i].strip().split()
@@ -351,13 +331,19 @@ class Pst(Pest):
             self.ins[ins] = dat
 
 
-    def read_prior(self):
+    def _read_prior(self):
         """
         convenience function to read prior information into a dataframe
         for now, just read items into list
         """
-        knt = self.prior_ind
+        ## Needs to be completed still, not into DataFrame yet
+        knt = self._prior_ind
+        self.prior = []
         tmp = {}
         for i in np.arange(self.NOBS) + knt:
 
             self.prior.append(self.pst[i].strip())
+            
+if __name__ == '__main__':
+    pest = Pest(r'C:\Users\egc\Documents\GitHub\pest_tools-1\cc\Columbia.pst')
+    pst = Pst(pest.pstfile)
