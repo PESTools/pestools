@@ -49,7 +49,7 @@ class Pest(object):
         convenience function to read parameter information into a dataframe
         """
         pst = open(self.pstfile).readlines()
-        NPAR = [int(s) for s in pst[3].strip().split()[0]]
+        NPAR = int(pst[3].strip().split()[0])
         pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
         'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
         knt = 0
@@ -75,7 +75,7 @@ class Pest(object):
         convenience function to read observation information into a dataframe
         """
         pst = open(self.pstfile).readlines()
-        NOBS = [int(s) for s in pst[3].strip().split()[1]]
+        NOBS = int(pst[3].strip().split()[1])
         obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
         knt = 0
         for line in pst:
@@ -345,5 +345,5 @@ class Pst(Pest):
             self.prior.append(self.pst[i].strip())
             
 if __name__ == '__main__':
-    pest = Pest(r'C:\Users\egc\Documents\GitHub\pest_tools-1\cc\Columbia.pst')
+    pest = Pest(r'C:\Users\egc\pest_tools-1\cc\Columbia.pst')
     pst = Pst(pest.pstfile)
