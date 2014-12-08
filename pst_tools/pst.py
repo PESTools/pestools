@@ -38,20 +38,24 @@ class Pest(object):
 #        = [int(s) for s in top_control_data[3].strip().split()[0:5]]
 
         # parameter data
-        self._read_par_data()
+#        self._read_par_data()
 
         # observation data
-        self._read_obs_data()
+#        self._read_obs_data()
         
 
     def _read_par_data(self):
         """
         convenience function to read parameter information into a dataframe
         """
+
         pst = open(self.pstfile).readlines()
-        NPAR = [int(s) for s in pst[3].strip().split()[0]]
+
+        NPAR = int(pst[3].strip().split()[0])
+
         pardata_attr = ['PARNME', 'PARTRANS', 'PARCHGLIM', 'PARVAL1',
         'PARLBND', 'PARUBND', 'PARGP', 'SCALE', 'OFFSET', 'DERCOM']
+
         knt = 0
         for line in pst:
             knt +=1
@@ -74,8 +78,11 @@ class Pest(object):
         """
         convenience function to read observation information into a dataframe
         """
+
         pst = open(self.pstfile).readlines()
-        NOBS = [int(s) for s in pst[3].strip().split()[1]]
+
+        NOBS = int(pst[3].strip().split()[1])
+
         obsdata_attr = ['OBSNME', 'OBSVAL', 'WEIGHT', 'OBGNME']
         knt = 0
         for line in pst:
@@ -92,7 +99,8 @@ class Pest(object):
 
         self.obsdata = pd.DataFrame.from_dict(tmp, orient='index')
         self.obsdata = self.obsdata[obsdata_attr] # preserve column order
-        
+
+
     def _load_jco(self):
         import struct
         '''
