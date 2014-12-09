@@ -90,8 +90,7 @@ class ParSen(Pest):
         try:
             priordata = self._read_prior()
             for index, row in priordata:
-                ['PILBL', 'equation', 'PIVAL', 'WEIGHT', 'OBGNME']
-                obs_dict[index] = (row['WEIGHT'], row['OBBGNME'])
+                obs_dict[index] = (row['WEIGHT'], row['OBGNME'])
         except:
             pass
         # Build pars_dict
