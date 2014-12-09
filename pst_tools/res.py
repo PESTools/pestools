@@ -6,10 +6,10 @@ from pst import *
 import plots
 
 
-class Res(object):
+class Res(Pest):
 
-    def __init__(self, basename):
-        ''' Res Class
+    def __init__(self, res_file):
+        """ Res Class
 
         Parameters
         ----------
@@ -22,15 +22,12 @@ class Res(object):
 
         groups : array
             Array of observation groups
-        '''
-
-        Pest.__init__(self, basename)
+        """
+        Pest.__init__(self, res_file)
 
         self._read_obs_data()
 
-        self._new_obs_data = pd.DataFrame()
-
-        check = open(res_file + , 'r')
+        check = open(res_file, 'r')
         line_num = 0
         while True:
             current_line = check.readline()
@@ -434,6 +431,32 @@ class Res(object):
 
         plt.grid(True)
         plt.tight_layout()
-        
 
-Res.one2one_plot = plots.plot_one2one
+        
+    def add_locations(self, locfile, name_col='Name', x_col='X', y_col='Y'):
+        """
+        Adds observation locations from a csv file
+        """
+        # read in file with observation locations
+        self.loc = pd.read_csv(locfile)
+        self.loc.index = [n.lower() for n in self.loc[name_col]]
+
+        print 'joining observations in {} with {}'.format(locfile, reifile)
+        non_regul = [r.Name for i, r in self.df.iterrows() if 'regul_' not in r.Group]
+        self.df = self.loc.join(self.df[['Group','Measured', 'Modelled', 'Residual', 'Weight']], how='inner')
+
+        # check to see if any observations were dropped in the join
+        if len(non_regul) != len(self.df):
+            dropped = [o for o in non_regul if o not in self.df.Name]
+            for d in dropped:
+
+                print 'Warning, observation {} in reifile not found in {}!'.format(d, locfile)
+
+
+    def one2one_plot(self, groupinfo, **kwds):
+
+        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+
+        return plot_obj.fig, plot_obj.ax

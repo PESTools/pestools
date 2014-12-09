@@ -13,16 +13,16 @@ class Plot(object):
     Base class for assembling a plot using matplotlib
 
     """
-    def __init__(self, data, kind=None, by=None, subplots=False, sharex=True,
+    def __init__(self, df, kind=None, by=None, subplots=False, sharex=True,
                  sharey=False, use_index=True,
                  figsize=None, grid=None, legend=True, legend_title='',
-                 ax=None, fig=None, title=None, xlim=None, ylim=None,
+                 ax=None, fig=None, title='', xlim=None, ylim=None,
                  xticks=None, yticks=None, xlabel=None, ylabel=None, units=None,
                  sort_columns=False, fontsize=None,
                  secondary_y=False, colormap=None,
                  layout=None, **kwds):
 
-        self.data = data
+        self.df = df
         self.by = by
 
         self.kind = kind
@@ -57,10 +57,6 @@ class Plot(object):
         self.legend_handles = []
         self.legend_labels = []
 
-        for attr in self._pop_attributes:
-            value = kwds.pop(attr, self._attr_defaults.get(attr, None))
-            setattr(self, attr, value)
-
         self.ax = ax
         self.fig = fig
         self.axes = None
@@ -74,6 +70,8 @@ class Plot(object):
 
         self.kwds = kwds
 
+    def draw(self):
+        plt.draw_if_interactive()
 
     def generate(self):
 
@@ -84,19 +82,21 @@ class Plot(object):
 
 class One2onePlot(Plot):
 
-    def __init__(self, data, x, y, groupinfo, **kwargs):
+    def __init__(self, df, x, y, groupinfo, **kwargs):
 
-        Plot.__init__(self, data, **kwargs)
+        Plot.__init__(self, df, **kwargs)
         if x is None or y is None:
             raise ValueError( 'scatter requires and x and y column')
-        if pd.lib.is_integer(x) and not self.data.columns.holds_integer():
-            x = self.data.columns[x]
-        if pd.lib.is_integer(y) and not self.data.columns.holds_integer():
-            y = self.data.columns[y]
+        if pd.lib.is_integer(x) and not self.df.columns.holds_integer():
+            x = self.df.columns[x]
+        if pd.lib.is_integer(y) and not self.df.columns.holds_integer():
+            y = self.df.columns[y]
 
         self.x = x
         self.y = y
         self.groupinfo = groupinfo
+        self.groups = np.unique(self.df.Group)
+        self._legend_order = {}
 
         # format x and y labels
         if self.xlabel is None:
@@ -110,16 +110,22 @@ class One2onePlot(Plot):
         # dictionary supplied for groupinfo
         if isinstance(self.groupinfo, dict):
             # only attempt to plot groups that are in Res dataframe
-            groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
+            self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
         # list of group names supplied
         elif isinstance(self.groupinfo, list):
-            groups = self.groupinfo
-            groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
+            self.groupinfo = [g.lower() for g in self.groupinfo]
+            self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
+            self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
         elif isinstance(self.groupinfo, str):
-            groups = [self.groupinfo]
-            groupinfo = {self.groupinfo: {}}
+            self.groupinfo = self.groupinfo.lower()
+            self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
+            self.groupinfo = {self.groupinfo: {}}
         else:
             raise ValueError('Invalid input for groupinfo.')
+
+        if len(self.groups) == 0:
+            raise IndexError('Specified groups not found in residuals file.')
+
 
     def _make_plot(self):
 
@@ -132,20 +138,21 @@ class One2onePlot(Plot):
         max, min = -999999.9, 999999.9
 
         color_cycle = self.ax._get_lines.color_cycle
-        legend_order = {}
+
         knt = 0
         for grp in self.groups:
 
             # set keyword arguments dict and label for each group
-            kwargs = self.groupinfo.get(grp, {})
-            label = kwargs.get('label', grp)
+            self.kwds = {'label': grp, 'c': next(color_cycle)}
+            self.kwds.update(self.groupinfo.get(grp, {}))
+            label = self.kwds.get('label', grp)
 
             g = self.df[self.df.Group == grp.lower()]
 
-            x, y = self.data[self.x], self.data[self.y]
+            x, y = g[self.x], g[self.y]
 
-            s = self.ax.scatter(x, y, **kwargs)
-            legend_order[label] = s.get_zorder()
+            s = self.ax.scatter(x, y, **self.kwds)
+            self._legend_order[label] = s.get_zorder()
 
             # keep track of min/max for one2one line
             if np.max([x, y]) > max:
@@ -158,8 +165,8 @@ class One2onePlot(Plot):
         #plot one2one line
         plt.plot(np.arange(min, max+1), np.arange(min, max+1), color='r', zorder=0)
 
-        self.ax.set_ylabel()
-        self.ax.set_xlabel('Measured, {}'.format(self.units))
+        self.ax.set_ylabel(self.xlabel)
+        self.ax.set_xlabel(self.ylabel)
         self.ax.set_title(self.title)
         self.ax.set_ylim(min, max)
         self.ax.set_xlim(min, max)
@@ -183,11 +190,3 @@ class One2onePlot(Plot):
                         scatterpoints=1, labelspacing=1.5, ncol=1, columnspacing=1)
 
         plt.setp(lg.get_title(), fontsize=12, fontweight='bold')
-
-
-def plot_one2one(data, x=None, y=None, groupinfo=[], **kwds):
-
-    plot_obj = One2onePlot(data, x, y, groupinfo, **kwds)
-    plot_obj.draw()
-
-    return plot_obj.ax
