@@ -12,6 +12,12 @@ class Plot(object):
     """
     Base class for assembling a plot using matplotlib
 
+    This plotting structure is loosely based on pandas (albeit greatly simplified). Some of the structure may be
+    to complicated for our needs, and we may want add additional functionality and shift parts of it around
+    as needed. But hopefully it will provide a starting point to work off of.
+
+    The overall goal is to centralize plotting code for consistency and to maximize extensibility
+
     """
     def __init__(self, df, kind=None, by=None, subplots=False, sharex=True,
                  sharey=False, use_index=True,
@@ -85,6 +91,33 @@ class One2onePlot(Plot):
     def __init__(self, df, x, y, groupinfo, **kwargs):
 
         Plot.__init__(self, df, **kwargs)
+        """
+        Makes one-to-one plot of two dataframe columns
+
+        Parameters
+        ----------
+        df : DataFrame,
+            Pandas DataFrame
+
+        x: string or int
+            Column in df containing values to plot on the x-axis
+
+        y: string or int
+            Column in df containing values to plot on the y-axis
+
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list. A dictionary
+            can be supplied to indicate the groups to plot (as keys), with item consisting of
+            a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
+
+        **kwargs: dict
+            Additional keyword arguments to Matplotlib.pyplot
+
+        Notes
+        ------
+
+        """
         if x is None or y is None:
             raise ValueError( 'scatter requires and x and y column')
         if pd.lib.is_integer(x) and not self.df.columns.holds_integer():

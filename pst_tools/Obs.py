@@ -3,13 +3,18 @@ __author__ = 'aleaf'
 import sys
 sys.path.append('../pst_tools')
 from pst import *
+from res import *
 import pandas as pd
 
 import numpy as np
 
 class Obs(Pest):
     """
-    Class for working with observations
+    Class for working with observations, especially with observation weighting.
+
+    Goal is to facilitate:
+    * replacing observation data in pest control file with a new observation dataset from an external file
+    * interactively adjust weighting and visualize changes to the objective function
 
 
     Attributes
@@ -25,27 +30,26 @@ class Obs(Pest):
 
         self._new_obs_data = pd.DataFrame()
 
+        # get residuals information from PEST run
+        self.res = Res(basename + '.res')
 
-    def from_file(self, filepath, sheetname='Sheet1'):
-        """
-        Read observation data section of Pest control from csv or Excel spreadsheet.
-        Should we require a header or add extra code to make it work with or without a header?
+        # copy observation data for weight adjustment
+        self.df = self.res.df.copy()
 
-        Parameters
-        ----------
-        filepath: string
-            csv file or Excel document containing new observation data section for PEST control file
-        sheetname: string, optional
-            name of spreadsheet in Excel document to read
-        """
-        if filepath.split('.')[-1][:2] == 'xls':
-            self._new_obs_data = pd.read_excel(filepath, sheetname)
+        # get list of groups that aren't regularisation
+        self.groups = np.unique(self.obsdata.OBGNME)
 
-        else:
-            self._new_obs_data = pd.read_csv(filepath)
+
+    def plot_objective_contrib(self):
+        self.res.plot_objective_contrib(self.df)
 
         return
 
+
+    def objective_contrib(self):
+        self.res.objective_contrib(self.df)
+
+        return
 
     def mikes_weighting_routine(self):
         # Not implemented yet
@@ -53,5 +57,5 @@ class Obs(Pest):
 
 
     def widget_method_for_group_weighting(self):
-        # Not implemented yet
+        # ?? Not implemented yet
         return

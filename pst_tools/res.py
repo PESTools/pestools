@@ -432,25 +432,41 @@ class Res(Pest):
         plt.grid(True)
         plt.tight_layout()
 
-        
-    def add_locations(self, locfile, name_col='Name', x_col='X', y_col='Y'):
+
+    def add_locations(self, locfile, name_col='Name', **kwargs):
         """
-        Adds observation locations from a csv file
+        Parameters
+        ----------
+        locfile : string
+            csvfile containing the locations for PEST observations
+
+        name_col: string
+            column name in locfile containing observation names,
+            which must match those in the PEST files
+
+        Attributes
+        ----------
+        loc : Pandas DataFrame
+            DataFrame with information from the observation locations file
+
+        Notes
+        ------
+        Columns with location information are added to the df attribute (dataframe of residuals information)
+        in an inner join (only observations listed in both the residuals and locations dataframes are retained)
         """
         # read in file with observation locations
-        self.loc = pd.read_csv(locfile)
+        self.loc = pd.read_csv(locfile, **kwargs)
         self.loc.index = [n.lower() for n in self.loc[name_col]]
 
-        print 'joining observations in {} with {}'.format(locfile, reifile)
         non_regul = [r.Name for i, r in self.df.iterrows() if 'regul_' not in r.Group]
-        self.df = self.loc.join(self.df[['Group','Measured', 'Modelled', 'Residual', 'Weight']], how='inner')
+        self.df = self.loc.join(self.df, how='inner')
 
         # check to see if any observations were dropped in the join
         if len(non_regul) != len(self.df):
             dropped = [o for o in non_regul if o not in self.df.Name]
             for d in dropped:
 
-                print 'Warning, observation {} in reifile not found in {}!'.format(d, locfile)
+                print 'Warning, observation {} in residuals file not found in {}!'.format(d, locfile)
 
 
     def one2one_plot(self, groupinfo, **kwds):
