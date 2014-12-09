@@ -17,7 +17,7 @@ class Obs(Pest):
 
     """
 
-    def __init__(self, basename, run_folder=None):
+    def __init__(self, basename):
 
         Pest.__init__(self, basename)
 
@@ -26,9 +26,9 @@ class Obs(Pest):
         self._new_obs_data = pd.DataFrame()
 
 
-    def replace(self, filepath, sheetname='Sheet1'):
+    def from_file(self, filepath, sheetname='Sheet1'):
         """
-        Replace observation data section of Pest control from csv or Excel spreadsheet.
+        Read observation data section of Pest control from csv or Excel spreadsheet.
         Should we require a header or add extra code to make it work with or without a header?
 
         Parameters
@@ -44,12 +44,14 @@ class Obs(Pest):
         else:
             self._new_obs_data = pd.read_csv(filepath)
 
-
-
-
         return
 
 
     def mikes_weighting_routine(self):
+        # Not implemented yet
+        return
+
+
+    def widget_method_for_group_weighting(self):
         # Not implemented yet
         return

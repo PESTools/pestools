@@ -2,11 +2,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from pst import *
+import plots
 
 
 class Res(object):
 
-    def __init__(self, res_file):
+    def __init__(self, basename):
         ''' Res Class
 
         Parameters
@@ -22,7 +24,13 @@ class Res(object):
             Array of observation groups
         '''
 
-        check = open(res_file, 'r')
+        Pest.__init__(self, basename)
+
+        self._read_obs_data()
+
+        self._new_obs_data = pd.DataFrame()
+
+        check = open(res_file + , 'r')
         line_num = 0
         while True:
             current_line = check.readline()
@@ -206,7 +214,7 @@ class Res(object):
             print ' '
 
 
-    def plot_objective_contrib (self):
+    def plot_objective_contrib (self, df=None):
         ''' Plot the contribution of each group to the objective function 
         as a pie chart.
         
@@ -219,9 +227,14 @@ class Res(object):
         Does not plot observation group is contribution is less than 1%.  This
         is to make the plot easier to read.
         '''
+
+        # Allow any residuals dataframe to be submitted as argument
+        if df is None:
+            df = self.df
+
         contributions = []
         groups = []
-        grouped = self.df.groupby('Group')
+        grouped = df.groupby('Group')
         group_keys = grouped.groups.keys()
         for key in group_keys:
             contributions.append((grouped.get_group(key)['Weighted Residual']**2).sum())
@@ -251,7 +264,7 @@ class Res(object):
         plt.pie(greater_1_values, labels=greater_1_groups, autopct='%1.1f%%', colors = colors, startangle=90)
 
         
-    def objective_contrib (self, return_data = False):
+    def objective_contrib (self, df=None, return_data=False):
         '''Print out the contribution of each observation group to the 
         objective function as a percent
         
@@ -264,6 +277,10 @@ class Res(object):
         -------
         None or Numpy array
         '''
+        # Allow any residuals dataframe to be submitted as argument
+        if df is None:
+            df = self.df
+
         contributions = []
         groups = []
         grouped = self.df.groupby('Group')
@@ -418,4 +435,5 @@ class Res(object):
         plt.grid(True)
         plt.tight_layout()
         
-    
+
+Res.one2one_plot = plots.plot_one2one
