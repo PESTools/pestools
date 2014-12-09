@@ -93,6 +93,30 @@ class Pest(object):
         self.obsdata = pd.DataFrame.from_dict(tmp, orient='index')
         self.obsdata = self.obsdata[obsdata_attr] # preserve column order
         
+    def _read_prior(self):
+        """
+        convenience function to read prior information into a dataframe
+        """
+        pst = open(self.pstfile).readlines()
+        NPRIOR = int(pst[3].strip().split()[3])
+        priordata_attr = ['PILBL', 'equation', 'PIVAL', 'WEIGHT', 'OBGNME']
+        knt = 0
+        for line in pst:
+            knt +=1
+            if 'prior information' in line:
+                break
+        tmp = {}
+        for i in np.arange(NPRIOR) + knt:
+            l = pst[i].strip().split()
+            priordata = [l[0], " ".join(l[1:-4]), float(l[-3]), float(l[-2]), l[-1]]
+
+            tmp[priordata[0]] = dict(zip(priordata_attr, priordata))            
+            
+            
+        self.priordata = pd.DataFrame.from_dict(tmp, orient='index')
+        self.priordata = self.priordata[priordata_attr] # preserve column order
+
+        
     def _load_jco(self):
         import struct
         '''
@@ -262,7 +286,7 @@ class Pst(Pest):
 
             if 'prior information' in line:
                 #print 'prior information...'
-                self._prior_ind = knt + 1
+                #self._prior_ind = knt + 1
                 self._read_prior()
 
             if 'regularisation' in line:
@@ -331,18 +355,7 @@ class Pst(Pest):
             self.ins[ins] = dat
 
 
-    def _read_prior(self):
-        """
-        convenience function to read prior information into a dataframe
-        for now, just read items into list
-        """
-        ## Needs to be completed still, not into DataFrame yet
-        knt = self._prior_ind
-        self.prior = []
-        tmp = {}
-        for i in np.arange(self.NOBS) + knt:
 
-            self.prior.append(self.pst[i].strip())
             
 if __name__ == '__main__':
     pest = Pest(r'C:\Users\egc\pest_tools-1\cc\Columbia.pst')
