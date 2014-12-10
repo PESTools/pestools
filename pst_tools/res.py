@@ -2,12 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from pst import *
+import plots
 
 
-class Res(object):
+class Res(Pest):
 
     def __init__(self, res_file):
-        ''' Res Class
+        """ Res Class
 
         Parameters
         ----------
@@ -20,7 +22,10 @@ class Res(object):
 
         groups : array
             Array of observation groups
-        '''
+        """
+        Pest.__init__(self, res_file)
+
+        self._read_obs_data()
 
         check = open(res_file, 'r')
         line_num = 0
@@ -206,7 +211,7 @@ class Res(object):
             print ' '
 
 
-    def plot_objective_contrib (self):
+    def plot_objective_contrib (self, df=None):
         ''' Plot the contribution of each group to the objective function 
         as a pie chart.
         
@@ -219,9 +224,14 @@ class Res(object):
         Does not plot observation group is contribution is less than 1%.  This
         is to make the plot easier to read.
         '''
+
+        # Allow any residuals dataframe to be submitted as argument
+        if df is None:
+            df = self.df
+
         contributions = []
         groups = []
-        grouped = self.df.groupby('Group')
+        grouped = df.groupby('Group')
         group_keys = grouped.groups.keys()
         for key in group_keys:
             contributions.append((grouped.get_group(key)['Weighted Residual']**2).sum())
@@ -251,7 +261,7 @@ class Res(object):
         plt.pie(greater_1_values, labels=greater_1_groups, autopct='%1.1f%%', colors = colors, startangle=90)
 
         
-    def objective_contrib (self, return_data = False):
+    def objective_contrib (self, df=None, return_data=False):
         '''Print out the contribution of each observation group to the 
         objective function as a percent
         
@@ -264,6 +274,10 @@ class Res(object):
         -------
         None or Numpy array
         '''
+        # Allow any residuals dataframe to be submitted as argument
+        if df is None:
+            df = self.df
+
         contributions = []
         groups = []
         grouped = self.df.groupby('Group')
@@ -417,5 +431,48 @@ class Res(object):
 
         plt.grid(True)
         plt.tight_layout()
-        
-    
+
+
+    def add_locations(self, locfile, name_col='Name', **kwargs):
+        """
+        Parameters
+        ----------
+        locfile : string
+            csvfile containing the locations for PEST observations
+
+        name_col: string
+            column name in locfile containing observation names,
+            which must match those in the PEST files
+
+        Attributes
+        ----------
+        loc : Pandas DataFrame
+            DataFrame with information from the observation locations file
+
+        Notes
+        ------
+        Columns with location information are added to the df attribute (dataframe of residuals information)
+        in an inner join (only observations listed in both the residuals and locations dataframes are retained)
+        """
+        # read in file with observation locations
+        self.loc = pd.read_csv(locfile, **kwargs)
+        self.loc.index = [n.lower() for n in self.loc[name_col]]
+
+        non_regul = [r.Name for i, r in self.df.iterrows() if 'regul_' not in r.Group]
+        self.df = self.loc.join(self.df, how='inner')
+
+        # check to see if any observations were dropped in the join
+        if len(non_regul) != len(self.df):
+            dropped = [o for o in non_regul if o not in self.df.Name]
+            for d in dropped:
+
+                print 'Warning, observation {} in residuals file not found in {}!'.format(d, locfile)
+
+
+    def one2one_plot(self, groupinfo, **kwds):
+
+        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+
+        return plot_obj.fig, plot_obj.ax
