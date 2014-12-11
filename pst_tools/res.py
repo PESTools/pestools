@@ -469,9 +469,18 @@ class Res(Pest):
                 print 'Warning, observation {} in residuals file not found in {}!'.format(d, locfile)
 
 
-    def one2one_plot(self, groupinfo, **kwds):
+    def plot_one2one(self, groupinfo, **kwds):
 
         plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+
+        return plot_obj.fig, plot_obj.ax
+
+
+    def plot_hexbin(self, groupinfo, **kwds):
+
+        plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 

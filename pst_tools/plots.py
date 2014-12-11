@@ -76,14 +76,28 @@ class Plot(object):
 
         self.kwds = kwds
 
+    def _adorn_subplots(self):
+
+        self.ax.set_ylabel(self.xlabel)
+        self.ax.set_xlabel(self.ylabel)
+        self.ax.set_title(self.title)
+        self.ax.set_ylim(self.min, self.max)
+        self.ax.set_xlim(self.min, self.max)
+
     def draw(self):
         plt.draw_if_interactive()
 
     def generate(self):
 
+        self._initialize()
         self._make_plot()
+        self._adorn_subplots()
         self._make_legend()
 
+    def _initialize(self):
+        # this will need to be extended to accommodate subplots
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
 
 
 class One2onePlot(Plot):
@@ -165,9 +179,6 @@ class One2onePlot(Plot):
         # adjustments to matplotlib defaults (can be overidden by groupinfo arguments)
         mpl.rcParams.update({'patch.linewidth': 0.25})
 
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
-
         max, min = -999999.9, 999999.9
 
         color_cycle = self.ax._get_lines.color_cycle
@@ -189,37 +200,48 @@ class One2onePlot(Plot):
 
             # keep track of min/max for one2one line
             if np.max([x, y]) > max:
-                max = np.max([g.Measured, g.Modelled])
+                self.max = np.max([g.Measured, g.Modelled])
             if np.min([x, y]) < min:
-                min = np.min([g.Measured, g.Modelled])
-
-        if self.legend: self._make_legend()
+                self.min = np.min([g.Measured, g.Modelled])
 
         #plot one2one line
-        plt.plot(np.arange(min, max+1), np.arange(min, max+1), color='r', zorder=0)
+        plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), color='r', zorder=0)
 
-        self.ax.set_ylabel(self.xlabel)
-        self.ax.set_xlabel(self.ylabel)
-        self.ax.set_title(self.title)
-        self.ax.set_ylim(min, max)
-        self.ax.set_xlim(min, max)
 
 
     def _make_legend(self):
 
-        handles, labels = self.ax.get_legend_handles_labels()
+        if self.legend:
+            handles, labels = self.ax.get_legend_handles_labels()
 
-        # weed out duplicate legend entries (from multiple PEST groups in single category)
-        # enforce drawing order in legend
-        u_handles, u_labels = [], []
-        legend_order = sorted(self._legend_order.items(), key=operator.itemgetter(1))
-        legend_order.reverse()
+            # weed out duplicate legend entries (from multiple PEST groups in single category)
+            # enforce drawing order in legend
+            u_handles, u_labels = [], []
+            legend_order = sorted(self._legend_order.items(), key=operator.itemgetter(1))
+            legend_order.reverse()
 
-        for item in legend_order:
-            u_handles.append([handles[i] for i, l in enumerate(labels) if l==item[0]][0])
-            u_labels.append(item[0])
+            for item in legend_order:
+                u_handles.append([handles[i] for i, l in enumerate(labels) if l==item[0]][0])
+                u_labels.append(item[0])
 
-        lg = plt.legend(u_handles, u_labels, title=self.legend_title, loc='lower right',
-                        scatterpoints=1, labelspacing=1.5, ncol=1, columnspacing=1)
+            lg = plt.legend(u_handles, u_labels, title=self.legend_title, loc='lower right',
+                            scatterpoints=1, labelspacing=1.5, ncol=1, columnspacing=1)
 
-        plt.setp(lg.get_title(), fontsize=12, fontweight='bold')
+            plt.setp(lg.get_title(), fontsize=12, fontweight='bold')
+
+
+class HexbinPlot(One2onePlot):
+
+    def _make_plot(self):
+
+        x = self.df[self.df['Group'].isin(self.groups)]['Measured'].values
+        y = self.df[self.df['Group'].isin(self.groups)]['Modelled'].values
+        self.min, self.max = np.min([x, y]), np.max([x, y])
+
+        kwds = {'bins': 'log', 'alpha': 1.0, 'edgecolors': 'none'}
+        kwds.update(self.kwds)
+
+        plt.hexbin(x, y, **kwds)
+
+        #plot one2one line
+        plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), color='r', zorder=0)

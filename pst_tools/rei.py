@@ -31,7 +31,7 @@ class Rei(Pest):
 
     Notes
     ------
-    
+
     """
 
     def __init__(self, basename):
@@ -50,7 +50,7 @@ class Rei(Pest):
                 continue
 
 
-    def one2one_plots(self, groupinfo, outpdf='', **kwds):
+    def plot_one2ones(self, groupinfo, outpdf='', **kwds):
 
         if len(outpdf) == 0:
             outpdf = self.basename + '_reis.pdf'
