@@ -469,18 +469,66 @@ class Res(Pest):
                 print 'Warning, observation {} in residuals file not found in {}!'.format(d, locfile)
 
 
-    def plot_one2one(self, groupinfo, **kwds):
+    def plot_one2one(self, groupinfo, line_kwds={}, **kwds):
+        """
+        Makes one-to-one plot of two dataframe columns, using pyplot.scatter
 
-        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
+        Parameters
+        ----------
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list. A dictionary
+            can be supplied to indicate the groups to plot (as keys), with item consisting of
+            a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
+
+        line_kwds: dict, optional
+            Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+            See http://matplotlib.org/api/pyplot_api.html
+
+        **kwds:
+            Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
+            for controlling appearance scatter or hexbin plot. Order of priority for keywords is:
+                * keywords supplied in groupinfo for individual groups
+                * **kwds entered for whole plot
+                * default settings
+
+        Notes
+        ------
+
+        """
+        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, line_kwds=line_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 
         return plot_obj.fig, plot_obj.ax
 
 
-    def plot_hexbin(self, groupinfo, **kwds):
+    def plot_hexbin(self, groupinfo, line_kwds={}, **kwds):
+        """
+        Makes a hexbin plot of two dataframe columns, pyplot.hexbin
 
-        plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, **kwds)
+        Parameters
+        ----------
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list. A dictionary
+            can be supplied to indicate the groups to plot (as keys), with item consisting of
+            a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
+
+        line_kwds: dict, optional
+            Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+            See http://matplotlib.org/api/pyplot_api.html
+
+        **kwds:
+            Additional keyword arguments to Matplotlib.pyplot.hexbin, for controlling appearance hexbin plot.
+            (need to figure out how to differentiate documentation with inheritance!)
+            See http://matplotlib.org/api/pyplot_api.html
+
+        Notes
+        ------
+
+        """
+        plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, line_kwds=line_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 
