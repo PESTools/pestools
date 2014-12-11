@@ -208,7 +208,6 @@ class One2onePlot(Plot):
         plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), color='r', zorder=0)
 
 
-
     def _make_legend(self):
 
         if self.legend:
@@ -234,6 +233,7 @@ class HexbinPlot(One2onePlot):
 
     def _make_plot(self):
 
+        # overrides _make_plot() method in One2onePlot; inherits everything else
         x = self.df[self.df['Group'].isin(self.groups)]['Measured'].values
         y = self.df[self.df['Group'].isin(self.groups)]['Modelled'].values
         self.min, self.max = np.min([x, y]), np.max([x, y])
