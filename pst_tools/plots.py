@@ -76,6 +76,11 @@ class Plot(object):
         self.ax.set_xlabel(self.ylabel)
         self.ax.set_title(self.title)
 
+    def log_trans(self, x, pos):
+        # Reformat tick labels out of log space
+        # x : value
+        # pos : position
+        return '%d' % (10**x)
 
     def draw(self):
         plt.draw_if_interactive()
@@ -253,19 +258,20 @@ class HexbinPlot(One2onePlot):
         self.min, self.max = np.min([x, y]), np.max([x, y])
 
         # default keyword settings, which can be overriden by submitted keywords
-        kwds = {'bins': 'log', 'alpha': 1.0, 'edgecolors': 'none'}
+        kwds = {'bins': 'log', 'mincnt': 1, 'extent': (self.min, self.max, self.min, self.max),
+                'alpha': 1.0, 'edgecolors': 'none'}
         kwds.update(self.kwds)
         self.kwds = kwds
 
         plt.hexbin(x, y, **self.kwds)
 
         #plot one2one line
-        line_kwds = dict(color='w', alpha=0.5, zorder=1)
+        line_kwds = dict(color='k', alpha=0.5, zorder=1)
         line_kwds.update(self.line_kwds)
         plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), **line_kwds)
 
-        self.ax.set_ylim(np.min(y), np.max(y))
-        self.ax.set_xlim(self.min, self.max)
+        #self.ax.set_ylim(np.min(y), np.max(y))
+        #self.ax.set_xlim(self.min, self.max)
 
     def _make_legend(self):
 
@@ -273,6 +279,8 @@ class HexbinPlot(One2onePlot):
             # put this here for now, may want to restructure later
             cb = plt.colorbar()
             if self.kwds['bins'] == 'log':
-                cb.set_label('Log$\mathregular{_{10}}$ bin counts')
+                cb.formatter = mpl.ticker.FuncFormatter(self.log_trans)
+                cb.update_ticks()
+                cb.set_label('Bin counts')
             else:
                 cb.set_label('Bin counts')
