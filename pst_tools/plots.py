@@ -25,7 +25,7 @@ class Plot(object):
                  ax=None, fig=None, title='', xlim=None, ylim=None,
                  xticks=None, yticks=None, xlabel=None, ylabel=None, units=None,
                  sort_columns=False, fontsize=None,
-                 secondary_y=False, colormap=None,
+                 secondary_y=False,
                  layout=None, **kwds):
 
         self.df = df
@@ -67,32 +67,44 @@ class Plot(object):
         self.fig = fig
         self.axes = None
 
-        if 'cmap' in kwds and colormap:
-            raise TypeError("Only specify one of `cmap` and `colormap`.")
-        elif 'cmap' in kwds:
-            self.colormap = kwds.pop('cmap')
-        else:
-            self.colormap = colormap
-
         self.kwds = kwds
+
+
+    def _adorn_subplots(self):
+
+        self.ax.set_ylabel(self.xlabel)
+        self.ax.set_xlabel(self.ylabel)
+        self.ax.set_title(self.title)
+
+    def log_trans(self, x, pos):
+        # Reformat tick labels out of log space
+        # x : value
+        # pos : position
+        return '%d' % (10**x)
 
     def draw(self):
         plt.draw_if_interactive()
 
     def generate(self):
 
+        self._initialize()
         self._make_plot()
+        self._adorn_subplots()
         self._make_legend()
 
+    def _initialize(self):
+        # this will need to be extended to accommodate subplots
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
 
 
 class One2onePlot(Plot):
+    """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-    def __init__(self, df, x, y, groupinfo, **kwargs):
+    def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
 
-        Plot.__init__(self, df, **kwargs)
+        Plot.__init__(self, df, **kwds)
         """
-        Makes one-to-one plot of two dataframe columns
 
         Parameters
         ----------
@@ -111,8 +123,20 @@ class One2onePlot(Plot):
             can be supplied to indicate the groups to plot (as keys), with item consisting of
             a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
 
-        **kwargs: dict
-            Additional keyword arguments to Matplotlib.pyplot
+        line_kwds: dict, optional
+            Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+            See http://matplotlib.org/api/pyplot_api.html
+
+        **kwds:
+            Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
+            for controlling appearance scatter or hexbin plot. Order of priority for keywords is:
+                * keywords supplied in groupinfo for individual groups
+                * **kwds entered for whole plot
+                * default settings
+
+            (need to figure out how to differentiate documentation with inheritance,
+            and how to duplicate it in the plotting method!)
+            See http://matplotlib.org/api/pyplot_api.html
 
         Notes
         ------
@@ -129,7 +153,9 @@ class One2onePlot(Plot):
         self.y = y
         self.groupinfo = groupinfo
         self.groups = np.unique(self.df.Group)
+        self.line_kwds = line_kwds
         self._legend_order = {}
+        self.max, self.min = -999999.9, 999999.9
 
         # format x and y labels
         if self.xlabel is None:
@@ -143,16 +169,20 @@ class One2onePlot(Plot):
         # dictionary supplied for groupinfo
         if isinstance(self.groupinfo, dict):
             # only attempt to plot groups that are in Res dataframe
+            self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.iteritems())
             self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
+
         # list of group names supplied
         elif isinstance(self.groupinfo, list):
             self.groupinfo = [g.lower() for g in self.groupinfo]
             self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
             self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
+
         elif isinstance(self.groupinfo, str):
             self.groupinfo = self.groupinfo.lower()
             self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
             self.groupinfo = {self.groupinfo: {}}
+
         else:
             raise ValueError('Invalid input for groupinfo.')
 
@@ -162,64 +192,95 @@ class One2onePlot(Plot):
 
     def _make_plot(self):
 
-        # adjustments to matplotlib defaults (can be overidden by groupinfo arguments)
-        mpl.rcParams.update({'patch.linewidth': 0.25})
-
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
-
-        max, min = -999999.9, 999999.9
-
+        # use matplotlib's color cycle to plot each group as a different color by default
         color_cycle = self.ax._get_lines.color_cycle
-
-        knt = 0
         for grp in self.groups:
 
-            # set keyword arguments dict and label for each group
-            self.kwds = {'label': grp, 'c': next(color_cycle)}
-            self.kwds.update(self.groupinfo.get(grp, {}))
-            label = self.kwds.get('label', grp)
+            # default keyword settings, which can be overriden by submitted keywords
+            # order of priority is default, then keywords entered for whole plot,
+            # then keywords supplied for individual group
+            kwds = {'label': grp, 'c': next(color_cycle), 'linewidth': 0.25}
+            kwds.update(self.kwds)
+            kwds.update(self.groupinfo.get(grp, {}))
+            label = kwds.get('label', grp)
 
-            g = self.df[self.df.Group == grp.lower()]
+            g = self.df[self.df.Group == grp]
 
             x, y = g[self.x], g[self.y]
 
-            s = self.ax.scatter(x, y, **self.kwds)
+            s = self.ax.scatter(x, y, **kwds)
             self._legend_order[label] = s.get_zorder()
 
             # keep track of min/max for one2one line
-            if np.max([x, y]) > max:
-                max = np.max([g.Measured, g.Modelled])
-            if np.min([x, y]) < min:
-                min = np.min([g.Measured, g.Modelled])
-
-        if self.legend: self._make_legend()
+            if np.max([x, y]) > self.max:
+                self.max = np.max([g.Measured, g.Modelled])
+            if np.min([x, y]) < self.min:
+                self.min = np.min([g.Measured, g.Modelled])
 
         #plot one2one line
-        plt.plot(np.arange(min, max+1), np.arange(min, max+1), color='r', zorder=0)
+        line_kwds = {'color': 'r', 'zorder': 0}
+        line_kwds.update(self.line_kwds)
+        plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), **line_kwds)
 
-        self.ax.set_ylabel(self.xlabel)
-        self.ax.set_xlabel(self.ylabel)
-        self.ax.set_title(self.title)
-        self.ax.set_ylim(min, max)
-        self.ax.set_xlim(min, max)
-
+        self.ax.set_ylim(self.min, self.max)
+        self.ax.set_xlim(self.min, self.max)
 
     def _make_legend(self):
 
-        handles, labels = self.ax.get_legend_handles_labels()
+        if self.legend:
+            handles, labels = self.ax.get_legend_handles_labels()
 
-        # weed out duplicate legend entries (from multiple PEST groups in single category)
-        # enforce drawing order in legend
-        u_handles, u_labels = [], []
-        legend_order = sorted(self._legend_order.items(), key=operator.itemgetter(1))
-        legend_order.reverse()
+            # weed out duplicate legend entries (from multiple PEST groups in single category)
+            # enforce drawing order in legend
+            u_handles, u_labels = [], []
+            legend_order = sorted(self._legend_order.items(), key=operator.itemgetter(1))
+            legend_order.reverse()
 
-        for item in legend_order:
-            u_handles.append([handles[i] for i, l in enumerate(labels) if l==item[0]][0])
-            u_labels.append(item[0])
+            for item in legend_order:
+                u_handles.append([handles[i] for i, l in enumerate(labels) if l==item[0]][0])
+                u_labels.append(item[0])
 
-        lg = plt.legend(u_handles, u_labels, title=self.legend_title, loc='lower right',
-                        scatterpoints=1, labelspacing=1.5, ncol=1, columnspacing=1)
+            lg = plt.legend(u_handles, u_labels, title=self.legend_title, loc='lower right', fontsize=8,
+                            scatterpoints=1, labelspacing=1.5, ncol=1, columnspacing=1)
 
-        plt.setp(lg.get_title(), fontsize=12, fontweight='bold')
+            plt.setp(lg.get_title(), fontsize=9, fontweight='bold')
+            lg.set_zorder(100)
+
+
+class HexbinPlot(One2onePlot):
+    """Makes a hexbin plot of two dataframe columns, pyplot.hexbin"""
+
+    def _make_plot(self):
+
+        # overrides _make_plot() method in One2onePlot; inherits everything else
+        x = self.df[self.df['Group'].isin(self.groups)]['Measured'].values
+        y = self.df[self.df['Group'].isin(self.groups)]['Modelled'].values
+        self.min, self.max = np.min([x, y]), np.max([x, y])
+
+        # default keyword settings, which can be overriden by submitted keywords
+        kwds = {'bins': 'log', 'mincnt': 1, 'extent': (self.min, self.max, self.min, self.max),
+                'alpha': 1.0, 'edgecolors': 'none'}
+        kwds.update(self.kwds)
+        self.kwds = kwds
+
+        plt.hexbin(x, y, **self.kwds)
+
+        #plot one2one line
+        line_kwds = dict(color='k', alpha=0.5, zorder=1)
+        line_kwds.update(self.line_kwds)
+        plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), **line_kwds)
+
+        #self.ax.set_ylim(np.min(y), np.max(y))
+        #self.ax.set_xlim(self.min, self.max)
+
+    def _make_legend(self):
+
+        if self.legend:
+            # put this here for now, may want to restructure later
+            cb = plt.colorbar()
+            if self.kwds['bins'] == 'log':
+                cb.formatter = mpl.ticker.FuncFormatter(self.log_trans)
+                cb.update_ticks()
+                cb.set_label('Bin counts')
+            else:
+                cb.set_label('Bin counts')
