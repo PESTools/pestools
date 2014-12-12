@@ -63,7 +63,7 @@ class Pest(object):
         for i in np.arange(NPAR) + knt:
 
             l = pst[i].strip().split()
-            pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
+            pardata = [l[0].lower(), l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
                        l[6], int(l[7]), int(l[8]), int(l[9])]
 
             tmp[pardata[0]] = dict(zip(pardata_attr, pardata))
@@ -89,7 +89,7 @@ class Pest(object):
         for i in np.arange(NOBS) + knt:
 
             l = pst[i].strip().split()
-            obsdata = [l[0], float(l[1]), float(l[2]), l[3]]
+            obsdata = [l[0].lower(), float(l[1]), float(l[2]), l[3]]
 
             tmp[obsdata[0]] = dict(zip(obsdata_attr, obsdata))
 
@@ -111,7 +111,7 @@ class Pest(object):
         tmp = {}
         for i in np.arange(NPRIOR) + knt:
             l = pst[i].strip().split()
-            priordata = [l[0], " ".join(l[1:-4]), float(l[-3]), float(l[-2]), l[-1]]
+            priordata = [l[0].lower(), " ".join(l[1:-4]), float(l[-3]), float(l[-2]), l[-1]]
 
             tmp[priordata[0]] = dict(zip(priordata_attr, priordata))            
             
