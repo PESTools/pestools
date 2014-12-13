@@ -336,10 +336,10 @@ if __name__ == '__main__':
                   'sfr_cond' : 'b',
                   'rech' : 'k'}
     #parsen.plot(n=20)
-    parsen.plot(n=20, color_dict = color_dict, alt_labels = alt_labels)
+#    parsen.plot(n=20, color_dict = color_dict, alt_labels = alt_labels)
+#    parsen.plot_mean_group(color = 'k')
 #    parsen.plot(n=-20)
 #    parsen.plot(n=20, group = 'kz')
 #    parsen.plot_mean_group()
 #    parsen.plot_sum_group()
-#    cmp_set3 = plt.get_cmap('Set3')
-#    parsen.plot_test(n=20, cmap = cmp_set3)
+    parsen.plot(n=20, cmap = 'set3')

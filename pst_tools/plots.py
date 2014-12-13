@@ -268,21 +268,24 @@ class BarPloth(Plot):
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
         
+        
         values = self.df[self.values_col].values
         bottom = np.arange(len(values))
         
         # Assign colors for each group
+        # Will be overriden by kwds if provoded for color
         if self.group_col != None:            
             # Use provided colormap or use Set1 as default
-            if self.colormap != None:
-                cmap = self.colormap
+            if 'cmap' in self.kwds:
+                cmap = plt.get_cmap(self.kwds['cmap'])           
             else:
-                cmap = plt.get_cmap('Set1')
+                cmap = plt.get_cmap()
+                #Default of jet is ugly should we force a diference default?
+                #cmap = plt.get_cmap('Set1')
             _color_dict = dict()
             unique_par_groups = np.asarray(self.df.drop_duplicates(cols = self.group_col)[self.group_col])
             for i in range(len(unique_par_groups)):
-                # If color is provied for paragroup in color_dict parameter than use it
-                print self.color_dict[unique_par_groups[i]]                
+                # If color is provied for paragroup in color_dict parameter than use it               
                 try:
                     _color_dict[unique_par_groups[i]] = self.color_dict[unique_par_groups[i]]
                 except:
@@ -294,8 +297,13 @@ class BarPloth(Plot):
                 self.colors.append(_color_dict[par_group])
         else:
             self.colors = None
+            
+        # default keyword settings, which can be overriden by submitted keywords
+        kwds = {'align' : 'center', 'color' : self.colors}
+        kwds.update(self.kwds)
+        self.kwds = kwds
         
-        plt.barh(bottom, values, color = self.colors, align = 'center', **self.kwds)
+        plt.barh(bottom, values, **self.kwds)
         
         plt.ylim(-1, len(bottom))
         
