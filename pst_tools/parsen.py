@@ -350,23 +350,3 @@ class ParSen(Pest):
         
 
 
-        
-        
-if __name__ == '__main__':
-    parsen = ParSen(r'C:\Users\egc\pest_tools-1\cc\columbia')
-    #pst = Pest(r'C:\Users\egc\pest_tools-1\cc\columbia')
-    alt_labels = {'r_lc' : "Full Parameter Description 'r_lc'"}
-    color_dict = {'kz': (0.89411765336990356, 0.10196078568696976, 0.10980392247438431, 1.0),
-                  'kp': 'g',
-                  'sfr_cond' : 'b',
-                  'rech' : 'k'}
-
-    parsen.plot(n=20)
-#    parsen.plot(n=20, color_dict = color_dict, alt_labels = alt_labels)
-#    parsen.plot_mean_group(color = 'k')
-#    parsen.plot(n=-20)
-#    parsen.plot(n=20, group = 'kz')
-#    parsen.plot_mean_group()
-#    parsen.plot_sum_group()
-    #parsen.plot(n=20, cmap = 'Set3')
-
