@@ -284,7 +284,7 @@ class HexbinPlot(One2onePlot):
                 cb.set_label('Bin counts')
             else:
                 cb.set_label('Bin counts')
-                
+        
 class BarPloth(Plot):
     def __init__(self, df, values_col, group_col=None, color_dict = None, alt_labels = None, **kwargs):
         Plot.__init__(self, df, **kwargs)

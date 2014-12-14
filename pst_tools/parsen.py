@@ -284,6 +284,7 @@ class ParSen(Pest):
                 sensitivity = self.df.sort(columns = 'Sensitivity', ascending = False).ix[self.df['Parameter Group'] == group].head(n=n_head)         
             if n_head < 0:
                 n_head = abs(n_head)            
+
                 sensitivity = self.df.sort(columns = 'Sensitivity', ascending = False).ix[self.df['Parameter Group'] == group].tail(n=n_head)
 
         if 'ylabel' not in kwds:
@@ -298,7 +299,9 @@ class ParSen(Pest):
 
         return plot_obj.fig, plot_obj.ax
         
+
     def plot_mean_group (self, alt_labels = None, **kwds):
+
         ''' Plot mean of all parameters sensitivity by group
         
         Returns
@@ -320,6 +323,7 @@ class ParSen(Pest):
         return plot_obj.fig, plot_obj.ax
         
     def plot_sum_group (self, alt_labels = None, **kwds):
+
         ''' Plot sum of all parameters sensitivity by group
         
         Returns
@@ -331,6 +335,7 @@ class ParSen(Pest):
         sen_grouped = self.df.groupby(['Parameter Group'])\
         .aggregate(np.sum).sort(columns = 'Sensitivity', ascending = False)
         
+
         if 'ylabel' not in kwds:
             kwds['ylabel'] = 'Sum of Parameter Sensitivity'
         if 'xlabel' not in kwds:
@@ -355,6 +360,7 @@ if __name__ == '__main__':
                   'kp': 'g',
                   'sfr_cond' : 'b',
                   'rech' : 'k'}
+
     parsen.plot(n=20)
 #    parsen.plot(n=20, color_dict = color_dict, alt_labels = alt_labels)
 #    parsen.plot_mean_group(color = 'k')
@@ -363,3 +369,4 @@ if __name__ == '__main__':
 #    parsen.plot_mean_group()
 #    parsen.plot_sum_group()
     #parsen.plot(n=20, cmap = 'Set3')
+
