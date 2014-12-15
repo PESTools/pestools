@@ -116,8 +116,8 @@ class Pest(object):
         tmp = {}
         for i in np.arange(NPAR) + knt:
 
-            l = pst[i].lower().strip().split() # enforce lower case
-            pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
+            l = pst[i].strip().split()
+            pardata = [l[0].lower(), l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
                        l[6], int(l[7]), int(l[8]), int(l[9])]
 
             tmp[pardata[0]] = dict(zip(pardata_attr, pardata))

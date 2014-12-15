@@ -284,3 +284,110 @@ class HexbinPlot(One2onePlot):
                 cb.set_label('Bin counts')
             else:
                 cb.set_label('Bin counts')
+        
+class BarPloth(Plot):
+    def __init__(self, df, values_col, group_col=None, color_dict = None, alt_labels = None, **kwargs):
+        Plot.__init__(self, df, **kwargs)
+        '''
+        Make horizontal bar graph
+        Parameters
+        ----------
+        df : DataFrame,
+            Pandas DataFrame
+
+        values_col: string
+            Column in df containing values to plot as the length of the bars
+            the 'width' parameter for matplotlib.pyplot.barh
+            
+        group_col : string, optional
+            Column in df containing group for each value.  Will be used to color
+            bars based on groups
+            
+        color_dict : dict, optional
+            Dictionary of alternate colors for groups.  Keys are groups and values
+            are colors.  Can be tuple such as (0.8, 0.1, 0.1, 1.0), or other
+            standard matplotlib recognized color
+            
+        alt_labels : dict, optional
+            Dictionary of alternative labels to use. Keys are raw PEST names.
+            Values are preferred lables or descriptions
+        '''
+        
+        self.df = df
+        self.values_col = values_col
+        self.group_col = group_col
+        self.color_dict = color_dict
+        self.alt_labels = alt_labels
+        
+        if self.ylabel is None:
+            self.ylabel = str(self.values_col)
+
+            
+            
+
+
+    def _make_plot(self, ):
+
+#        self.fig = plt.figure()
+#        self.ax = self.fig.add_subplot(111)
+        
+        
+        values = self.df[self.values_col].values
+        bottom = np.arange(len(values))
+        
+        # Assign colors for each group
+        # Will be overriden by kwds if provoded for color
+        if self.group_col != None:            
+            # Use provided colormap or use Set1 as default
+            if 'cmap' in self.kwds:
+                cmap = plt.get_cmap(self.kwds['cmap'])
+                del self.kwds['cmap']
+            else:
+                #Default of jet is ugly
+                #cmap = plt.get_cmap()
+                cmap = plt.get_cmap('Set2')
+            _color_dict = dict()
+            unique_par_groups = np.asarray(self.df.drop_duplicates(cols = self.group_col)[self.group_col])
+            for i in range(len(unique_par_groups)):
+                # If color is provied for paragroup in color_dict parameter than use it               
+                try:
+                    _color_dict[unique_par_groups[i]] = self.color_dict[unique_par_groups[i]]
+                except:
+                    color = cmap(1.*i/len(unique_par_groups))
+                    _color_dict[unique_par_groups[i]] = color
+            
+            self.colors = []
+            for par_group in self.df[self.group_col].values:            
+                self.colors.append(_color_dict[par_group])
+        else:
+            self.colors = None
+            
+        # default keyword settings, which can be overriden by submitted keywords
+        kwds = {'align' : 'center', 'color' : self.colors}
+        kwds.update(self.kwds)
+        self.kwds = kwds
+        
+        plt.barh(bottom, values, **self.kwds)
+        
+        plt.ylim(-1, len(bottom))
+        
+        
+        if self.alt_labels == None:
+            plt.yticks(np.arange(len(self.df.index)), self.df.index)
+        else:
+            # Make sure all keys are lower
+            self.alt_labels = dict((k.lower(), v) for k, v in self.alt_labels.iteritems())
+            labels = []
+            for label in self.df.index:
+                if label in self.alt_labels:
+                    labels.append(self.alt_labels[label])
+                else:
+                    labels.append(label)
+            plt.yticks(np.arange(len(labels)), labels)
+
+        plt.xlabel(self.xlabel)
+        plt.tight_layout()
+
+    def _make_legend(self):
+        # This needs work, or maybe not needed?
+        None
