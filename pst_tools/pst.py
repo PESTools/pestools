@@ -42,7 +42,61 @@ class Pest(object):
 
         # observation data
 #        self._read_obs_data()
-        
+
+    def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type'):
+            """Bring in ancillary observation information from csv file such as location and measurement type
+            """
+            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col)
+            self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
+
+            # remap observation info columns to default names
+            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type'}, inplace=True)
+
+            # make a dataframe of observation type for each group
+            if 'Type' in self.obsinfo.columns:
+                self._read_obs_data()
+                # join observation info to 'obsdata' so that the type and group for each observation are listed
+                self.obsinfo = self.obsinfo.join(self.obsdata['OBGNME'], lsuffix='', rsuffix='1', how='inner')
+                self.obsinfo.rename(columns={'OBGNME': 'Group'}, inplace=True)
+                self.obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
+                self.obstypes.index = self.obstypes.Group
+                self.obstypes = self.obstypes.drop('Group', axis=1)
+
+    def _parse_rec_file(self):
+        """parse information, including regularisation weighting factor, from rec file
+            looks like we don't need this for the time being,
+            as regularisation values in rei file reflect weighting factor!
+        """
+        self._rwf = {'rwf': {}}
+        with open(self.pstfile[:-4] + '.rec') as input:
+            itr = 0
+            while True:
+                line = input.next()
+                if "OPTIMISATION ITERATION NO." in line:
+                    itr += 1
+                if itr == 0 and "Current regularisation weight factor" in line:
+                    rwf = float(line.strip().split()[-1])
+                    self._rwf['rwf'][0] = rwf
+                if "Re-calculated regularisation weight factor" in line:
+                    rwf = float(line.strip().split()[-1])
+                    self._rwf['rwf'][itr] = rwf
+                if "OPTIMISATION RESULTS" in line:
+                    break
+
+    def _read_svda(self):
+        """retrieve SVDA information
+        """
+        with open(self.pstfile) as input:
+            knt = 0
+            while True:
+                knt += 1
+                line = input.next()
+                if "svd assist" in line:
+                    self.BASEPESTFILE = input.next().strip()
+                    self.BASEJACFILE = input.next().strip()
+                    self.SVDA_MULBPA, self.SVDA_SCALADJ, self.SVDA_EXTSUPER, self.SVDA_SUPDERCALC, \
+                    self.SVDA_PAR_EXCL = [int(i) for i in input.next().strip().split()]
+                    break
 
     def _read_par_data(self):
         """
@@ -62,7 +116,7 @@ class Pest(object):
         tmp = {}
         for i in np.arange(NPAR) + knt:
 
-            l = pst[i].strip().split()
+            l = pst[i].lower().strip().split() # enforce lower case
             pardata = [l[0], l[1], l[2], float(l[3]), float(l[4]), float(l[5]),
                        l[6], int(l[7]), int(l[8]), int(l[9])]
 
@@ -71,6 +125,24 @@ class Pest(object):
         self.pardata = pd.DataFrame.from_dict(tmp, orient='index')
         self.pardata = self.pardata[pardata_attr] # preserve column order
 
+    def _read_obs_groups(self):
+        """
+        convenience function to read observation information into a dataframe
+        this is useful to have for the Rei class
+        """
+        self.allgroups = []
+        with open(self.pstfile) as input:
+            for i in range(3):
+                input.next()
+            NOBSGP = int(input.next().strip().split()[4])
+            while True:
+                line = input.next()
+                if "observation groups" in line:
+                    for i in np.arange(NOBSGP):
+                        self.allgroups.append(input.next().strip().lower())
+                    break
+        self.obsgroups = [g for g in self.allgroups if 'regul' not in g]
+        self.reggroups = [g for g in self.allgroups if 'regul' in g]
 
     def _read_obs_data(self):
         """
@@ -88,7 +160,7 @@ class Pest(object):
         tmp = {}
         for i in np.arange(NOBS) + knt:
 
-            l = pst[i].strip().split()
+            l = pst[i].lower().strip().split() # enforce lower case
             obsdata = [l[0], float(l[1]), float(l[2]), l[3]]
 
             tmp[obsdata[0]] = dict(zip(obsdata_attr, obsdata))
@@ -110,7 +182,7 @@ class Pest(object):
                 break
         tmp = {}
         for i in np.arange(NPRIOR) + knt:
-            l = pst[i].strip().split()
+            l = pst[i].lower().strip().split()
             priordata = [l[0], " ".join(l[1:-4]), float(l[-3]), float(l[-2]), l[-1]]
 
             tmp[priordata[0]] = dict(zip(priordata_attr, priordata))            
@@ -118,7 +190,6 @@ class Pest(object):
             
         self.priordata = pd.DataFrame.from_dict(tmp, orient='index')
         self.priordata = self.priordata[priordata_attr] # preserve column order
-
         
     def _load_jco(self):
         import struct
@@ -185,10 +256,6 @@ class Pst(Pest):
         # note: these could also be included before the __init__ method, in which case they would retain their values
         # in the Pst class (if it was called directly), but could be updated in instances of the Pst class. Not sure if we
         # need this, but it is an option.
-
-        # svd assist
-        # Not sure what this is for?
-        self.svda = {}
         
         # Read in all the PEST variables
         self._read_pst()
@@ -251,6 +318,9 @@ class Pst(Pest):
         # read parameter data
         self._read_par_data()
 
+        # read observation groups
+        self._read_obs_groups()
+
         # read observation data
         self._read_obs_data()
 
@@ -272,11 +342,6 @@ class Pst(Pest):
                 #print 'parameter groups...'
                 for i in np.arange(self.NPARGP) + 1:
                     self._read_par_group(self.pst[knt + i])
-
-            if 'observation groups' in line:
-                #print 'observation groups...'
-                self._obsgroups_ind = knt + 1
-                self._read_obs_groups()
 
             if 'model command line' in line:
                 #print 'batch file...'
@@ -313,7 +378,6 @@ class Pst(Pest):
 
             knt += 1
 
-
     def _read_par_group(self, l):
         """
         convenience function to read par group information into a dictionary
@@ -325,17 +389,6 @@ class Pst(Pest):
         pargp = [l[0], l[1], float(l[2]), float(l[3]), l[4], float(l[5]), l[6]]
 
         self.pargroups[pargp[0]] = dict(zip(pargroups_attr, pargp))
-
-
-    def _read_obs_groups(self):
-        """
-        convenience function to read observation groups into a list
-        """
-        self.obsgroups = []
-        knt = self._obsgroups_ind
-        for i in np.arange(self.NOBSGP) + knt:
-            self.obsgroups.append(self.pst[i].strip())
-
 
     def _read_instpl(self):
         """
@@ -356,9 +409,6 @@ class Pst(Pest):
             ins, dat = self.pst[i].strip().split()
 
             self.ins[ins] = dat
-
-
-
             
 if __name__ == '__main__':
     pest = Pest(r'C:\Users\egc\pest_tools-1\cc\Columbia.pst')
