@@ -17,18 +17,43 @@ class Res(Pest):
         res_file : str
             Path to .res or .rei file from PEST
 
+        obs_info_file : str, optional
+            csv file containing observation locations and/or observation type.
+
+        name_col : str, default 'Name'
+            column in obs_info_file containing observation names
+
+        x_col : str, default 'X'
+            column in obs_info_file containing observation x locations
+
+        y_col : str, default 'Y'
+            column in obs_info_file containing observation y locations
+
+        type_col : str, default 'Type'
+            column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+            type ('observation') is assigned in the absence of type information
+
         Attributes
         ----------
-        df : Pandas Data Frame
+        df : DataFrame
+            contains all of the information from the res or rei file; is used to build phi dataframe
 
-        groups : array
-            Array of observation groups
+        phi : DataFrame
+            contains phi contribution by group, and also a column with observation type
+
+        obsinfo : DataFrame
+            contains information from observation information file, and also observation groups
+
+        Notes
+        ------
+        Column names in the observation information file are remapped to their default values after import
+
         """
         Pest.__init__(self, res_file)
 
         self._read_obs_groups()
         self.obsinfo = pd.DataFrame()
-        self.obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
+        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
 
         if obs_info_file is not None:
             self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
@@ -53,8 +78,8 @@ class Res(Pest):
         # calculate phi
         self.df['Weighted_Sq_Residual'] = self.df['Weighted_Residual']**2
         self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
-        self.phi = self.phi.join(self.obstypes)
-        self.phi_m = self.phi.ix[self.obsgroups, :]
+        self.phi = self.phi.join(self._obstypes)
+        self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
         self.phi_r = self.phi.ix[self.reggroups, :]
 
     def group(self, group):
@@ -444,7 +469,7 @@ class Res(Pest):
         plt.tight_layout()
 
 
-    def plot_one2one(self, groupinfo, line_kwds={}, **kwds):
+    def plot_one2one(self, groupinfo, title=None, line_kwds={}, **kwds):
         """
         Makes one-to-one plot of two dataframe columns, using pyplot.scatter
 
@@ -471,14 +496,15 @@ class Res(Pest):
         ------
 
         """
-        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, line_kwds=line_kwds, **kwds)
+        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, title=title,
+                                     line_kwds=line_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 
         return plot_obj.fig, plot_obj.ax
 
 
-    def plot_hexbin(self, groupinfo, line_kwds={}, **kwds):
+    def plot_hexbin(self, groupinfo, title=None, line_kwds={}, **kwds):
         """
         Makes a hexbin plot of two dataframe columns, pyplot.hexbin
 
@@ -489,6 +515,9 @@ class Res(Pest):
             in "Group" column of df can be specified using a list. A dictionary
             can be supplied to indicate the groups to plot (as keys), with item consisting of
             a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
+
+        title:
+            not sure if we need to specify arguments like this one if we are already using kwds. Need to look into it more.
 
         line_kwds: dict, optional
             Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
@@ -503,7 +532,8 @@ class Res(Pest):
         ------
 
         """
-        plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, line_kwds=line_kwds, **kwds)
+        plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, title=title,
+                                    line_kwds=line_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 

@@ -22,7 +22,7 @@ class Plot(object):
     def __init__(self, df, kind=None, by=None, subplots=False, sharex=True,
                  sharey=False, use_index=True,
                  figsize=None, grid=None, legend=True, legend_title='',
-                 ax=None, fig=None, title='', xlim=None, ylim=None,
+                 ax=None, fig=None, title=None, xlim=None, ylim=None,
                  xticks=None, yticks=None, xlabel=None, ylabel=None, units=None,
                  sort_columns=False, fontsize=None,
                  secondary_y=False,
@@ -74,7 +74,8 @@ class Plot(object):
 
         self.ax.set_ylabel(self.xlabel)
         self.ax.set_xlabel(self.ylabel)
-        self.ax.set_title(self.title)
+        if self.title:
+            self.ax.set_title(self.title)
 
     def log_trans(self, x, pos):
         # Reformat tick labels out of log space
@@ -189,7 +190,6 @@ class One2onePlot(Plot):
         if len(self.groups) == 0:
             raise IndexError('Specified groups not found in residuals file.')
 
-
     def _make_plot(self):
 
         # use matplotlib's color cycle to plot each group as a different color by default
@@ -284,7 +284,8 @@ class HexbinPlot(One2onePlot):
                 cb.set_label('Bin counts')
             else:
                 cb.set_label('Bin counts')
-        
+
+
 class BarPloth(Plot):
     def __init__(self, df, values_col, group_col=None, color_dict = None, alt_labels = None, **kwargs):
         Plot.__init__(self, df, **kwargs)
@@ -322,15 +323,7 @@ class BarPloth(Plot):
         if self.ylabel is None:
             self.ylabel = str(self.values_col)
 
-            
-            
-
-
     def _make_plot(self, ):
-
-#        self.fig = plt.figure()
-#        self.ax = self.fig.add_subplot(111)
-        
         
         values = self.df[self.values_col].values
         bottom = np.arange(len(values))
@@ -370,8 +363,7 @@ class BarPloth(Plot):
         plt.barh(bottom, values, **self.kwds)
         
         plt.ylim(-1, len(bottom))
-        
-        
+
         if self.alt_labels == None:
             plt.yticks(np.arange(len(self.df.index)), self.df.index)
         else:

@@ -9,12 +9,50 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 class Rei(Pest):
     """
-    Class for working with set of REI files from a PEST run
+    Rei Class
 
     Parameters
     ----------
-    basename : string
-        Base name for PEST run.
+    basename : str
+        basename for pest run (including path)
+
+    obs_info_file : str, optional
+        csv file containing observation locations and/or observation type.
+
+    name_col : str, default 'Name'
+        column in obs_info_file containing observation names
+
+    x_col : str, default 'X'
+        column in obs_info_file containing observation x locations
+
+    y_col : str, default 'Y'
+        column in obs_info_file containing observation y locations
+
+    type_col : str, default 'Type'
+        column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+        type ('observation') is assigned in the absence of type information
+
+    Attributes
+    ----------
+    df : DataFrame
+        contains all of the information from the res or rei file; is used to build phi dataframe
+
+    phi_by_group : DataFrame
+        contains phi contribution by group for each iteration
+
+    phi_by_type : DataFrame
+        contains phi contribution by observation type for each iteration
+
+    phi_by_component : DataFrame
+        contains phi contribution by objective function component for each iteration
+
+    obsinfo : DataFrame
+        contains information from observation information file, and also observation groups
+
+    Notes
+    ------
+    Column names in the observation information file are remapped to their default values after import
+
 
 
     Attributes
@@ -41,7 +79,7 @@ class Rei(Pest):
 
         self._read_obs_groups()
         self.obsinfo = pd.DataFrame()
-        self.obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
+        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
 
         if obs_info_file is not None:
             self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
@@ -76,7 +114,7 @@ class Rei(Pest):
         for i in self.reifiles.iterkeys():
             print '{}'.format(self.reifiles[i])
             r = Res(self.reifiles[i])
-            fig, ax = r.plot_one2one(groupinfo, **kwds)
+            fig, ax = r.plot_one2one(groupinfo, title='Iteration {}'.format(i), **kwds)
 
             pdf.savefig(fig, **kwds)
         print '\nsaved to {}'.format(outpdf)
@@ -97,7 +135,7 @@ class Rei(Pest):
 
         # get phi by observation type for each iteration
         for type in np.unique(self.obstypes.Type):
-            typegroups = self.obstypes[self.obstypes.Type == type].index.tolist()
+            typegroups = self._obstypes[self._obstypes.Type == type].index.tolist()
             self.phi_by_type[type] = self.phi_by_group.ix[:, typegroups].sum(axis=1)
             self.phi_by_type.index.name = 'Pest iteration'
 
