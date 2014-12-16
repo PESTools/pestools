@@ -58,9 +58,9 @@ class Pest(object):
                 # join observation info to 'obsdata' so that the type and group for each observation are listed
                 self.obsinfo = self.obsinfo.join(self.obsdata['OBGNME'], lsuffix='', rsuffix='1', how='inner')
                 self.obsinfo.rename(columns={'OBGNME': 'Group'}, inplace=True)
-                self.obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
-                self.obstypes.index = self.obstypes.Group
-                self.obstypes = self.obstypes.drop('Group', axis=1)
+                self._obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
+                self._obstypes.index = self._obstypes.Group
+                self._obstypes = self._obstypes.drop('Group', axis=1)
 
     def _parse_rec_file(self):
         """parse information, including regularisation weighting factor, from rec file

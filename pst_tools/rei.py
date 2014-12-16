@@ -134,7 +134,7 @@ class Rei(Pest):
         self.phi_obs_by_group = self.phi_by_group.ix[:, self.obsgroups]
 
         # get phi by observation type for each iteration
-        for type in np.unique(self.obstypes.Type):
+        for type in np.unique(self._obstypes.Type):
             typegroups = self._obstypes[self._obstypes.Type == type].index.tolist()
             self.phi_by_type[type] = self.phi_by_group.ix[:, typegroups].sum(axis=1)
             self.phi_by_type.index.name = 'Pest iteration'
