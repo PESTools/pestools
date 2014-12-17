@@ -9,12 +9,50 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 class Rei(Pest):
     """
-    Class for working with set of REI files from a PEST run
+    Rei Class
 
     Parameters
     ----------
-    basename : string
-        Base name for PEST run.
+    basename : str
+        basename for pest run (including path)
+
+    obs_info_file : str, optional
+        csv file containing observation locations and/or observation type.
+
+    name_col : str, default 'Name'
+        column in obs_info_file containing observation names
+
+    x_col : str, default 'X'
+        column in obs_info_file containing observation x locations
+
+    y_col : str, default 'Y'
+        column in obs_info_file containing observation y locations
+
+    type_col : str, default 'Type'
+        column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+        type ('observation') is assigned in the absence of type information
+
+    Attributes
+    ----------
+    df : DataFrame
+        contains all of the information from the res or rei file; is used to build phi dataframe
+
+    phi_by_group : DataFrame
+        contains phi contribution by group for each iteration
+
+    phi_by_type : DataFrame
+        contains phi contribution by observation type for each iteration
+
+    phi_by_component : DataFrame
+        contains phi contribution by objective function component for each iteration
+
+    obsinfo : DataFrame
+        contains information from observation information file, and also observation groups
+
+    Notes
+    ------
+    Column names in the observation information file are remapped to their default values after import
+
 
 
     Attributes
@@ -34,10 +72,23 @@ class Rei(Pest):
 
     """
 
-    def __init__(self, basename):
+    def __init__(self, basename, obs_info_file=None, name_col='Name',
+                 x_col='X', y_col='Y', type_col='Type'):
 
         Pest.__init__(self, basename)
 
+        self._read_obs_groups()
+        self.obsinfo = pd.DataFrame()
+        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
+
+        if obs_info_file is not None:
+            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
+
+        self.phi_by_group = pd.DataFrame(columns=self.obsgroups)
+        self.phi_by_type = pd.DataFrame()
+        self.phi_by_component = pd.DataFrame()
+
+        # list rei files for run
         reifiles = [f for f in os.listdir(self.run_folder) if self.basename + '.rei' in f]
 
         # sort by iteration number (may not be the most elegant approach)
@@ -48,7 +99,10 @@ class Rei(Pest):
                 self.reifiles[i] = os.path.join(self.run_folder, f)
             except:
                 continue
-
+        # for SVDA runs, may not have .0 (initial) rei file. Get rei file for base run.
+        if 0 not in self.reifiles.keys():
+            self._read_svda()
+            self.reifiles[0] = os.path.join(self.run_folder, self.BASEPESTFILE[:-4] + '.rei')
 
     def plot_one2ones(self, groupinfo, outpdf='', **kwds):
 
@@ -60,8 +114,39 @@ class Rei(Pest):
         for i in self.reifiles.iterkeys():
             print '{}'.format(self.reifiles[i])
             r = Res(self.reifiles[i])
-            fig, ax = r.one2one_plot(groupinfo, **kwds)
+            fig, ax = r.plot_one2one(groupinfo, title='Iteration {}'.format(i), **kwds)
 
             pdf.savefig(fig, **kwds)
         print '\nsaved to {}'.format(outpdf)
         pdf.close()
+
+    def get_phi(self):
+        print 'getting phi by group for each iteration...'
+        for i in self.reifiles.iterkeys():
+            print '{}'.format(self.reifiles[i])
+            r = Res(self.reifiles[i])
+            phi = r.phi.Weighted_Sq_Residual
+            phi.name = i
+            self.phi_by_group = self.phi_by_group.append(phi.T)
+            self.phi_by_group.index.name = 'Pest iteration'
+
+        # get phi just for observation groups
+        self.phi_obs_by_group = self.phi_by_group.ix[:, self.obsgroups]
+
+        # get phi by observation type for each iteration
+        for type in np.unique(self._obstypes.Type):
+            typegroups = self._obstypes[self._obstypes.Type == type].index.tolist()
+            self.phi_by_type[type] = self.phi_by_group.ix[:, typegroups].sum(axis=1)
+            self.phi_by_type.index.name = 'Pest iteration'
+
+        # get phi by component for each iteration
+        self.phi_by_component['Measurement Phi'] = self.phi_obs_by_group.sum(axis=1)
+        if len(self.reggroups) > 0:
+            self.phi_by_component['Regularisation Phi'] = self.phi_by_group.ix[:, self.reggroups].sum(axis=1)
+        self.phi_by_component['Phi Total'] = self.phi_by_component.sum(axis=1)
+        self.phi_by_component.index.name = 'Pest iteration'
+
+
+
+
+
