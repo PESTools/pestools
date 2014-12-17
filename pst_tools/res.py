@@ -9,7 +9,9 @@ import plots
 class Res(Pest):
 
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
-                 x_col='X', y_col='Y', type_col='Type'):
+                 x_col='X', y_col='Y', type_col='Type',
+                 basename_col='basename', datetime_col='datetime', group_cols=[],
+                 **kwds):
         """ Res Class
 
         Parameters
@@ -56,7 +58,9 @@ class Res(Pest):
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
 
         if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
+            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,
+                                     basename_col=basename_col, datetime_col=datetime_col, group_cols=group_cols,
+                                     **kwds)
 
         check = open(res_file, 'r')
         line_num = 0
@@ -77,10 +81,11 @@ class Res(Pest):
 
         # calculate phi
         self.df['Weighted_Sq_Residual'] = self.df['Weighted_Residual']**2
-        self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
-        self.phi = self.phi.join(self._obstypes)
-        self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
-        self.phi_r = self.phi.ix[self.reggroups, :]
+        #self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
+        self.phi = self.df[['Weighted_Sq_Residual']].join(self.obsinfo)
+        #self.phi = self.phi.join(self._obstypes)
+        #self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
+        #self.phi_r = self.phi.ix[self.reggroups, :]
 
     def group(self, group):
         ''' Get pandas DataFrame for a single group

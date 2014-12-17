@@ -43,14 +43,15 @@ class Pest(object):
         # observation data
 #        self._read_obs_data()
 
-    def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type'):
+    def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
+                            basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
             """Bring in ancillary observation information from csv file such as location and measurement type
             """
-            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col)
+            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **kwds)
             self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
 
             # remap observation info columns to default names
-            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type'}, inplace=True)
+            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', 'foo': 'foo'}, inplace=True)
 
             # make a dataframe of observation type for each group
             if 'Type' in self.obsinfo.columns:
@@ -61,6 +62,7 @@ class Pest(object):
                 self._obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
                 self._obstypes.index = self._obstypes.Group
                 self._obstypes = self._obstypes.drop('Group', axis=1)
+
 
     def _parse_rec_file(self):
         """parse information, including regularisation weighting factor, from rec file
