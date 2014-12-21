@@ -21,7 +21,8 @@ Residuals Class
 
 .. autosummary::
 	pst_tools.res.group
-	prt_tools.res.stats
+	pst_tools.res.stats
+	
 
 REI Class
 *********
