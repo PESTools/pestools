@@ -7,50 +7,49 @@ import plots
 
 
 class Res(Pest):
+    """ Res Class
 
+    Parameters
+    ----------
+    res_file : str
+        Path to .res or .rei file from PEST
+
+    obs_info_file : str, optional
+        csv file containing observation locations and/or observation type.
+
+    name_col : str, default 'Name'
+        column in obs_info_file containing observation names
+
+    x_col : str, default 'X'
+        column in obs_info_file containing observation x locations
+
+    y_col : str, default 'Y'
+        column in obs_info_file containing observation y locations
+
+    type_col : str, default 'Type'
+        column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+        type ('observation') is assigned in the absence of type information
+
+    Attributes
+    ----------
+    df : DataFrame
+        contains all of the information from the res or rei file; is used to build phi dataframe
+
+    phi : DataFrame
+        contains phi contribution by group, and also a column with observation type
+
+    obsinfo : DataFrame
+        contains information from observation information file, and also observation groups
+
+    Notes
+    ------
+    Column names in the observation information file are remapped to their default values after import
+
+    """
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
                  x_col='X', y_col='Y', type_col='Type',
                  basename_col='basename', datetime_col='datetime', group_cols=[],
                  **kwds):
-        """ Res Class
-
-        Parameters
-        ----------
-        res_file : str
-            Path to .res or .rei file from PEST
-
-        obs_info_file : str, optional
-            csv file containing observation locations and/or observation type.
-
-        name_col : str, default 'Name'
-            column in obs_info_file containing observation names
-
-        x_col : str, default 'X'
-            column in obs_info_file containing observation x locations
-
-        y_col : str, default 'Y'
-            column in obs_info_file containing observation y locations
-
-        type_col : str, default 'Type'
-            column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
-            type ('observation') is assigned in the absence of type information
-
-        Attributes
-        ----------
-        df : DataFrame
-            contains all of the information from the res or rei file; is used to build phi dataframe
-
-        phi : DataFrame
-            contains phi contribution by group, and also a column with observation type
-
-        obsinfo : DataFrame
-            contains information from observation information file, and also observation groups
-
-        Notes
-        ------
-        Column names in the observation information file are remapped to their default values after import
-
-        """
         Pest.__init__(self, res_file)
 
         self._read_obs_groups()
