@@ -147,6 +147,41 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </tbody>
 </table>
 <p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.group" title="pst_tools.res.Res.group"><tt class="xref py py-obj docutils literal"><span class="pre">group</span></tt></a>(group)</td>
+<td>Get pandas DataFrame for a single group</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.objective_contrib" title="pst_tools.res.Res.objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">objective_contrib</span></tt></a>([df,&nbsp;return_data])</td>
+<td>Print out the contribution of each observation group to the</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_hexbin" title="pst_tools.res.Res.plot_hexbin"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hexbin</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;line_kwds])</td>
+<td>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measure_vs_model" title="pst_tools.res.Res.plot_measure_vs_model"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measure_vs_model</span></tt></a>([groups,&nbsp;plot_type])</td>
+<td>Plot measured vs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measured_vs_residual" title="pst_tools.res.Res.plot_measured_vs_residual"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measured_vs_residual</span></tt></a>([groups,&nbsp;...])</td>
+<td>Plot measured vs.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_objective_contrib" title="pst_tools.res.Res.plot_objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">plot_objective_contrib</span></tt></a>([df])</td>
+<td>Plot the contribution of each group to the objective function  as a pie chart.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_one2one" title="pst_tools.res.Res.plot_one2one"><tt class="xref py py-obj docutils literal"><span class="pre">plot_one2one</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;line_kwds])</td>
+<td>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.stats" title="pst_tools.res.Res.stats"><tt class="xref py py-obj docutils literal"><span class="pre">stats</span></tt></a>(group)</td>
+<td>Return stats for single group</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.stats_all" title="pst_tools.res.Res.stats_all"><tt class="xref py py-obj docutils literal"><span class="pre">stats_all</span></tt></a>()</td>
+<td>Return stats for each observation group</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="pst_tools.res.Res.group">
 <tt class="descname">group</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.group" title="Permalink to this definition">¶</a></dt>
@@ -393,6 +428,20 @@ See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.htm
 
 </dd></dl>
 
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">pst_tools.res.group</span></tt></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">pst_tools.res.stats</span></tt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="module-pst_tools.rei">
 <span id="rei-class"></span><h2>REI Class<a class="headerlink" href="#module-pst_tools.rei" title="Permalink to this headline">¶</a></h2>

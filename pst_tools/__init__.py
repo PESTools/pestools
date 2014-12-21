@@ -20,8 +20,7 @@ Residuals Class
 .. automodule:: pst_tools.res
 
 .. autosummary::
-	pst_tools.res.group
-	pst_tools.res.stats
+
 	
 
 REI Class
