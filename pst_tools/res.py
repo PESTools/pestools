@@ -7,48 +7,49 @@ import plots
 
 
 class Res(Pest):
+    """ Res Class
 
+    Parameters
+    ----------
+    res_file : str
+        Path to .res or .rei file from PEST
+
+    obs_info_file : str, optional
+        csv file containing observation locations and/or observation type.
+
+    name_col : str, default 'Name'
+        column in obs_info_file containing observation names
+
+    x_col : str, default 'X'
+        column in obs_info_file containing observation x locations
+
+    y_col : str, default 'Y'
+        column in obs_info_file containing observation y locations
+
+    type_col : str, default 'Type'
+        column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+        type ('observation') is assigned in the absence of type information
+
+    Attributes
+    ----------
+    df : DataFrame
+        contains all of the information from the res or rei file; is used to build phi dataframe
+
+    phi : DataFrame
+        contains phi contribution by group, and also a column with observation type
+
+    obsinfo : DataFrame
+        contains information from observation information file, and also observation groups
+
+    Notes
+    ------
+    Column names in the observation information file are remapped to their default values after import
+
+    """
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
-                 x_col='X', y_col='Y', type_col='Type'):
-        """ Res Class
-
-        Parameters
-        ----------
-        res_file : str
-            Path to .res or .rei file from PEST
-
-        obs_info_file : str, optional
-            csv file containing observation locations and/or observation type.
-
-        name_col : str, default 'Name'
-            column in obs_info_file containing observation names
-
-        x_col : str, default 'X'
-            column in obs_info_file containing observation x locations
-
-        y_col : str, default 'Y'
-            column in obs_info_file containing observation y locations
-
-        type_col : str, default 'Type'
-            column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
-            type ('observation') is assigned in the absence of type information
-
-        Attributes
-        ----------
-        df : DataFrame
-            contains all of the information from the res or rei file; is used to build phi dataframe
-
-        phi : DataFrame
-            contains phi contribution by group, and also a column with observation type
-
-        obsinfo : DataFrame
-            contains information from observation information file, and also observation groups
-
-        Notes
-        ------
-        Column names in the observation information file are remapped to their default values after import
-
-        """
+                 x_col='X', y_col='Y', type_col='Type',
+                 basename_col='basename', datetime_col='datetime', group_cols=[],
+                 **kwds):
         Pest.__init__(self, res_file)
 
         self._read_obs_groups()
@@ -56,7 +57,9 @@ class Res(Pest):
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
 
         if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
+            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,
+                                     basename_col=basename_col, datetime_col=datetime_col, group_cols=group_cols,
+                                     **kwds)
 
         check = open(res_file, 'r')
         line_num = 0
@@ -77,10 +80,11 @@ class Res(Pest):
 
         # calculate phi
         self.df['Weighted_Sq_Residual'] = self.df['Weighted_Residual']**2
-        self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
-        self.phi = self.phi.join(self._obstypes)
-        self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
-        self.phi_r = self.phi.ix[self.reggroups, :]
+        #self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
+        self.phi = self.df[['Weighted_Sq_Residual']].join(self.obsinfo)
+        #self.phi = self.phi.join(self._obstypes)
+        #self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
+        #self.phi_r = self.phi.ix[self.reggroups, :]
 
     def group(self, group):
         ''' Get pandas DataFrame for a single group

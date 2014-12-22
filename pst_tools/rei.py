@@ -73,17 +73,25 @@ class Rei(Pest):
     """
 
     def __init__(self, basename, obs_info_file=None, name_col='Name',
-                 x_col='X', y_col='Y', type_col='Type'):
+                 x_col='X', y_col='Y', type_col='Type',
+                 basename_col='basename', datetime_col='datetime', group_cols=[],
+                 **kwds):
 
         Pest.__init__(self, basename)
 
         self._read_obs_groups()
-        self.obsinfo = pd.DataFrame()
+
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
 
         if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col)
+            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,
+                                     basename_col=basename_col, datetime_col=datetime_col, group_cols=group_cols,
+                                     **kwds)
+        else:
+            self._read_obs_data()
+            self.obsinfo = pd.DataFrame(self.obsdata.OBGNME)
 
+        self.phi = self.obsinfo.copy()
         self.phi_by_group = pd.DataFrame(columns=self.obsgroups)
         self.phi_by_type = pd.DataFrame()
         self.phi_by_component = pd.DataFrame()
@@ -126,9 +134,11 @@ class Rei(Pest):
             print '{}'.format(self.reifiles[i])
             r = Res(self.reifiles[i])
             phi = r.phi.Weighted_Sq_Residual
-            phi.name = i
-            self.phi_by_group = self.phi_by_group.append(phi.T)
-            self.phi_by_group.index.name = 'Pest iteration'
+            #phi.name = i
+            self.phi[i] = phi
+            #self.phi = self.phi.append(phi.T)
+            #self.phi_by_group = self.phi_by_group.append(phi.T)
+            #self.phi_by_group.index.name = 'Pest iteration'
 
         # get phi just for observation groups
         self.phi_obs_by_group = self.phi_by_group.ix[:, self.obsgroups]
