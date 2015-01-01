@@ -7,6 +7,7 @@
 from pst import Pest
 import numpy as np
 import pandas as pd
+import os
 import plots
 
 
@@ -101,7 +102,8 @@ class ParSen(Pest):
         # key is OBSNME values are (WEIGHT, OBGNME)
         obs_dict = {}
         if res_file is None:
-            res_file = self.pstfile.rstrip('pst')+'res'
+            res_file = os.path.splitext(self.pstfile)[0]+'.res'
+            #res_file = self.pstfile.rstrip('pst')+'res'
         # Check if .res or .rei
         try:
             check = open(res_file, 'r')
