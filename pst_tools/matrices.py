@@ -70,8 +70,8 @@ class Matrices(Pest):
 
         # Check if reularization is used and warn the user
         # Note: Might want to come up with some better warning
-#        if 'regularisation' in open(self.pstfile).read():
-#            warnings.warn('Regularization used, statistical matrices may not applicable')           
+        if 'regularisation' in open(self.pstfile).read():
+            warnings.warn('Regularization used, statistical matrices may not applicable')           
         if jco_df is None:
             jco_df = self._load_jco()
 
