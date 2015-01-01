@@ -206,7 +206,8 @@ class Pest(object):
         Method is is the Pest class because it will be used for several other 
         classes; including Jco, ParSen, Cor
         '''
-        f = open(self.pstfile.rstrip('.pst')+'.jco','rb')
+        f = open(os.path.splitext(self.pstfile)[0]+'.jco', 'rb')       
+        #f = open(self.pstfile.rstrip('.pst')+'.jco','rb')
         # Header info of .jco file
         npar = abs(struct.unpack('i', f.read(4))[0])
         nobs = abs(struct.unpack('i', f.read(4))[0])
