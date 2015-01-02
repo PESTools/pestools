@@ -36,7 +36,7 @@ class _Matrices(Pest):
 
         Methods
         -------
-        _cov : Get dataframe of covarience matrix
+        _cov : Get DataFrame of covariance matrix
 
         _cor : Get DataFrame of correlation coefficient matrix
 
@@ -45,10 +45,10 @@ class _Matrices(Pest):
         Notes
         ------
         As noted in Section 5.3.6 of the PEST manual, there may be slight
-        differences between matrixes recorded to the final matrix file (.mtt)
+        differences between matrices recorded to the final matrix file (.mtt)
         from PEST and those listed in the run record file at the end of a PEST
         run. The same issue applies here.  "Reference variance" used to record
-        values in the PEST matrix (.mtt) file is conputed using the objective
+        values in the PEST matrix (.mtt) file is computed using the objective
         function computed from the previous iteration.  The covariance matrices
         recorded in the run record uses the best objective function value.
         Covariance calculated with pestools uses the final .res file and .jco,
@@ -88,7 +88,7 @@ class _Matrices(Pest):
         self._weights = self._res_df['Weight'].values
 
     def _cov(self):
-        # Calc Covarience Matrix
+        # Calc Covariance Matrix
         # See eq. 2.17 in PEST Manual
         # Note: Number of observations are number of non-zero weighted observations
         q = np.diag(np.diag(np.tile(self._weights**2, (len(self._weights), 1))))
@@ -147,10 +147,10 @@ class Cov(_Matrices):
         Notes
         ------
         As noted in Section 5.3.6 of the PEST manual, there may be slight
-        differences between matrixes recorded to the final matrix file (.mtt)
+        differences between matrices recorded to the final matrix file (.mtt)
         from PEST and those listed in the run record file at the end of a PEST
         run. The same issue applies here.  "Reference variance" used to record
-        values in the PEST matrix (.mtt) file is conputed using the objective
+        values in the PEST matrix (.mtt) file is computed using the objective
         function computed from the previous iteration.  The covariance matrices
         recorded in the run record uses the best objective function value.
         Covariance calculated with pestools uses the final .res file and .jco,
