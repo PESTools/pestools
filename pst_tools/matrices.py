@@ -73,7 +73,7 @@ class Matrices(Pest):
         if 'regularisation' in open(self.pstfile).read():
             warnings.warn('Regularization used, statistical matrices may not applicable')           
         if jco_df is None:
-            jco_df = self._load_jco()
+            self._jco_df = self._load_jco()
 
         if res_file is None:
             res_file = os.path.splitext(self.pstfile)[0]+'.res'
@@ -90,35 +90,80 @@ class Matrices(Pest):
                 break
             else:
                 line_num += 1
-        res_df = pd.read_csv(res_file, skiprows=line_num, delim_whitespace=True)
-        res_df.index = [n.lower() for n in res_df['Name']]
+        self._res_df = pd.read_csv(res_file, skiprows=line_num, delim_whitespace=True)
+        self._res_df.index = [n.lower() for n in self._res_df['Name']]
 
-        pars = jco_df.columns.values
-        phi = sum(res_df['Weight*Residual']**2)
-        weights = res_df['Weight'].values
-        q = np.diag(np.diag(np.tile(weights**2, (len(weights), 1))))
-
+        # Define _pars, _phi, and _weights in Matrices class.  Plan to allow
+        # for additional filtering etc here later
+        self._pars = self._jco_df.columns.values
+        self._phi = sum(self._res_df['Weight*Residual']**2)
+        self._weights = self._res_df['Weight'].values
+    
+    def _cov(self):
         # Calc Covarience Matrix
         # See eq. 2.17 in PEST Manual
-        # Note: Number of obs. are number of non-zero weighted obs.
-        self.cov = np.dot((phi/(np.count_nonzero(weights)-len(pars))),
-                     (np.linalg.inv(np.dot(np.dot(jco_df.values.T, q),jco_df.values))))
-        # Put into dataframe
-        self.cov_df = pd.DataFrame(self.cov, index=pars, columns=pars)
-
+        # Note: Number of observations are number of non-zero weighted observations
+        q = np.diag(np.diag(np.tile(self._weights**2, (len(self._weights), 1))))
+        cov = np.dot((self._phi/(np.count_nonzero(self._weights)-len(self._pars))),
+                     (np.linalg.inv(np.dot(np.dot(self._jco_df.values.T, q),self._jco_df.values))))
+        cov_df = pd.DataFrame(cov, index=self._pars, columns=self._pars)
+        return cov_df
+            
+    def _cor(self):
         # Calc correlation matrix
-        d = np.diag(self.cov)
-        self.cor = self.cov/np.sqrt(np.multiply.outer(d, d))
+        cov = self._cov().values
+        d = np.diag(cov)
+        cor = cov/np.sqrt(np.multiply.outer(d, d))
         # Put into dataframe
-        self.cor_df = pd.DataFrame(self.cor, index=pars, columns=pars)
-
+        cor_df = pd.DataFrame(cor, index=self._pars, columns=self._pars)
+        return cor_df
+        
+    def _eig(self):
         # Calc eigenvalues, eigenvectors
         # Use UPLO='U' (upper triangular part) to be consistent with PEST
-        self.eig_values, self.eig_vectors = np.linalg.eigh(self.cov, UPLO='U')
-        # Put eig_vectors into dataframe
-        self.eig_vectors_df = pd.DataFrame(self.eig_vectors, index=pars)
+        eig_values, eig_vectors = np.linalg.eigh(self._cov().values, UPLO='U')
+        eig_vectors_df = pd.DataFrame(eig_vectors, index=self._pars)
+        return eig_vectors_df, eig_values
+
+
+class Cov(Matrices):
+    def __init__(self, basename):
+        Matrices.__init__(self, basename, res_file=None, jco_df=None)
+        
+        self.df = self._cov()
+        
+
+
+class Cor(Matrices):
+    def __init__(self, basename):
+        Matrices.__init__(self, basename, res_file=None, jco_df=None)
+        
+        self.df = self._cor()
+        
+    def plot_heatmap(self, label_rows=True, label_cols=True, **kwds):
+        plot_obj = plots.HeatMap(self.df, label_rows=label_rows, label_cols=label_cols, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+        return plot_obj.fig, plot_obj.ax
+        
+class Eig(Matrices):
+    def __init__(self, basename):
+        Matrices.__init__(self, basename, res_file=None, jco_df=None)
+        
+        self.df, self.values = self._eig()
+        # .df may not be clear what it is compared to .values
+        # make a .vectors attribute also that is the same is
+        self.vectors = self.df
+
 
 if __name__ == '__main__':
     #mtt = Matrices(r'C:\Users\egc\pest_tools-1\cc\Columbia.pst')
     #mtt = Matrices(r'H:\Pest_Tools_Archive\pest_tools\Examples\cor_testing')
-    mtt = Matrices (r'C:\PEST\pest13\ppestex\test.pst')
+    #mtt = Matrices(r'C:\PEST\pest13\ppestex\test.pst')
+    #cov = Cov(r'C:\PEST\pest13\ppestex\test.pst')
+    cor = Cor(r'C:\PEST\pest13\ppestex\test.pst')
+    #eig = Eig(r'C:\PEST\pest13\ppestex\test.pst')
+    cor.plot_heatmap(label_rows = True, label_cols = True, cmap = 'PuOr')
+    
+    #cor2 = Cor(r'C:\Users\egc\pest_tools-1\cc\Columbia.pst')
+    #cor2.plot_heatmap()
