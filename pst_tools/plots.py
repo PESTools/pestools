@@ -385,7 +385,8 @@ class BarPloth(Plot):
         None
 
 class HeatMap(Plot):
-    def __init__(self, df,  label_rows=True, label_cols=True, **kwargs):
+    def __init__(self, df,  vmin=None, vmax=None, label_rows=True, label_cols=True,
+                 square=True, **kwargs):
         Plot.__init__(self, df, **kwargs)
         '''
         Heatmap of values in DataFram that represent a matrix (Cov, Cor, Eig)
@@ -403,6 +404,15 @@ class HeatMap(Plot):
         self.data = df.ix[::-1]
         self.row_labels = self.data.index.values
         self.col_labels = self.data.columns.values
+        self.square = square
+        if vmin is None:
+            self.vmin = np.min(self.plot_data)
+        else:
+            self.vmin = vmin
+        if vmax is None:
+            self.vmax = np.max(self.plot_data)
+        else:
+            self.vmax = vmax
         
     def _make_plot(self):
         if self.ylabel == None:
@@ -415,16 +425,14 @@ class HeatMap(Plot):
             del self.kwds['cmap']
         else:
             self.cmap = "RdBu_r"
-            
-        
-        plt.pcolormesh(self.plot_data, cmap = self.cmap, **self.kwds)
+                   
+        plt.pcolormesh(self.plot_data, vmin=self.vmin, vmax=self.vmax, cmap = self.cmap, **self.kwds)
         ax = plt.gca()
         # Set ticks
         ticks = np.arange(0,len(self.row_labels),1) +0.5      
         plt.xticks(ticks)
         plt.yticks(ticks)
-        
-        
+     
         # Remove tick marks
         for mark in ax.get_xticklines() + ax.get_yticklines():
             mark.set_markersize(0)        
@@ -440,16 +448,12 @@ class HeatMap(Plot):
             ax.set_yticklabels(self.row_labels)
         else:
             ax.set_yticklabels('')
-
-        # Add row and column labels
-        #nx, ny = self.data.T.shape
-        #ax.set(xticks=np.arange(nx) + .5, yticks=np.arange(ny) + .5)
-        #xtl = ax.set_xticklabels(self.xticklabels)
-        #ytl = ax.set_yticklabels(self.yticklabels, rotation="vertical")
-        
+      
         ax = plt.gca()
         # Set the axis limits
-        ax.set(xlim=(0, self.data.shape[1]), ylim=(0, self.data.shape[0]))
+        #ax.set(xlim=(0, self.data.shape[1]), ylim=(0, self.data.shape[0]))
+        if self.square == True:
+            ax.set_aspect("equal")
         
         # Set up so pars and cor value show in lower left as mouse moved
         def _format_coord(x, y):
