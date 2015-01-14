@@ -12,7 +12,7 @@ import plots
 
 class ParSen(Pest):
 
-    def __init__(self, basename, jco_df=None, drop_regul=False,
+    def __init__(self, basename, res_file=None, jco_df=None, drop_regul=False,
                  drop_groups=None, keep_groups=None, keep_obs=None,
                  remove_obs=None):
         Pest.__init__(self, basename)
@@ -21,12 +21,23 @@ class ParSen(Pest):
 
         Parameters
         ----------
+        basename : str
+            basename for PEST control file, if pull path not provided the 
+            current working directory is assumed.
+            
         jco_df : DataFrame, optional,
             Pandas DataFrame of the jacobian. If not provided then it will be
             read in based on base name of pest file provided. Providing a
             jco_df offers some efficiencies if working interactively.
             Otherwise the jco is read in every time ParSen class is initialized.
             Jco_df is an attribute of the Jco class
+            
+        res_file : str, optional
+            Path to a .res  or .rei file to use to define the weights used to 
+            calculate the parameter sensitivity.  If not provided it will look
+            for basename+'.res'.  Weights are not taken from PEST control file
+            (.pst) because regularization weights in PEST conrtrol file do
+            not reflect the current weights.
 
         drop_regul: {False, True}, optional
             Flag to drop regularization information in calculating parameter
@@ -85,19 +96,31 @@ class ParSen(Pest):
             jco_df = self._load_jco()
         self._read_par_data()
         self._read_obs_data()
-
-        # Build obs dictionary
+      
+        # Build obs_dict from .res or .rei file
         # key is OBSNME values are (WEIGHT, OBGNME)
         obs_dict = {}
-        for index, row in self.obsdata.iterrows():
-            obs_dict[index.lower()] = (row['WEIGHT'], row['OBGNME'].lower())
-        # Also need to get prior info if present
+        if res_file is None:
+            res_file = self.pstfile.rstrip('pst')+'res'
+        # Check if .res or .rei
         try:
-            self._read_prior()
-            for index, row in self.priordata.iterrows():
-                obs_dict[index.lower()] = (row['WEIGHT'], row['OBGNME'].lower())
-        except:
-            pass
+            check = open(res_file, 'r')
+        except:           
+            raise IOError('Not able to open .res or .rei file: %s (res_file)')            
+        line_num = 0
+        while True:
+            current_line = check.readline()
+            if "name" in current_line.lower() and "residual" in current_line.lower():
+                break
+            else:
+                line_num += 1
+        res_df = pd.read_csv(res_file, skiprows=line_num, delim_whitespace=True)
+        res_df.index = [n.lower() for n in res_df['Name']]
+        # Fill obs_dict
+        obs_dict = {}
+        for index, row in res_df.iterrows():
+            obs_dict[index.lower()] = (row['Weight'], row['Group'].lower())
+       
         # Build pars_dict
         # key is PARNME value is PARGP
         pars_dict = {}
