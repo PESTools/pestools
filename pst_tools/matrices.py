@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from pst import Pest
+from parsen import ParSen
 import numpy as np
 import pandas as pd
 import plots
 import os
 import warnings
+import copy
 
 
 class _Matrices(Pest):
@@ -182,7 +184,8 @@ class Cor(_Matrices):
             calculate the parameter sensitivity.  If not provided it will look
             for basename+'.res'.  Weights are not taken from PEST control file
             (.pst)
-
+            
+           
         Attributes
         ----------
         df : DataFrame
@@ -195,12 +198,17 @@ class Cor(_Matrices):
         '''
         self.df = self._cor()
 
-    def pars(self, par_list):
+    def pars(self, par_list, inplace = False):
         ''' Reduce the correlation coefficient matrix to select parameters
         Parameters
         ----------
         par_list : list
             list of parameters to show correlation coefficient matrix for
+            
+        inplace : False, True
+            If False return a smaller DataFrame of Cor.df
+            If True, change DataFrame of Cor.df inplace
+           
 
         Returns
         -------
@@ -209,7 +217,10 @@ class Cor(_Matrices):
             parameters
         '''
         reduced_matrix = self.df.loc[par_list][par_list]
-        return reduced_matrix
+        if inplace == False:
+            return reduced_matrix
+        if inplace == True:
+            self.df = reduced_matrix
 
     def plot_heatmap(self, label_rows=True, label_cols=True, par_list=None, **kwds):
         ''' Plot correlation coefficient matrix
@@ -287,3 +298,73 @@ class Eig(_Matrices):
         # .df may not be clear what it is compared to .values
         # make a .vectors attribute also that is the same is
         self.vectors = self.df
+        
+    def eigproc(self, exlim, n, cor=None, parsen=None):
+        '''
+        Method similar in function to PEST utility EIGPROC
+        
+        Parameters
+        ----------
+        exlim : float
+            eigencomponent exclusion limit
+
+        n : int
+            nth eigenvalue to process
+        
+        cor : instance of Cor class, optional
+            if None (default) a Cor class will be created based on the
+            current basebase of the Eig Class
+        
+        parsen : instance of ParSen class, optional
+            if None (default) a ParSen class will be created based on the
+            current basebase of the Eig Class
+            
+        Returns
+        --------
+        eigproc_df : DataFrame
+            DataFrame consisits of the largest eigenvector components for the
+            nth eigenvalue and the parameter sensitivity and parameter group
+            for each eigenvector component
+        
+        eigenvalue : Eigenvalue coresponding to the nth eigenvalue
+        
+        eigproc_cor : instance of Cor class 
+            Cor class with only parameters that make up the eigenvector components
+            
+        Notes
+        -----
+        cor and parsen should be provided when working interactivly or in batch.
+        Otherwise, new Cor and Parsen classes will be generated for each call
+        to eigproc, which can be time consuming.
+        
+        '''
+        # Set the eigenvalues as the column names and sort by eigenvalue
+        df = self.df.copy()
+        df.columns = self.values
+        df.sort(axis=1, ascending=False, inplace=True)      
+        # Get the nth eigenvalue and sort the eigencomponents
+        nth_eig_value = df.iloc[:,(n-1)].abs().copy()
+        nth_eig_value.sort(ascending=False)
+        # Exclude eigencomponents less than exlim
+        nth_eig_value_exlim = nth_eig_value[nth_eig_value > exlim]
+        # Get parameters
+        parameters = nth_eig_value_exlim.index.values
+        # Cor class with only parameters that makeup the eigenvector components
+        if cor==None:
+            eigproc_cor=Cor(self.pstfile)
+        else:
+            eigproc_cor=copy.deepcopy(cor)
+        eigproc_cor.pars(parameters, inplace = True)
+        # Get the parameter sensitivities of parameters that make up the eigenvector components
+        if parsen==None:
+            _parsen = ParSen(self.pstfile)
+        else:
+            _parsen = copy.deepcopy(parsen)
+        _parsen = _parsen.df.loc[parameters]
+        # create eigenproc_df
+        eigproc_df = _parsen.copy()
+        eigproc_df['Eigenvector Component'] = df.loc[parameters].iloc[:,(n-1)]
+        # Resort columns
+        eigproc_df = eigproc_df[['Eigenvector Component', 'Sensitivity', 'Parameter Group']]
+       
+        return eigproc_df, nth_eig_value.name, eigproc_cor
