@@ -72,8 +72,8 @@ class Plot(object):
 
     def _adorn_subplots(self):
 
-        self.ax.set_ylabel(self.xlabel)
-        self.ax.set_xlabel(self.ylabel)
+        self.ax.set_ylabel(self.ylabel)
+        self.ax.set_xlabel(self.xlabel)
         if self.title:
             self.ax.set_title(self.title)
 
