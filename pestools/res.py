@@ -250,7 +250,8 @@ class Res(Pest):
             print 'Range:     %10.4e' % (range_w_res)
             print ' '
 
-def plot_objective_contrib (self, df=None, drop_regul=False):
+
+    def plot_objective_contrib (self, df=None, drop_regul=False):
         ''' Plot the contribution of each group to the objective function 
         as a pie chart.
         drop_regul: If True, ignores regularization groups
