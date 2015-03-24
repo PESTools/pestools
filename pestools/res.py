@@ -387,11 +387,10 @@ class Res(Pest):
             print 'Range:     %10.4e' % (range_w_res)
             print ' '
 
-
-    def plot_objective_contrib (self, df=None):
+def plot_objective_contrib (self, df=None, drop_regul=False):
         ''' Plot the contribution of each group to the objective function 
         as a pie chart.
-        
+        drop_regul: If True, ignores regularization groups
         Returns
         -------
         metplotlib pie chart
@@ -404,15 +403,25 @@ class Res(Pest):
 
         # Allow any residuals dataframe to be submitted as argument
         if df is None:
-            df = self.df
+            df = self.df.copy()
+
+
+
 
         contributions = []
         groups = []
         grouped = df.groupby('Group')
         group_keys = grouped.groups.keys()
         for key in group_keys:
-            contributions.append((grouped.get_group(key)['Weighted Residual']**2).sum())
-            groups.append(key)
+            if drop_regul:
+                if key.lower().startswith('regul'):
+                    pass
+                else:
+                    contributions.append((grouped.get_group(key)['Weighted_Residual']**2).sum())
+                    groups.append(key)
+            else:
+                contributions.append((grouped.get_group(key)['Weighted_Residual']**2).sum())
+                groups.append(key)
         percents = (contributions / sum(contributions))*100
         groups = np.array(groups)
         data = np.rec.fromarrays([percents, groups])

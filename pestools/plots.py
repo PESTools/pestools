@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import operator
-from pst import *
+#from pst import *
 
 
 class Plot(object):
@@ -98,7 +98,10 @@ class Plot(object):
 
     def _adorn_subplots(self):
 
-        to_adorn = self.axes
+        self.ax.set_ylabel(self.ylabel)
+        self.ax.set_xlabel(self.xlabel)
+        if self.title:
+            self.ax.set_title(self.title)
 
         for ax in to_adorn:
             ax.set_xlabel(self.xlabel)
@@ -475,158 +478,97 @@ class BarPloth(Plot):
         # This needs work, or maybe not needed?
         None
 
-
-class SpatialScatter(ScatterPlot):
-
-    def __init__(self, df, x, y, s, c, groupinfo, color_scheme=None, line_kwds={}, **kwds):
-
-        ScatterPlot.__init__(self, df, x, y, groupinfo, line_kwds={}, **kwds)
-        """
-
+class HeatMap(Plot):
+    def __init__(self, df,  vmin=None, vmax=None, label_rows=True, label_cols=True,
+                 square=True, **kwargs):
+        Plot.__init__(self, df, **kwargs)
+        '''
+        Heatmap of values in DataFram that represent a matrix (Cov, Cor, Eig)
         Parameters
         ----------
         df : DataFrame,
             Pandas DataFrame
 
-        x: string or int
-            Column in df containing values to plot on the x-axis
-
-        y: string or int
-            Column in df containing values to plot on the y-axis
-
-        s: string or int, optional
-            Column in df containing values for sizing the scatter points
-
-        c: string or int, optional
-            Column in df containing values to plot on the y-axis
-
-        color_scheme: string
-            'pct_error' to color points by percent error in the residuals,
-            using a diverging color map centered on 0. 'binary' to color
-            positive residuals one color; negative residuals another color.
-
-        groupinfo: dict, list, or string
-            If string, name of group in "Group" column of df to plot. Multiple groups
-            in "Group" column of df can be specified using a list. A dictionary
-            can be supplied to indicate the groups to plot (as keys), with item consisting of
-            a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
-
-        line_kwds: dict, optional
-            Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
-            See http://matplotlib.org/api/pyplot_api.html
-
-        **kwds:
-            Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
-            for controlling appearance scatter or hexbin plot. Order of priority for keywords is:
-                * keywords supplied in groupinfo for individual groups
-                * **kwds entered for whole plot
-                * default settings
-
-            (need to figure out how to differentiate documentation with inheritance,
-            and how to duplicate it in the plotting method!)
-            See http://matplotlib.org/api/pyplot_api.html
-
-        Notes
-        ------
-
-        """
-        if x is None or y is None:
-            raise ValueError( 'scatter requires and x and y column')
-        if pd.lib.is_integer(x) and not self.df.columns.holds_integer():
-            x = self.df.columns[x]
-        if pd.lib.is_integer(y) and not self.df.columns.holds_integer():
-            y = self.df.columns[y]
-
-        self.x = x
-        self.y = y
-        self.s = s
-        self.c = c
-
-        # calculate percent error relative to measured
-        self.df['Pct_error'] = 100 * self.df.Absolute_Residual / self.df.Measured
-
+        '''
+        self.label_rows = label_rows
+        self.label_cols = label_cols
+        self.plot_data = df.values
+        # Reverse the rows so the plot looks like the matrix
+        self.plot_data = self.plot_data[::-1]
+        self.data = df.ix[::-1]
+        self.row_labels = self.data.index.values
+        self.col_labels = self.data.columns.values
+        self.square = square
+        if vmin is None:
+            self.vmin = np.min(self.plot_data)
+        else:
+            self.vmin = vmin
+        if vmax is None:
+            self.vmax = np.max(self.plot_data)
+        else:
+            self.vmax = vmax
+        
     def _make_plot(self):
+        if self.ylabel == None:
+            self.ylabel = ''
+        if self.xlabel == None:
+            self.xlabel = ''
+        
+        if 'cmap' in self.kwds:
+            self.cmap = plt.get_cmap(self.kwds['cmap'])
+            del self.kwds['cmap']
+        else:
+            self.cmap = "RdBu_r"
+                   
+        plt.pcolormesh(self.plot_data, vmin=self.vmin, vmax=self.vmax, cmap = self.cmap, **self.kwds)
+        ax = plt.gca()
+        # Set ticks
+        ticks = np.arange(0,len(self.row_labels),1) +0.5      
+        plt.xticks(ticks)
+        plt.yticks(ticks)
+     
+        # Remove tick marks
+        for mark in ax.get_xticklines() + ax.get_yticklines():
+            mark.set_markersize(0)        
+        
+        # Set x lables
+        ax.xaxis.set_ticks_position('top')
+        if self.label_cols is True:
+            ax.set_xticklabels(self.col_labels, rotation="vertical")
+        else:
+            ax.set_xticklabels('')
 
-        # use matplotlib's color cycle to plot each group as a different color by default
-        color_cycle = self.ax._get_lines.color_cycle
-        for grp in self.groups:
+        if self.label_rows is True:
+            ax.set_yticklabels(self.row_labels)
+        else:
+            ax.set_yticklabels('')
+      
+        ax = plt.gca()
+        # Set the axis limits
+        #ax.set(xlim=(0, self.data.shape[1]), ylim=(0, self.data.shape[0]))
+        if self.square == True:
+            ax.set_aspect("equal")
+        
+        # Set up so pars and cor value show in lower left as mouse moved
+        def _format_coord(x, y):
+            #x = int(x + 0.5)
+            #y = int(y + 0.5)
+            try:
+                label_row = self.row_labels[y]
+                label_col = self.col_labels[x]
+                return "%.3f %s | %s" % (self.plot_data[y, x], label_row, label_col)
+            except IndexError:
+                return ""
+       
+        ax.format_coord = _format_coord  
+        
+    def _make_legend(self):
+        if self.legend:
+            # put this here for now, may want to restructure later
+            cb = plt.colorbar()
+            #cb.set_label('Bin counts')
 
-            # default keyword settings, which can be overriden by submitted keywords
-            # order of priority is default, then keywords entered for whole plot,
-            # then keywords supplied for individual group
-            kwds = {'label': grp, 'c': next(color_cycle), 'linewidth': 0.25}
-            kwds.update(self.kwds)
-            kwds.update(self.groupinfo.get(grp, {}))
-            label = kwds.get('label', grp)
+ 
 
-            g = self.df[self.df.Group == grp]
+        
 
-            x, y = g[self.x], g[self.y]
-
-            s = self.ax.scatter(x, y, **kwds)
-
-        # define markers and legend stuff
-        if type == 'heads':
-
-            # segregate points into over and under values
-            over = all_groups[all_groups['residual']>0]
-            under = all_groups[all_groups['residual']<0]
-
-            def markersize(value):
-                size = 2 + 0.75 * value
-                return size
-
-            marker = 'o'
-            colors = ['r', 'b']
-            over_size = list(over.abs_resid.map(lambda x: markersize(x)))
-            under_size = under.abs_resid.map(lambda x: markersize(x))
-            cmap = cm.get_cmap('coolwarm')
-
-            norm = mplu.MidpointNormalize(midpoint=0)
-            legendxy= np.ones(6) * -1000
-            legendvalues = np.array([-50, -20, -10, 10, 20, 50])
-            legendlabels = ['+{:,.0f}'.format(v) if v > 0 else '{:,.0f}' for v in legendvalues]
-
-            values = np.array([[-50, -20, -10], [50, 20, 10]], dtype=float)
-            sizes = map(lambda x: markersize(x), values[1])
-            labels = [['{:,.0f} ft'.format(values[0][0]),
-                       '{:,.0f}'.format(values[0][1]),
-                       '{:,.0f}'.format(values[0][2])],
-                      ['+{:,.0f} ft'.format(values[1][0]),
-                       '+{:,.0f}'.format(values[1][1]),
-                       '+{:,.0f}'.format(values[1][2])]]
-
-            x = [geom.x-offset[0] for geom in all_groups['geometry']] # currently basemap origin is 0,0, regardless of map extents
-            y = [geom.y-offset[1] for geom in all_groups['geometry']]
-            all_size = list(all_groups.abs_resid.map(lambda x: markersize(x)))
-            points = m.scatter(x, y, s=all_size, c=all_groups.residual, cmap='coolwarm', norm=norm,
-                               marker=marker, lw=.25, edgecolor=None, alpha=0.75, antialiased=True, zorder=3)
-            '''
-            # plot over
-            x = [geom.x-offset[0] for geom in over['geometry']] # currently basemap origin is 0,0, regardless of map extents
-            y = [geom.y-offset[1] for geom in over['geometry']]
-
-            #points = m.scatter(x, y, over_size, cmap=cmap, marker=marker, lw=.25, facecolor=colors[0],
-            #edgecolor=None, alpha=0.5, antialiased=True, zorder=3)
-            points = m.scatter(x, y, s=over_size, c=colors[0], marker=marker, lw=.25, edgecolor=None, alpha=0.5, antialiased=True, zorder=3)
-
-            # plot under
-            x = [geom.x-offset[0] for geom in under['geometry']]
-            y = [geom.y-offset[1] for geom in under['geometry']]
-
-            points = m.scatter(x, y, c=colors[1], s=under_size, cmap=cmap, marker=marker, lw=.25,
-            edgecolor='k', alpha=0.8, antialiased=True, zorder=3)
-            '''
-
-            # make the legend
-            plt.rcParams['font.family'] = 'Univers 67 Condensed'
-            for i in range(2):
-                for s in range(len(sizes)):
-                    m.scatter([-1000], [-1000], s=sizes[s], marker=marker, edgecolor='black', lw=0.25,
-                    c=cmap(norm(values[i][s])), cmap='coolwarm', alpha=0.75, label=labels[i][s])
-
-            handles, labels = ax.get_legend_handles_labels()
-            lg = ax.legend(handles, labels, title='Explanation', loc='upper right',
-                      scatterpoints=1,
-                      ncol=1)
-            plt.setp(lg.get_title(), fontsize=12, fontweight='bold')
