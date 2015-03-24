@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import operator
-from pst import *
+#from pst import *
 
 
 class Plot(object):
@@ -383,3 +383,98 @@ class BarPloth(Plot):
     def _make_legend(self):
         # This needs work, or maybe not needed?
         None
+
+class HeatMap(Plot):
+    def __init__(self, df,  vmin=None, vmax=None, label_rows=True, label_cols=True,
+                 square=True, **kwargs):
+        Plot.__init__(self, df, **kwargs)
+        '''
+        Heatmap of values in DataFram that represent a matrix (Cov, Cor, Eig)
+        Parameters
+        ----------
+        df : DataFrame,
+            Pandas DataFrame
+
+        '''
+        self.label_rows = label_rows
+        self.label_cols = label_cols
+        self.plot_data = df.values
+        # Reverse the rows so the plot looks like the matrix
+        self.plot_data = self.plot_data[::-1]
+        self.data = df.ix[::-1]
+        self.row_labels = self.data.index.values
+        self.col_labels = self.data.columns.values
+        self.square = square
+        if vmin is None:
+            self.vmin = np.min(self.plot_data)
+        else:
+            self.vmin = vmin
+        if vmax is None:
+            self.vmax = np.max(self.plot_data)
+        else:
+            self.vmax = vmax
+        
+    def _make_plot(self):
+        if self.ylabel == None:
+            self.ylabel = ''
+        if self.xlabel == None:
+            self.xlabel = ''
+        
+        if 'cmap' in self.kwds:
+            self.cmap = plt.get_cmap(self.kwds['cmap'])
+            del self.kwds['cmap']
+        else:
+            self.cmap = "RdBu_r"
+                   
+        plt.pcolormesh(self.plot_data, vmin=self.vmin, vmax=self.vmax, cmap = self.cmap, **self.kwds)
+        ax = plt.gca()
+        # Set ticks
+        ticks = np.arange(0,len(self.row_labels),1) +0.5      
+        plt.xticks(ticks)
+        plt.yticks(ticks)
+     
+        # Remove tick marks
+        for mark in ax.get_xticklines() + ax.get_yticklines():
+            mark.set_markersize(0)        
+        
+        # Set x lables
+        ax.xaxis.set_ticks_position('top')
+        if self.label_cols is True:
+            ax.set_xticklabels(self.col_labels, rotation="vertical")
+        else:
+            ax.set_xticklabels('')
+
+        if self.label_rows is True:
+            ax.set_yticklabels(self.row_labels)
+        else:
+            ax.set_yticklabels('')
+      
+        ax = plt.gca()
+        # Set the axis limits
+        #ax.set(xlim=(0, self.data.shape[1]), ylim=(0, self.data.shape[0]))
+        if self.square == True:
+            ax.set_aspect("equal")
+        
+        # Set up so pars and cor value show in lower left as mouse moved
+        def _format_coord(x, y):
+            #x = int(x + 0.5)
+            #y = int(y + 0.5)
+            try:
+                label_row = self.row_labels[y]
+                label_col = self.col_labels[x]
+                return "%.3f %s | %s" % (self.plot_data[y, x], label_row, label_col)
+            except IndexError:
+                return ""
+       
+        ax.format_coord = _format_coord  
+        
+    def _make_legend(self):
+        if self.legend:
+            # put this here for now, may want to restructure later
+            cb = plt.colorbar()
+            #cb.set_label('Bin counts')
+
+ 
+
+        
+
