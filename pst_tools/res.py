@@ -1,5 +1,3 @@
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import math
 from pst import *
@@ -46,6 +44,7 @@ class Res(Pest):
     Column names in the observation information file are remapped to their default values after import
 
     """
+
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
                  x_col='X', y_col='Y', type_col='Type',
                  basename_col='basename', datetime_col='datetime', group_cols=[],
@@ -80,11 +79,10 @@ class Res(Pest):
 
         # calculate phi
         self.df['Weighted_Sq_Residual'] = self.df['Weighted_Residual']**2
-        #self.phi = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
         self.phi = self.df[['Weighted_Sq_Residual']].join(self.obsinfo)
-        #self.phi = self.phi.join(self._obstypes)
-        #self.phi_m = self.phi.ix[self.obsgroups, :] # these may not be needed
-        #self.phi_r = self.phi.ix[self.reggroups, :]
+        self.phi_by_group = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
+        self.phi_by_group = self.phi_by_group.join(self._obstypes)
+
 
     def group(self, group):
         ''' Get pandas DataFrame for a single group
@@ -102,8 +100,147 @@ class Res(Pest):
         '''       
         return self.df.ix[self.df['Group'] == group]
 
+    def describe_data(self, data, ddof=1):
+        ''' Basic desription of np array
 
-    def stats(self, group): 
+        Parameters
+        ----------
+        data : arr
+            Numpy array
+
+        Returns
+        --------
+        pandas DataFrame
+            DataFrame of residuals for group
+
+        '''
+        from scipy.stats import shapiro
+
+        data = data.ravel() # flatten to one dimmensional array
+        data = data[~np.isnan(data)] # drop nans
+
+        stats = {}
+        stats['n'] = len(data)
+        stats['Range'] = np.max(data) - np.min(data)
+        stats['Max'] = np.max(data)
+        stats['Min'] = np.min(data)
+        stats['Mean'] = np.mean(data)
+        stats['Standard deviation'] = np.std(data, ddof=ddof)
+        stats['Varience'] = np.var(data, ddof=ddof)
+        stats['25%'] = np.percentile(data, 25)
+        stats['50%'] = np.percentile(data, 50)
+        stats['75%'] = np.percentile(data, 75)
+        stats['Max (absolute)'] = np.max(np.abs(data))
+        stats['Min (absolute)'] = np.min(np.abs(data))
+        stats['MAE'] = np.mean(np.abs(data))
+        stats['RMSE']= np.sqrt(((data)**2).mean())
+        stats['RMSE/range'] = stats['RMSE'] / stats['Range']
+
+        # perform the Shapiro-Wilks test for normality of the residuals
+        if stats['n'] > 2:
+            W, p = shapiro(data)
+        else:
+            p = -1
+
+        if p > 0.05:
+            stats['Normally Distributed'] = False
+        elif 0 <= p < 0.05:
+            stats['Normally Distributed'] = True
+        else:
+            stats['Normally Distributed'] = np.nan
+
+        stats['p-value'] = p
+
+        return stats
+
+    def describe_groups(self, groups, exclude_zero=True, ddof=1):
+        """ Calculate summary statistics for residuals
+
+        Parameters
+        ----------
+        groups : list
+            groups to include. If no groups submitted, calculate stats for all residuals.
+
+        ddof : int (optional)
+            delta degrees of freedom argument to np.std and np.var (see numpy documentation)
+
+        Returns
+        -------
+        Series of summary statistics for group
+        """
+        from scipy.stats import shapiro
+
+        # index to supplied groups
+        if isinstance(groups, list):
+            groups = [g.lower() for g in groups]
+            inds = [True if g in groups else False for g in self.df.Group]
+            df = self.df.ix[inds, :]
+        else:
+            df = self.df.ix[self.df.Group == groups.lower(), :]
+
+        # drop any regularisation
+        obs = [True if 'regul' not in g else False for g in df.Group]
+        df = df.ix[obs, :]
+
+        # drop zero weighted observations
+        if exclude_zero:
+            nonzero = [True if w > 0 else False for w in df.Weight]
+            df = df.ix[nonzero, :]
+
+        stats = pd.DataFrame()
+        stats = stats.append(df['Residual'].describe().copy())
+        stats.index = ['Group summary']
+        stats.columns = [c.capitalize() for c in stats.columns]
+        stats.rename(columns={'Count': 'n'}, inplace=True)
+
+        # range, variance, and std
+        stats['Range'] = stats['Max'] - stats['Min']
+        stats['Standard deviation'] = df.Residual.std(ddof=ddof)
+        stats['Varience'] = df.Residual.var(ddof=ddof)
+
+        # absolute max, min amd mean
+        stats['Max (absolute)'] = df.Absolute_Residual.max()
+        stats['Min (absolute)'] = df.Absolute_Residual.min()
+        stats['MAE'] = df.Absolute_Residual.mean()
+
+        # rmse
+        stats['RMSE'] = np.sqrt(((df['Residual'].values)**2).mean())
+        stats['RMSE/range'] = stats['RMSE'] / stats['Range']
+
+        # perform the Shapiro-Wilks test for normality of the residuals
+        if len(df.Residual) > 2:
+            W, p = shapiro(df.Residual)
+        else:
+            p = -1
+
+        if p > 0.05:
+            stats['Normally Distributed'] = False
+        elif 0 <= p < 0.05:
+            stats['Normally Distributed'] = True
+        else:
+            stats['Normally Distributed'] = np.nan
+
+        stats['p-value'] = p
+
+        # clean-up the ordering
+        stats = stats.T.ix[['n', 'Range', 'Max', 'Min', 'Mean', 'Standard deviation', 'Varience', '25%', '50%', '75%',
+                          'Max (absolute)', 'Min (absolute)', 'MAE', 'RMSE', 'RMSE/range', 'Normally Distributed', 'p-value']]
+        return stats
+
+    @property
+    def description(self):
+        """ Convenience method to summarize stats for each group
+        """
+        groups = [g for g in np.unique(self.df.Group) if 'regul' not in g.lower()]
+
+        df = pd.DataFrame()
+        for g in groups:
+
+            df[g] = self.describe_groups(g)['Group summary']
+
+        return df.T
+
+    def print_stats(self, group):
         ''' Return stats for single group
         
         Parameters
@@ -177,7 +314,7 @@ class Res(Pest):
         print ' '
         
 
-    def stats_all(self):
+    def print_stats_all(self):
         ''' Return stats for each observation group
         
         Returns
@@ -473,7 +610,9 @@ class Res(Pest):
         plt.tight_layout()
 
 
-    def plot_one2one(self, groupinfo, title=None, line_kwds={}, **kwds):
+    def plot_one2one(self, groupinfo, exclude_zero=True, title=None, print_stats=[], print_format='.2f',
+                     exclude_zero_stats=True,
+                     line_kwds={}, **kwds):
         """
         Makes one-to-one plot of two dataframe columns, using pyplot.scatter
 
@@ -502,13 +641,20 @@ class Res(Pest):
         """
         plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, title=title,
                                      line_kwds=line_kwds, **kwds)
+
         plot_obj.generate()
+
+        if len(print_stats) > 0:
+            stats = self.describe_groups(plot_obj.groups, exclude_zero=exclude_zero_stats).ix[print_stats]
+            text = ''.join(['{}: {:{fmt}}\n'.format(i, r['Group summary'], fmt=print_format) for i, r in stats.iterrows()])
+            plot_obj.ax.text(0.05, 0.95, text, transform=plot_obj.ax.transAxes, va='top', ha='left')
+
         plot_obj.draw()
 
         return plot_obj.fig, plot_obj.ax
 
 
-    def plot_hexbin(self, groupinfo, title=None, line_kwds={}, **kwds):
+    def plot_hexbin(self, groupinfo, title=None, print_stats=[], line_kwds={}, **kwds):
         """
         Makes a hexbin plot of two dataframe columns, pyplot.hexbin
 
@@ -540,5 +686,28 @@ class Res(Pest):
                                     line_kwds=line_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
+
+
+        return plot_obj.fig, plot_obj.ax
+
+
+    def plot_hist(self, groupinfo, **kwds):
+        """
+        Makes a histogram of a dataframe column
+
+        Parameters
+        ----------
+
+
+        Notes
+        ------
+
+        """
+        kwds.update({'ylabel': 'Number of Observations', 'xlabel': 'Error'})
+
+        plot_obj = plots.Hist(self.df, 'Residual', groupinfo, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+
 
         return plot_obj.fig, plot_obj.ax
