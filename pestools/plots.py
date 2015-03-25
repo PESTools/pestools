@@ -19,7 +19,7 @@ class Plot(object):
     The overall goal is to centralize plotting code for consistency and to maximize extensibility
 
     """
-    def __init__(self, df, kind=None, by=None, subplots=False, sharex=True,
+    def __init__(self, df, kind=None, by=None, subplots=None, sharex=True,
                  sharey=False, use_index=True,
                  figsize=None, grid=None, legend=True, legend_title='',
                  ax=None, fig=None, title=None, xlim=None, ylim=None,
@@ -35,6 +35,7 @@ class Plot(object):
 
         self.sort_columns = sort_columns
 
+        self.imagegrid = None
         self.subplots = subplots
         self.sharex = sharex
         self.sharey = sharey
@@ -66,9 +67,34 @@ class Plot(object):
         self.ax = ax
         self.fig = fig
         self.axes = None
+        self.layout = layout
 
         self.kwds = kwds
 
+    def _parse_groups(self):
+
+        # dictionary supplied for groupinfo
+        if isinstance(self.groupinfo, dict):
+            # only attempt to plot groups that are in Res dataframe
+            self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.iteritems())
+            self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
+
+        # list of group names supplied
+        elif isinstance(self.groupinfo, list):
+            self.groupinfo = [g.lower() for g in self.groupinfo]
+            self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
+            self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
+
+        elif isinstance(self.groupinfo, str):
+            self.groupinfo = self.groupinfo.lower()
+            self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
+            self.groupinfo = {self.groupinfo: {}}
+
+        else:
+            raise ValueError('Invalid input for groupinfo.')
+
+        if len(self.groups) == 0:
+            raise IndexError('Specified groups not found in residuals file.')
 
     def _adorn_subplots(self):
 
@@ -76,6 +102,12 @@ class Plot(object):
         self.ax.set_xlabel(self.xlabel)
         if self.title:
             self.ax.set_title(self.title)
+
+        for ax in to_adorn:
+            ax.set_xlabel(self.xlabel)
+            ax.set_ylabel(self.ylabel)
+            if self.title:
+                ax.set_title(self.title)
 
     def log_trans(self, x, pos):
         # Reformat tick labels out of log space
@@ -94,12 +126,86 @@ class Plot(object):
         self._make_legend()
 
     def _initialize(self):
-        # this will need to be extended to accommodate subplots
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
+
+        if self.imagegrid is not None:
+
+            from mpl_toolkits.axes_grid1 import ImageGrid
+
+            self.fig = plt.figure(1, (4., 4.))
+            self.axes = ImageGrid(self.fig, 111, nrows_ncols=self.layout, axes_pad=0.1)
+
+        elif self.subplots is not None:
+            raise AssertionError('Subplots not implemented yet.')
+            # This needs some work. The main reason to use subplots instead of axes_grid1 seems to be
+            # the ability to have different y-scales (e.g. for histograms, for example)
+            # otherwise spatial plots and images are easier with axes_grid1
+        else:
+            if self.ax is None:
+                # this will need to be extended to accommodate subplots
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+            else:
+                fig = self.ax.get_figures()
+                if self.figsize is not None:
+                    fig.set_size_inches(self.figsize)
+
+            self.fig = fig
+            self.axes = [ax]
+            self.ax = ax
+
+class Hist(Plot):
+    """Makes a grid of histograms
+    """
 
 
-class One2onePlot(Plot):
+    def __init__(self, df, values, groupinfo, **kwds):
+
+        Plot.__init__(self, df, **kwds)
+        """
+        df : DataFrame,
+            Pandas DataFrame
+
+        values: string or int
+            Column in df containing values for histogram
+
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list.
+
+        **kwds:
+            Keyword arguments to matplotlib.pyplot.hist
+        """
+
+        self.values = values
+        self.groupinfo = groupinfo
+        self.groups = np.unique(self.df.Group)
+
+        self._parse_groups()
+
+    def _make_plot(self):
+
+        # default keyword settings, which can be overriden by submitted keywords
+        # order of priority is default, then keywords entered for whole plot,
+        # then keywords supplied for individual group
+        kwds = {'bins': 100}
+        kwds.update(self.kwds)
+
+        for i, sp in enumerate(self.subplots):
+
+            # get the groups for each subplot from the groupinfo dictionary
+            groups = [k for k, v in self.groupinfo.iteritems() if v['subplot'] ==self.subplots[i]]
+            inds = [True if g in groups else False for g in self.df.Group]
+            g = self.df.ix[inds, self.values]
+
+            g.hist(ax=self.axes[i], **kwds)
+
+            self.axes[i].set_title(sp)
+
+    def _make_legend(self):
+        pass
+
+
+class ScatterPlot(Plot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
     def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
@@ -167,28 +273,16 @@ class One2onePlot(Plot):
             self.xlabel += ', {}'.format(self.units)
             self.ylabel += ', {}'.format(self.units)
 
-        # dictionary supplied for groupinfo
-        if isinstance(self.groupinfo, dict):
-            # only attempt to plot groups that are in Res dataframe
-            self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.iteritems())
-            self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
+        # get information on groups to plot from supplied string, list, or dict
+        self._parse_groups()
 
-        # list of group names supplied
-        elif isinstance(self.groupinfo, list):
-            self.groupinfo = [g.lower() for g in self.groupinfo]
-            self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
-            self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
 
-        elif isinstance(self.groupinfo, str):
-            self.groupinfo = self.groupinfo.lower()
-            self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
-            self.groupinfo = {self.groupinfo: {}}
+class One2onePlot(ScatterPlot):
+    """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-        else:
-            raise ValueError('Invalid input for groupinfo.')
+    def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
 
-        if len(self.groups) == 0:
-            raise IndexError('Specified groups not found in residuals file.')
+        ScatterPlot.__init__(self, df, x, y, groupinfo, line_kwds={}, **kwds)
 
     def _make_plot(self):
 

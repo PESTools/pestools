@@ -153,31 +153,40 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.describe_data" title="pst_tools.res.Res.describe_data"><tt class="xref py py-obj docutils literal"><span class="pre">describe_data</span></tt></a>(data[,&nbsp;ddof])</td>
+<td>Basic desription of np array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.describe_groups" title="pst_tools.res.Res.describe_groups"><tt class="xref py py-obj docutils literal"><span class="pre">describe_groups</span></tt></a>(groups[,&nbsp;exclude_zero,&nbsp;ddof])</td>
+<td>Calculate summary statistics for residuals</td>
+</tr>
 <tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.group" title="pst_tools.res.Res.group"><tt class="xref py py-obj docutils literal"><span class="pre">group</span></tt></a>(group)</td>
 <td>Get pandas DataFrame for a single group</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.objective_contrib" title="pst_tools.res.Res.objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">objective_contrib</span></tt></a>([df,&nbsp;return_data])</td>
 <td>Print out the contribution of each observation group to the</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_hexbin" title="pst_tools.res.Res.plot_hexbin"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hexbin</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;line_kwds])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_hexbin" title="pst_tools.res.Res.plot_hexbin"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hexbin</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;print_stats,&nbsp;...])</td>
 <td>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measure_vs_model" title="pst_tools.res.Res.plot_measure_vs_model"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measure_vs_model</span></tt></a>([groups,&nbsp;plot_type])</td>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_hist" title="pst_tools.res.Res.plot_hist"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hist</span></tt></a>(groupinfo,&nbsp;**kwds)</td>
+<td>Makes a histogram of a dataframe column</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measure_vs_model" title="pst_tools.res.Res.plot_measure_vs_model"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measure_vs_model</span></tt></a>([groups,&nbsp;plot_type])</td>
 <td>Plot measured vs.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measured_vs_residual" title="pst_tools.res.Res.plot_measured_vs_residual"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measured_vs_residual</span></tt></a>([groups,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_measured_vs_residual" title="pst_tools.res.Res.plot_measured_vs_residual"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measured_vs_residual</span></tt></a>([groups,&nbsp;...])</td>
 <td>Plot measured vs.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_objective_contrib" title="pst_tools.res.Res.plot_objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">plot_objective_contrib</span></tt></a>([df])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_objective_contrib" title="pst_tools.res.Res.plot_objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">plot_objective_contrib</span></tt></a>([df])</td>
 <td>Plot the contribution of each group to the objective function  as a pie chart.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.plot_one2one" title="pst_tools.res.Res.plot_one2one"><tt class="xref py py-obj docutils literal"><span class="pre">plot_one2one</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;line_kwds])</td>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.plot_one2one" title="pst_tools.res.Res.plot_one2one"><tt class="xref py py-obj docutils literal"><span class="pre">plot_one2one</span></tt></a>(groupinfo[,&nbsp;exclude_zero,&nbsp;...])</td>
 <td>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.stats" title="pst_tools.res.Res.stats"><tt class="xref py py-obj docutils literal"><span class="pre">stats</span></tt></a>(group)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.print_stats" title="pst_tools.res.Res.print_stats"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats</span></tt></a>(group)</td>
 <td>Return stats for single group</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#pst_tools.res.Res.stats_all" title="pst_tools.res.Res.stats_all"><tt class="xref py py-obj docutils literal"><span class="pre">stats_all</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#pst_tools.res.Res.print_stats_all" title="pst_tools.res.Res.print_stats_all"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats_all</span></tt></a>()</td>
 <td>Return stats for each observation group</td>
 </tr>
 </tbody>
@@ -207,8 +216,63 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.stats">
-<tt class="descname">stats</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.stats" title="Permalink to this definition">¶</a></dt>
+<dt id="pst_tools.res.Res.describe_data">
+<tt class="descname">describe_data</tt><big>(</big><em>data</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.describe_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.describe_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic desription of np array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : arr</p>
+<blockquote>
+<div><p>Numpy array</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame of residuals for group</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pst_tools.res.Res.describe_groups">
+<tt class="descname">describe_groups</tt><big>(</big><em>groups</em>, <em>exclude_zero=True</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.describe_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.describe_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate summary statistics for residuals</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groups</strong> : list</p>
+<blockquote>
+<div><p>groups to include. If no groups submitted, calculate stats for all residuals.</p>
+</div></blockquote>
+<p><strong>ddof</strong> : int (optional)</p>
+<blockquote>
+<div><p>delta degrees of freedom argument to np.std and np.var (see numpy documentation)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Series of summary statistics for group</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pst_tools.res.Res.description">
+<tt class="descname">description</tt><a class="reference internal" href="_modules/pst_tools/res.html#Res.description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to summarize stats for each group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pst_tools.res.Res.print_stats">
+<tt class="descname">print_stats</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.print_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.print_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return stats for single group</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -231,8 +295,8 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.stats_all">
-<tt class="descname">stats_all</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.stats_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.stats_all" title="Permalink to this definition">¶</a></dt>
+<dt id="pst_tools.res.Res.print_stats_all">
+<tt class="descname">print_stats_all</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.print_stats_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.print_stats_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return stats for each observation group</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -354,7 +418,7 @@ scatter plot</p>
 
 <dl class="method">
 <dt id="pst_tools.res.Res.plot_one2one">
-<tt class="descname">plot_one2one</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_one2one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_one2one" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_one2one</tt><big>(</big><em>groupinfo</em>, <em>exclude_zero=True</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>print_format='.2f'</em>, <em>exclude_zero_stats=True</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_one2one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_one2one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -392,7 +456,7 @@ for controlling appearance scatter or hexbin plot. Order of priority for keyword
 
 <dl class="method">
 <dt id="pst_tools.res.Res.plot_hexbin">
-<tt class="descname">plot_hexbin</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_hexbin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_hexbin" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_hexbin</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_hexbin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_hexbin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -424,6 +488,12 @@ See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.htm
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pst_tools.res.Res.plot_hist">
+<tt class="descname">plot_hist</tt><big>(</big><em>groupinfo</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a histogram of a dataframe column</p>
 </dd></dl>
 
 </dd></dl>
