@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import math
-from pst import *
+from pest import *
 import plots
 
 
@@ -51,9 +51,9 @@ class Res(Pest):
                  **kwds):
         Pest.__init__(self, res_file)
 
-        self._read_obs_groups()
+        #self._read_obs_groups()
         self.obsinfo = pd.DataFrame()
-        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
+        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
         if obs_info_file is not None:
             self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,

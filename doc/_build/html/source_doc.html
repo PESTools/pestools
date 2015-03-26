@@ -63,7 +63,7 @@
 <span id="base-and-pest-control-file-classes"></span><h2>Base and PEST control file classes<a class="headerlink" href="#module-pst_tools.pst" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pst_tools.pst.Pest">
-<em class="property">class </em><tt class="descclassname">pst_tools.pst.</tt><tt class="descname">Pest</tt><big>(</big><em>basename</em><big>)</big><a class="reference internal" href="_modules/pst_tools/pst.html#Pest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.pst.Pest" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pst_tools.pst.</tt><tt class="descname">Pest</tt><big>(</big><em>basename</em><big>)</big><a class="headerlink" href="#pst_tools.pst.Pest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>base class for PEST run
 contains run name, folder and some control data from PEST control file
@@ -76,7 +76,7 @@ pest basename or pest control file (includes path)</p>
 
 <dl class="class">
 <dt id="pst_tools.pst.Pst">
-<em class="property">class </em><tt class="descclassname">pst_tools.pst.</tt><tt class="descname">Pst</tt><big>(</big><em>basename</em><big>)</big><a class="reference internal" href="_modules/pst_tools/pst.html#Pst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.pst.Pst" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pst_tools.pst.</tt><tt class="descname">Pst</tt><big>(</big><em>basename</em><big>)</big><a class="headerlink" href="#pst_tools.pst.Pst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pst_tools.pst.Pest" title="pst_tools.pst.Pest"><tt class="xref py py-class docutils literal"><span class="pre">pst_tools.pst.Pest</span></tt></a></p>
 <p>Class for PEST control file
 * has method to read in run information from PEST control file</p>
@@ -90,7 +90,7 @@ pest basename or pest control file (includes path)</p>
 <span id="residuals-class"></span><h2>Residuals Class<a class="headerlink" href="#module-pst_tools.res" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pst_tools.res.Res">
-<em class="property">class </em><tt class="descclassname">pst_tools.res.</tt><tt class="descname">Res</tt><big>(</big><em>res_file</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pst_tools.res.</tt><tt class="descname">Res</tt><big>(</big><em>res_file</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pst_tools.pst.Pest" title="pst_tools.pst.Pest"><tt class="xref py py-class docutils literal"><span class="pre">pst_tools.pst.Pest</span></tt></a></p>
 <p>Res Class</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -192,32 +192,8 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </tbody>
 </table>
 <dl class="method">
-<dt id="pst_tools.res.Res.group">
-<tt class="descname">group</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.group" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get pandas DataFrame for a single group</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group</strong> : str</p>
-<blockquote>
-<div><p>Observation group to get</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
-<blockquote class="last">
-<div><p>DataFrame of residuals for group</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pst_tools.res.Res.describe_data">
-<tt class="descname">describe_data</tt><big>(</big><em>data</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.describe_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.describe_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">describe_data</tt><big>(</big><em>data</em>, <em>ddof=1</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.describe_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Basic desription of np array</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -241,7 +217,7 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 
 <dl class="method">
 <dt id="pst_tools.res.Res.describe_groups">
-<tt class="descname">describe_groups</tt><big>(</big><em>groups</em>, <em>exclude_zero=True</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.describe_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.describe_groups" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">describe_groups</tt><big>(</big><em>groups</em>, <em>exclude_zero=True</em>, <em>ddof=1</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.describe_groups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate summary statistics for residuals</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -266,27 +242,27 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 
 <dl class="attribute">
 <dt id="pst_tools.res.Res.description">
-<tt class="descname">description</tt><a class="reference internal" href="_modules/pst_tools/res.html#Res.description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.description" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">description</tt><a class="headerlink" href="#pst_tools.res.Res.description" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience method to summarize stats for each group</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.print_stats">
-<tt class="descname">print_stats</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.print_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.print_stats" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return stats for single group</p>
+<dt id="pst_tools.res.Res.group">
+<tt class="descname">group</tt><big>(</big><em>group</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pandas DataFrame for a single group</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group: str</strong></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group</strong> : str</p>
 <blockquote>
-<div><p>Observation group to get stats for</p>
+<div><p>Observation group to get</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
 <blockquote class="last">
-<div><p>DataFrame of statistics</p>
+<div><p>DataFrame of residuals for group</p>
 </div></blockquote>
 </td>
 </tr>
@@ -295,40 +271,8 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.print_stats_all">
-<tt class="descname">print_stats_all</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.print_stats_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.print_stats_all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return stats for each observation group</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Stats for each group printed to screen</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pst_tools.res.Res.plot_objective_contrib">
-<tt class="descname">plot_objective_contrib</tt><big>(</big><em>df=None</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_objective_contrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_objective_contrib" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot the contribution of each group to the objective function 
-as a pie chart.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">metplotlib pie chart</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
-<p>Does not plot observation group is contribution is less than 1%.  This
-is to make the plot easier to read.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="pst_tools.res.Res.objective_contrib">
-<tt class="descname">objective_contrib</tt><big>(</big><em>df=None</em>, <em>return_data=False</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.objective_contrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.objective_contrib" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">objective_contrib</tt><big>(</big><em>df=None</em>, <em>return_data=False</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.objective_contrib" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print out the contribution of each observation group to the 
 objective function as a percent</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -349,8 +293,50 @@ objective function as a percent</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pst_tools.res.Res.plot_hexbin">
+<tt class="descname">plot_hexbin</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_hexbin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groupinfo: dict, list, or string</strong></p>
+<blockquote>
+<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
+in &#8220;Group&#8221; column of df can be specified using a list. A dictionary
+can be supplied to indicate the groups to plot (as keys), with item consisting of
+a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.</p>
+</div></blockquote>
+<p><strong>title:</strong></p>
+<blockquote>
+<div><p>not sure if we need to specify arguments like this one if we are already using kwds. Need to look into it more.</p>
+</div></blockquote>
+<p><strong>line_kwds: dict, optional</strong></p>
+<blockquote>
+<div><p>Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
+</div></blockquote>
+<p><strong>**kwds:</strong></p>
+<blockquote class="last">
+<div><p>Additional keyword arguments to Matplotlib.pyplot.hexbin, for controlling appearance hexbin plot.
+(need to figure out how to differentiate documentation with inheritance!)
+See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pst_tools.res.Res.plot_hist">
+<tt class="descname">plot_hist</tt><big>(</big><em>groupinfo</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a histogram of a dataframe column</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pst_tools.res.Res.plot_measure_vs_model">
-<tt class="descname">plot_measure_vs_model</tt><big>(</big><em>groups=None</em>, <em>plot_type='scatter'</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_measure_vs_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_measure_vs_model" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_measure_vs_model</tt><big>(</big><em>groups=None</em>, <em>plot_type='scatter'</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_measure_vs_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot measured vs. model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -378,7 +364,7 @@ scatter plot</p>
 
 <dl class="method">
 <dt id="pst_tools.res.Res.plot_measured_vs_residual">
-<tt class="descname">plot_measured_vs_residual</tt><big>(</big><em>groups=None</em>, <em>weighted=False</em>, <em>plot_mean=True</em>, <em>plot_std=True</em>, <em>plot_type='scatter'</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_measured_vs_residual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_measured_vs_residual" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_measured_vs_residual</tt><big>(</big><em>groups=None</em>, <em>weighted=False</em>, <em>plot_mean=True</em>, <em>plot_std=True</em>, <em>plot_type='scatter'</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_measured_vs_residual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot measured vs. residual</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -417,8 +403,26 @@ scatter plot</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pst_tools.res.Res.plot_objective_contrib">
+<tt class="descname">plot_objective_contrib</tt><big>(</big><em>df=None</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_objective_contrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the contribution of each group to the objective function 
+as a pie chart.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">metplotlib pie chart</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Does not plot observation group is contribution is less than 1%.  This
+is to make the plot easier to read.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pst_tools.res.Res.plot_one2one">
-<tt class="descname">plot_one2one</tt><big>(</big><em>groupinfo</em>, <em>exclude_zero=True</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>print_format='.2f'</em>, <em>exclude_zero_stats=True</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_one2one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_one2one" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">plot_one2one</tt><big>(</big><em>groupinfo</em>, <em>exclude_zero=True</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>print_format='.2f'</em>, <em>exclude_zero_stats=True</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.plot_one2one" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -455,34 +459,22 @@ for controlling appearance scatter or hexbin plot. Order of priority for keyword
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.plot_hexbin">
-<tt class="descname">plot_hexbin</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_hexbin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_hexbin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
+<dt id="pst_tools.res.Res.print_stats">
+<tt class="descname">print_stats</tt><big>(</big><em>group</em><big>)</big><a class="headerlink" href="#pst_tools.res.Res.print_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return stats for single group</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groupinfo: dict, list, or string</strong></p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group: str</strong></p>
 <blockquote>
-<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
-in &#8220;Group&#8221; column of df can be specified using a list. A dictionary
-can be supplied to indicate the groups to plot (as keys), with item consisting of
-a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.</p>
+<div><p>Observation group to get stats for</p>
 </div></blockquote>
-<p><strong>title:</strong></p>
-<blockquote>
-<div><p>not sure if we need to specify arguments like this one if we are already using kwds. Need to look into it more.</p>
-</div></blockquote>
-<p><strong>line_kwds: dict, optional</strong></p>
-<blockquote>
-<div><p>Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
-See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
-</div></blockquote>
-<p><strong>**kwds:</strong></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
 <blockquote class="last">
-<div><p>Additional keyword arguments to Matplotlib.pyplot.hexbin, for controlling appearance hexbin plot.
-(need to figure out how to differentiate documentation with inheritance!)
-See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
+<div><p>DataFrame of statistics</p>
 </div></blockquote>
 </td>
 </tr>
@@ -491,9 +483,17 @@ See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.htm
 </dd></dl>
 
 <dl class="method">
-<dt id="pst_tools.res.Res.plot_hist">
-<tt class="descname">plot_hist</tt><big>(</big><em>groupinfo</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/res.html#Res.plot_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.res.Res.plot_hist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes a histogram of a dataframe column</p>
+<dt id="pst_tools.res.Res.print_stats_all">
+<tt class="descname">print_stats_all</tt><big>(</big><big>)</big><a class="headerlink" href="#pst_tools.res.Res.print_stats_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return stats for each observation group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Stats for each group printed to screen</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -511,7 +511,7 @@ See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.htm
 <span id="rei-class"></span><h2>REI Class<a class="headerlink" href="#module-pst_tools.rei" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pst_tools.rei.Rei">
-<em class="property">class </em><tt class="descclassname">pst_tools.rei.</tt><tt class="descname">Rei</tt><big>(</big><em>basename</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/rei.html#Rei"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pst_tools.rei.Rei" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">pst_tools.rei.</tt><tt class="descname">Rei</tt><big>(</big><em>basename</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#pst_tools.rei.Rei" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pst_tools.pst.Pest" title="pst_tools.pst.Pest"><tt class="xref py py-class docutils literal"><span class="pre">pst_tools.pst.Pest</span></tt></a></p>
 <p>Rei Class</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -582,7 +582,7 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 <span id="plotting-classes"></span><h2>Plotting Classes<a class="headerlink" href="#module-pst_tools.rei" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt>
-<em class="property">class </em><tt class="descclassname">pst_tools.rei.</tt><tt class="descname">Rei</tt><big>(</big><em>basename</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/pst_tools/rei.html#Rei"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><tt class="descclassname">pst_tools.rei.</tt><tt class="descname">Rei</tt><big>(</big><em>basename</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big></dt>
 <dd><p>Bases: <a class="reference internal" href="#pst_tools.pst.Pest" title="pst_tools.pst.Pest"><tt class="xref py py-class docutils literal"><span class="pre">pst_tools.pst.Pest</span></tt></a></p>
 <p>Rei Class</p>
 <table class="docutils field-list" frame="void" rules="none">
