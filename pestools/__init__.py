@@ -12,12 +12,12 @@ Modules:
 Base and PEST control file classes
 **********************************
  
-.. automodule:: pestools.pst
+.. automodule:: pst
  
 Residuals Class
 ***************
  
-.. automodule:: pestools.res
+.. automodule:: res
 
 .. autosummary::
 
@@ -26,17 +26,17 @@ Residuals Class
 REI Class
 *********
  
-.. automodule:: pestools.rei
+.. automodule:: rei
 
 Parameter Sensitivity Class
 ***************************
  
-.. automodule:: pestools.parsen
+.. automodule:: parsen
 
 Plotting Classes
 ****************
  
-.. automodule:: pestools.rei
+.. automodule:: rei
 
 """
 
