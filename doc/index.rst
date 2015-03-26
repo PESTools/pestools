@@ -4,11 +4,11 @@
    contain the root `toctree` directive.
 
 Welcome to the pestools documentation!
-====================================
+======================================
 
 Contents:
 
-.. include:: ../README.rst
+.. include:: ../README.md
 
 .. toctree::
    :maxdepth: 2
