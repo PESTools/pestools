@@ -228,7 +228,7 @@ class Res(Pest):
         return stats
 
     @property
-    def description(self):
+    def description(self, exclude_zero=False):
         """ Convenience method to summarize stats for each group
         """
         groups = [g for g in np.unique(self.df.Group) if 'regul' not in g.lower()]
@@ -236,7 +236,7 @@ class Res(Pest):
         df = pd.DataFrame()
         for g in groups:
 
-            df[g] = self.describe_groups(g)['Group summary']
+            df[g] = self.describe_groups(g, exclude_zero=exclude_zero)['Group summary']
 
         return df.T
 
@@ -620,7 +620,7 @@ class Res(Pest):
         plt.tight_layout()
 
 
-    def plot_one2one(self, groupinfo, exclude_zero=True, title=None, print_stats=[], print_format='.2f',
+    def plot_one2one(self, groupinfo, title=None, print_stats=[], print_format='.2f',
                      exclude_zero_stats=True,
                      line_kwds={}, **kwds):
         """
@@ -664,7 +664,8 @@ class Res(Pest):
         return plot_obj.fig, plot_obj.ax
 
 
-    def plot_hexbin(self, groupinfo, title=None, print_stats=[], line_kwds={}, **kwds):
+    def plot_hexbin(self, groupinfo, title=None, print_stats=[], print_format='.2f',
+                    exclude_zero_stats=True, line_kwds={}, **kwds):
         """
         Makes a hexbin plot of two dataframe columns, pyplot.hexbin
 
@@ -695,6 +696,12 @@ class Res(Pest):
         plot_obj = plots.HexbinPlot(self.df, 'Measured', 'Modelled', groupinfo, title=title,
                                     line_kwds=line_kwds, **kwds)
         plot_obj.generate()
+
+        if len(print_stats) > 0:
+            stats = self.describe_groups(plot_obj.groups, exclude_zero=exclude_zero_stats).ix[print_stats]
+            text = ''.join(['{}: {:{fmt}}\n'.format(i, r['Group summary'], fmt=print_format) for i, r in stats.iterrows()])
+            plot_obj.ax.text(0.05, 0.95, text, transform=plot_obj.ax.transAxes, va='top', ha='left')
+
         plot_obj.draw()
 
 

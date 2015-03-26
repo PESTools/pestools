@@ -103,12 +103,6 @@ class Plot(object):
         if self.title:
             self.ax.set_title(self.title)
 
-        for ax in to_adorn:
-            ax.set_xlabel(self.xlabel)
-            ax.set_ylabel(self.ylabel)
-            if self.title:
-                ax.set_title(self.title)
-
     def log_trans(self, x, pos):
         # Reformat tick labels out of log space
         # x : value
