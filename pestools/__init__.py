@@ -40,3 +40,6 @@ Plotting Classes
 
 """
 
+from parsen import ParSen
+from Cor import Cor
+from pest import Pest
