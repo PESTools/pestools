@@ -180,25 +180,28 @@ class Hist(Plot):
 
         self._parse_groups()
 
+        # need to expand this to support arbitrary labels
+        self.titles = [k for k in self.groupinfo.iterkeys()]
+
     def _make_plot(self):
 
         # default keyword settings, which can be overriden by submitted keywords
         # order of priority is default, then keywords entered for whole plot,
         # then keywords supplied for individual group
-        kwds = {'bins': 100}
+        kwds = {'bins': 100., 'sharex': True}
         kwds.update(self.kwds)
 
         hist_df = self.df.ix[self.df.Group.isin(self.groups), [self.by, self.values]]
-        self.axes = hist_df.hist(by=self.by, layout=self.layout, **kwds)
+        self.ax = hist_df.hist(by=self.by, layout=self.layout, **kwds)
 
-        fig = self.axes[0][0].get_figure()
-        titles = ['Head, best', 'Head, good', 'Head, fair', 'Wcrs1', 'Head, poor', 'Wcrs2']
-        for i, ax in enumerate(self.axes.ravel()):
-            ax.set_title(titles[i], loc='Left', fontsize='9')
+        self.fig = self.ax[0][0].get_figure()
 
-        fig.text(0.5, 0.04, 'Error', ha='center')
-        fig.text(0.04, 0.5, 'Number of Observations', va='center', rotation='vertical')
+        #for i, ax in enumerate(self.axes.ravel()):
+        #    ax.set_title(self.titles[i], loc='Left', fontsize='9')
 
+        self.fig.text(0.5, -0.02, 'Error', ha='center')
+        self.fig.text(-0.02, 0.5, 'Number of Observations', va='center', rotation='vertical')
+        self.fig.tight_layout()
         '''
         for i, sp in enumerate(self.subplots):
 
@@ -211,6 +214,7 @@ class Hist(Plot):
 
             self.axes[i].set_title(sp)
         '''
+
     def _make_legend(self):
         pass
 

@@ -721,10 +721,12 @@ class Res(Pest):
 
         """
         kwds.update({'ylabel': 'Number of Observations', 'xlabel': 'Error',
-                     'sharex': True})
+                     })
+        if df is None:
+            df = self.df
 
-        plot_obj = plots.Hist(self.df, col, by, groupinfo, layout=None, **kwds)
-        plot_obj.generate()
+        plot_obj = plots.Hist(df, col, by, groupinfo, layout=None, **kwds)
+        plot_obj._make_plot() # bypass the other generation methods because we're using pandas
         plot_obj.draw()
 
 
