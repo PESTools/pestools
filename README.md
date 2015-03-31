@@ -30,7 +30,7 @@ some stuff
 <table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>Group summary</th>    </tr>  </thead>  <tbody>    <tr>      <th>Mean</th>      <td>-2.704151</td>    </tr>    <tr>      <th>MAE</th>      <td> 15.54417</td>    </tr>    <tr>      <th>RMSE</th>      <td> 24.49298</td>    </tr>  </tbody></table>
 **Table 1. with some stuff**  
 some more stuff  
-![a graph](Examples/test_hexbin.pdf)  
+![a graph](Examples/hexbin.pdf)  
 **Figure 1. showing some stuff** 
 #####<center>SUMMARY
 #####<center>REFERENCES
