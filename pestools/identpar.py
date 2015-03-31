@@ -8,11 +8,15 @@ import plots
 
 class IdentPar:
     def __init__(self, jco):
+        """Computes parameter identifiability for a PEST jco file,
+        using the errvar class in pyemu (https://github.com/jtwhite79/pyemu)
+        """
 
         self.la = errvar(jco)
 
     def plot_singular_spectrum(self):
-
+        """see http://nbviewer.ipython.org/github/jtwhite79/pyemu/blob/master/examples/error_variance_example.ipynb
+        """
         s = self.la.qhalfx.s
 
         figure = plt.figure(figsize=(10, 5))
@@ -29,7 +33,20 @@ class IdentPar:
 
         self.ident_df = self.la.get_identifiability_dataframe(nsingular)
 
-    def plot_bar(self, nsingular, nbars=20):
+    def plot_bar(self, nsingular=None, nbars=20):
+        """Computes a stacked bar chart showing the most identifiable parameters
+        at a given number of singular values
+
+        Parameters:
+        -----------
+        nsingular:
+            number of singular values to include
+
+        nbars:
+            number of parameters (bars) to include in bar chart
+        """
+        if nsingular is not None:
+            self.ident_df = self.la.get_identifiability_dataframe(nsingular)
 
         plot_obj = plots.IdentBar(self.ident_df, nsingular=nsingular, nbars=nbars)
         plot_obj.generate()
