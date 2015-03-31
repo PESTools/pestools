@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.cm as cm
 import operator
 #from pst import *
 
@@ -487,6 +488,7 @@ class BarPloth(Plot):
         # This needs work, or maybe not needed?
         None
 
+
 class HeatMap(Plot):
     def __init__(self, df,  vmin=None, vmax=None, label_rows=True, label_cols=True,
                  square=True, **kwargs):
@@ -578,6 +580,35 @@ class HeatMap(Plot):
             #cb.set_label('Bin counts')
 
  
+class IdentBar(Plot):
+    def __init__(self, ident_df, nsingular, nbars=20, **kwargs):
+        Plot.__init__(self, ident_df, **kwargs)
 
-        
+        self.N = nsingular
+        self.nbars = nbars
+        self._df_Nvalues = self.df[self.df.columns[0:self.N]].copy()
+        self._df_Nvalues['ident'] = self._df_Nvalues.sum(axis=1)
+        self._df_Nvalues = self._df_Nvalues.sort(columns=['ident'], ascending=False)
+
+    def _make_plot(self):
+        # need to come up with a way to meaningfully plot out parameters with highest identifiabilities
+        # this line plots the nbars most identifiable parameters, using eigenvectors 1 through nbars
+
+        axmain = plt.subplot2grid((1, 15), (0, 0), colspan=13)
+        b = self._df_Nvalues.ix[0:20][self._df_Nvalues.columns[:-1]].plot(ax=axmain, kind='bar', stacked=True, width=0.8, colormap='jet_r')
+        b.legend_ = None
+        axmain.set_ylabel('Identifiability')
+        axmain.tick_params(axis='x', labelsize=6)
+
+    def _make_legend(self):
+        # make colorbar from scratch (Mike's code)
+        ax1 = plt.subplot2grid((1, 15), (0, 13))
+        norm = mpl.colors.Normalize(vmin=1, vmax=self.N)
+        cb_bounds = np.linspace(0, self.N, self.N+1).astype(int)[1:]
+        cb_axis = np.arange(0, self.N+1, int(self.N/10.0))
+        cb_axis[0] = 1
+        cb = mpl.colorbar.ColorbarBase(ax1, cmap=cm.jet_r, norm=norm, boundaries=cb_bounds, orientation='vertical')
+        cb.set_ticks(cb_axis)
+        cb.set_ticklabels(cb_axis)
+        cb.set_label('Number of singular values considered')
 

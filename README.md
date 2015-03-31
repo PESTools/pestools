@@ -5,7 +5,7 @@
 
   
 #####<center>ABSTRACT</center>
-PESTools is an open-source Python package for processing and visualizing information associated 
+<left>PESTools is an open-source Python package for processing and visualizing information associated 
 with the parameter estimation software PEST.  While PEST output can be reformatted for post- 
 processing in spreadsheets or other menu-driven software packages, this approach can be error-prone 
 and time-consuming. Managing information from highly parameterized models with thousands of 
@@ -19,7 +19,7 @@ observation locations and times and measurement types. PESTools’ object method
 scripted with concise code, or alternatively, the use of IPython notebooks allows for live interaction 
 with the information. PESTools is designed to not only streamline workflows, but also provide deeper 
 insight into model behavior, enhance troubleshooting, and improve transparency in the calibration
-process.
+process.</left>
 
 #####<center>INTRODUCTION
 In recent years the PEST software suite has become the industry standard for calibrating groundwater flow models and evaluating uncertainty in their predictions. PEST has many advantages, including the ability to robustly handle highly parameterized models with thousands of observations and parameters, as well as numerous  utility programs to perform ancillary analyses and facilitate use with popular modeling software such as MODFLOW. The use of PEST presents many challenges, however, especially in the highly parameterized context. Calibration of a highly parameterized model typically requires managing large volumes of information spread across numerous input and output files. This information can provide valuable insight to the modeler, but can be difficult or impossible to effectively visualize without custom programming. PESTools aims to provide a central platform for managing and visualizing this information, which minimizes the number of intermediate files and custom code required for parameter estimation workflows.
