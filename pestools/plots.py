@@ -152,7 +152,7 @@ class Hist(Plot):
     """
 
 
-    def __init__(self, df, values, groupinfo, **kwds):
+    def __init__(self, df, values, by, groupinfo, layout, **kwds):
 
         Plot.__init__(self, df, **kwds)
         """
@@ -164,15 +164,18 @@ class Hist(Plot):
 
         groupinfo: dict, list, or string
             If string, name of group in "Group" column of df to plot. Multiple groups
-            in "Group" column of df can be specified using a list.
+            in "Group" column of df can be specified using a list. A dictionary can be used to
+            specify a title and subplot number for each group.
 
         **kwds:
             Keyword arguments to matplotlib.pyplot.hist
         """
 
         self.values = values
+        self.by = by
         self.groupinfo = groupinfo
         self.groups = np.unique(self.df.Group)
+        self.layout = layout
 
         self._parse_groups()
 
@@ -184,6 +187,18 @@ class Hist(Plot):
         kwds = {'bins': 100}
         kwds.update(self.kwds)
 
+        hist_df = self.df.ix[self.df.Group.isin(self.groups), [self.by, self.values]]
+        self.axes = hist_df.hist(by=self.by, layout=self.layout, **kwds)
+
+        fig = self.axes[0][0].get_figure()
+        titles = ['Head, best', 'Head, good', 'Head, fair', 'Wcrs1', 'Head, poor', 'Wcrs2']
+        for i, ax in enumerate(self.axes.ravel()):
+            ax.set_title(titles[i], loc='Left', fontsize='9')
+
+        fig.text(0.5, 0.04, 'Error', ha='center')
+        fig.text(0.04, 0.5, 'Number of Observations', va='center', rotation='vertical')
+
+        '''
         for i, sp in enumerate(self.subplots):
 
             # get the groups for each subplot from the groupinfo dictionary
@@ -194,7 +209,7 @@ class Hist(Plot):
             g.hist(ax=self.axes[i], **kwds)
 
             self.axes[i].set_title(sp)
-
+        '''
     def _make_legend(self):
         pass
 

@@ -1,17 +1,13 @@
-pest_tools
-==========
+MODFLOW and More 2015 proceedings
+===============================  
 
-Development repository for PEST stuff
-
-
-MODFLOW and More 2015 Abstract
-===============================
-Pestools - A Python toolkit for processing PEST-related information
-Evan G. Christianson1, Andrew T. Leaf2
-
-1) Barr Engineering, echristianson@barr.com, Minneapolis, MN
-2) USGS – Wisconsin Water Science Center, aleaf@usgs.gov, Madison, WI
-
+#####<center>Pestools - A Python toolkit for processing PEST-related information
+<center>Evan G. Christianson<sup>1</sup>, Andrew T. Leaf<sup>2</sup>  
+<center><sup>1</sup>Barr Engineering, echristianson@barr.com, Minneapolis, MN, USA  
+<center><sup>2</sup>USGS – Wisconsin Water Science Center, aleaf@usgs.gov, Madison, WI, USA
+  
+  
+#####<center>ABSTRACT
 Pestools is an open-source Python package for processing and visualizing information associated 
 with the parameter estimation software PEST.  While PEST output can be reformatted for post- 
 processing in spreadsheets or other menu-driven software packages, this approach can be error-prone 
@@ -26,4 +22,15 @@ observation locations and times and measurement types. Pestools’ object method
 scripted with concise code, or alternatively, the use of IPython notebooks allows for live interaction 
 with the information. Pestools is designed to not only streamline workflows, but also provide deeper 
 insight into model behavior, enhance troubleshooting, and improve transparency in the calibration 
-process.
+process.  
+#####<center>INTRODUCTION
+
+#####<center>DEMONSTRATION
+some stuff     
+<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>Group summary</th>    </tr>  </thead>  <tbody>    <tr>      <th>Mean</th>      <td>-2.704151</td>    </tr>    <tr>      <th>MAE</th>      <td> 15.54417</td>    </tr>    <tr>      <th>RMSE</th>      <td> 24.49298</td>    </tr>  </tbody></table>
+**Table 1. with some stuff**  
+some more stuff  
+![a graph](Examples/test_hexbin.pdf)  
+**Figure 1. showing some stuff** 
+#####<center>SUMMARY
+#####<center>REFERENCES

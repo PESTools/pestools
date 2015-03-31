@@ -708,7 +708,7 @@ class Res(Pest):
         return plot_obj.fig, plot_obj.ax
 
 
-    def plot_hist(self, groupinfo, **kwds):
+    def plot_hist(self, df=None, col='Residual', by='Group', groupinfo={}, layout=None, **kwds):
         """
         Makes a histogram of a dataframe column
 
@@ -720,9 +720,10 @@ class Res(Pest):
         ------
 
         """
-        kwds.update({'ylabel': 'Number of Observations', 'xlabel': 'Error'})
+        kwds.update({'ylabel': 'Number of Observations', 'xlabel': 'Error',
+                     'sharex': True})
 
-        plot_obj = plots.Hist(self.df, 'Residual', groupinfo, **kwds)
+        plot_obj = plots.Hist(self.df, col, by, groupinfo, layout=None, **kwds)
         plot_obj.generate()
         plot_obj.draw()
 
