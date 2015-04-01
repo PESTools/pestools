@@ -95,7 +95,16 @@ class Pest(object):
         DataFrame of observation data
         '''
         observation_data = self.pst.observation_data
+        observation_data.index = observation_data.obsnme
         return observation_data
+
+    @property
+    def obs_groups(self):
+        '''
+        List of observation groups
+        '''
+        obs_groups = self.pst.obs_groups
+        return obs_groups
         
     @property
     def _cov(self):
@@ -120,6 +129,26 @@ class Pest(object):
     @property
     def cor(self):
         return Cor(self._cov)
+
+    def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
+                            basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
+            """Bring in ancillary observation information from csv file such as location and measurement type
+            """
+            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **kwds)
+            self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
+
+            # remap observation info columns to default names
+            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', 'foo': 'foo'}, inplace=True)
+
+            # make a dataframe of observation type for each group
+            if 'Type' in self.obsinfo.columns:
+                #self._read_obs_data()
+                # join observation info to 'obsdata' so that the type and group for each observation are listed
+                self.obsinfo = self.obsinfo.join(self.observation_data['obgnme'], lsuffix='', rsuffix='1', how='inner')
+                self.obsinfo.rename(columns={'obgnme': 'Group'}, inplace=True)
+                self._obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
+                self._obstypes.index = self._obstypes.Group
+                self._obstypes = self._obstypes.drop('Group', axis=1)
 
           
 if __name__ == '__main__':
