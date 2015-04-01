@@ -3,7 +3,7 @@ Utilities for working with PEST output.
  
 Modules:
 
-* ``pst`` - Base class and PEST control file
+* ``pest`` - Base class
 * ``res`` - Class for working with PEST residuals files
 * ``rei`` - Aggregates information from multiple interim residuals (.rei) files
 * ``parsen`` - Class for working with parameter sensitivities
@@ -12,12 +12,12 @@ Modules:
 Base and PEST control file classes
 **********************************
  
-.. automodule:: pst_tools.pst
+.. automodule:: pst
  
 Residuals Class
 ***************
  
-.. automodule:: pst_tools.res
+.. automodule:: res
 
 .. autosummary::
 
@@ -26,17 +26,17 @@ Residuals Class
 REI Class
 *********
  
-.. automodule:: pst_tools.rei
+.. automodule:: rei
 
 Parameter Sensitivity Class
 ***************************
  
-.. automodule:: pst_tools.parsen
+.. automodule:: parsen
 
 Plotting Classes
 ****************
  
-.. automodule:: pst_tools.rei
+.. automodule:: rei
 
 """
 
