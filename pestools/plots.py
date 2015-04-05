@@ -581,7 +581,7 @@ class HeatMap(Plot):
         if self.legend:
             # put this here for now, may want to restructure later
             cb = plt.colorbar()
-            #cb.set_label('Bin counts')
+            cb.set_label('Parameter Correlation ')
 
  
 class IdentBar(Plot):

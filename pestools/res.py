@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
 import math
-from pest import *
+import pandas as pd
 import plots
+from pest import Pest
+import numpy as np
+#from pst_handler import pst as Pst
 
 
-class Res(Pest):
+class Res(object):
     """ Res Class
 
     Parameters
@@ -49,16 +52,15 @@ class Res(Pest):
                  x_col='X', y_col='Y', type_col='Type',
                  basename_col='basename', datetime_col='datetime', group_cols=[],
                  **kwds):
-        Pest.__init__(self, res_file)
 
-        #self._read_obs_groups()
-        self.obsinfo = pd.DataFrame()
+        # Expose the Pest class for convience but not all attributes make sense
+        # when dealing with the Res class alone so make private
+        self._Pest = Pest(res_file, obs_info_file=obs_info_file)
+
+        self.obsinfo = self._Pest.obsinfo
+        self.obs_groups = self._Pest.obs_groups
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
-        if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,
-                                     basename_col=basename_col, datetime_col=datetime_col, group_cols=group_cols,
-                                     **kwds)
 
         check = open(res_file, 'r')
         line_num = 0
@@ -470,7 +472,7 @@ class Res(Pest):
         grouped = self.df.groupby('Group')
         group_keys = grouped.groups.keys()
         for key in group_keys:
-            contributions.append((grouped.get_group(key)['Weighted Residual']**2).sum())
+            contributions.append((grouped.get_group(key)['Weighted_Residual']**2).sum())
             groups.append(key)
         percents = (contributions / sum(contributions))*100
         groups = np.array(groups)
@@ -731,3 +733,6 @@ class Res(Pest):
 
 
         return plot_obj.fig, plot_obj.ax
+        
+
+    
