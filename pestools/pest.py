@@ -14,6 +14,7 @@ from parsen import ParSen
 from Cor import Cor
 
 
+
 class Pest(object):
     """
     base class for PEST run
@@ -38,6 +39,11 @@ class Pest(object):
         
         # Thinking this will get pass along later to the Res class or similar
         self.obs_info_file = obs_info_file
+        if obs_info_file is not None:
+            self._read_obs_info_file(obs_info_file)
+        else:
+            self.obsinfo = pd.DataFrame()
+
     
     @property    
     def _jco(self):
@@ -73,6 +79,24 @@ class Pest(object):
                         parameter_data = self.parameter_data, **kwargs)
         return parsen
         
+    
+    def res(self, res_file, obs_info_file = None):
+        '''
+        Res Class
+        
+        Parameters
+        ----------
+        res_extension : str
+           The extension of the residual file to load.  Assumes basename
+           from Pest.basename.  For exmaple 'rei' or 'res'
+        '''
+        from res import Res
+        #res_file = self.pstfile.rstrip('pst')+res_extension
+        print res_file, obs_info_file
+        res = Res(res_file, obs_info_file)
+
+        return res
+    
     @property
     def res_df(self):
         '''
@@ -136,10 +160,10 @@ class Pest(object):
             """
             self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **kwds)
             self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
-
+    
             # remap observation info columns to default names
             self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', 'foo': 'foo'}, inplace=True)
-
+    
             # make a dataframe of observation type for each group
             if 'Type' in self.obsinfo.columns:
                 #self._read_obs_data()

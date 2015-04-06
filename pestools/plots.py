@@ -98,7 +98,7 @@ class Plot(object):
             raise IndexError('Specified groups not found in residuals file.')
 
     def _adorn_subplots(self):
-
+        to_adorn = self.axes
         self.ax.set_ylabel(self.ylabel)
         self.ax.set_xlabel(self.xlabel)
         if self.title:
@@ -448,7 +448,7 @@ class BarPloth(Plot):
                 #cmap = plt.get_cmap()
                 cmap = plt.get_cmap('Set2')
             _color_dict = dict()
-            unique_par_groups = np.asarray(self.df.drop_duplicates(cols = self.group_col)[self.group_col])
+            unique_par_groups = np.asarray(self.df.drop_duplicates(subset = self.group_col)[self.group_col])
             for i in range(len(unique_par_groups)):
                 # If color is provied for paragroup in color_dict parameter than use it               
                 try:
@@ -581,7 +581,7 @@ class HeatMap(Plot):
         if self.legend:
             # put this here for now, may want to restructure later
             cb = plt.colorbar()
-            #cb.set_label('Bin counts')
+            cb.set_label('Parameter Correlation ')
 
  
 class IdentBar(Plot):

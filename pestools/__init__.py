@@ -39,4 +39,9 @@ Plotting Classes
 .. automodule:: rei
 
 """
+from pest import Pest
+from parsen import ParSen
+from Cor import Cor
+from res import Res
+#from identpar import IdentPar
 
