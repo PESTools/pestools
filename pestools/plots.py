@@ -199,9 +199,10 @@ class Hist(Plot):
         #for i, ax in enumerate(self.axes.ravel()):
         #    ax.set_title(self.titles[i], loc='Left', fontsize='9')
 
-        self.fig.text(0.5, -0.02, 'Error', ha='center')
-        self.fig.text(-0.02, 0.5, 'Number of Observations', va='center', rotation='vertical')
-        self.fig.tight_layout()
+        self.fig.text(0.5, 0.02, 'Error', ha='center')
+        self.fig.text(0.02, 0.5, 'Number of Observations', va='center', rotation='vertical')
+        #self.fig.tight_layout()
+        self.fig.subplots_adjust(left=0.1, bottom=0.15)
         '''
         for i, sp in enumerate(self.subplots):
 

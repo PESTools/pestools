@@ -58,6 +58,8 @@ class IdentPar:
         plot_obj = plots.IdentBar(self.ident_df, nsingular=nsingular, nbars=nbars)
         plot_obj.generate()
         plot_obj.draw()
+        
+        return plot_obj.fig, plot_obj.ax
 
     def plot_spatial(self, df, nsingular=None):
 
@@ -68,5 +70,6 @@ class IdentPar:
         ax.scatter(df.X, df.Y, df.ident_sum*100)
         ax.set_xlabel('Easting')
         ax.set_ylabel('Northing')
+        plt.tight_layout()
 
         return fig, ax
