@@ -308,8 +308,10 @@ class Res(Pest):
         colors = []
         for group in greater_1_groups:            
             colors.append(color_dict[group])
+        retfig = plt.figure()
+        cax = retfig.add_subplot(111, aspect='equal')
         plt.pie(greater_1_values, labels=greater_1_groups, autopct='%1.1f%%', colors = colors, startangle=90)
-
+        return retfig
         
     def objective_contrib (self, df=None, return_data=False):
         '''Print out the contribution of each observation group to the 
