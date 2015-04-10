@@ -42,7 +42,15 @@ class Pest(object):
             self._read_obs_info_file(obs_info_file)
         else:
             self.obsinfo = pd.DataFrame()
-
+    def IdentPar(self, jco=None, par_info_file=None):
+        '''
+        IdentPar class
+        '''
+        from identpar import IdentPar
+        if jco is None:
+            jco = self.pstfile.strip('pst')+'jco'
+        identpar = IdentPar(jco, par_info_file)
+        return identpar
     
     @property    
     def _jco(self):
