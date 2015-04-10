@@ -92,7 +92,6 @@ class Pest(object):
         '''
         from res import Res
         #res_file = self.pstfile.rstrip('pst')+res_extension
-        print res_file, obs_info_file
         res = Res(res_file, obs_info_file)
 
         return res
