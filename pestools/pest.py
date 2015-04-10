@@ -10,7 +10,6 @@ import pandas as pd
 from mat_handler import jco as Jco
 from mat_handler import cov as Cov
 from pst_handler import pst as Pst
-from parsen import ParSen
 from Cor import Cor
 
 
@@ -70,10 +69,11 @@ class Pest(object):
         return pst
         
 
-    def parsen(self, **kwargs):
+    def ParSen(self, **kwargs):
         '''
         ParSen class
         '''
+        from parsen import ParSen
         parsen = ParSen(basename=self.pstfile, jco_df = self.jco_df,
                         res_df = self.res_df, 
                         parameter_data = self.parameter_data, **kwargs)
