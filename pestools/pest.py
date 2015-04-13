@@ -10,7 +10,6 @@ import pandas as pd
 from mat_handler import jco as Jco
 from mat_handler import cov as Cov
 from pst_handler import pst as Pst
-from parsen import ParSen
 from Cor import Cor
 
 
@@ -43,7 +42,15 @@ class Pest(object):
             self._read_obs_info_file(obs_info_file)
         else:
             self.obsinfo = pd.DataFrame()
-
+    def IdentPar(self, jco=None, par_info_file=None):
+        '''
+        IdentPar class
+        '''
+        from identpar import IdentPar
+        if jco is None:
+            jco = self.pstfile.strip('pst')+'jco'
+        identpar = IdentPar(jco, par_info_file)
+        return identpar
     
     @property    
     def _jco(self):
@@ -70,10 +77,11 @@ class Pest(object):
         return pst
         
 
-    def parsen(self, **kwargs):
+    def ParSen(self, **kwargs):
         '''
         ParSen class
         '''
+        from parsen import ParSen
         parsen = ParSen(basename=self.pstfile, jco_df = self.jco_df,
                         res_df = self.res_df, 
                         parameter_data = self.parameter_data, **kwargs)
@@ -92,7 +100,6 @@ class Pest(object):
         '''
         from res import Res
         #res_file = self.pstfile.rstrip('pst')+res_extension
-        print res_file, obs_info_file
         res = Res(res_file, obs_info_file)
 
         return res
