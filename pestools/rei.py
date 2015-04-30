@@ -2,7 +2,7 @@ __author__ = 'aleaf'
 
 import sys
 sys.path.append('../pst_tools')
-from pst import *
+import os
 from res import *
 from matplotlib.backends.backend_pdf import PdfPages
 
