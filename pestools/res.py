@@ -776,5 +776,5 @@ class Res(object):
         plot_obj.draw()
 
 
-        return plot_obj.fig, plot_obj.ax
+        return plot_obj
     

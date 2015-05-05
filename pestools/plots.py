@@ -5,8 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
-from matplotlib.colors import Normalize
+from matplotlib.colors import ListedColormap
+from matplotlib.collections import PatchCollection, LineCollection
+from shapely.ops import transform
+from descartes import PolygonPatch
 import operator
+from Mapping import read_shapefile
 #from pst import *
 
 
@@ -23,7 +27,7 @@ class Plot(object):
     """
     def __init__(self, df, kind=None, by=None, subplots=None, sharex=True,
                  sharey=False, use_index=True,
-                 figsize=(8.5, 11), grid=None, legend=True, legend_title='',
+                 figsize=(11, 8.5), grid=None, legend=True, legend_title='',
                  ax=None, fig=None, title=None, xlim=None, ylim=None,
                  xticks=None, yticks=None, xlabel=None, ylabel=None, units=None,
                  sort_columns=False, fontsize=None,
@@ -138,7 +142,7 @@ class Plot(object):
         else:
             if self.ax is None:
                 # this will need to be extended to accommodate subplots
-                fig = plt.figure()
+                fig = plt.figure(figsize=self.figsize)
                 ax = fig.add_subplot(111)
             else:
                 fig = self.ax.get_figures()
@@ -341,7 +345,7 @@ class SpatialPlot(ScatterPlot):
         self.scatter_df = self.df.ix[self.df.Group.isin(self.groups)]
 
         self.colorby = colorby
-        self.overunder_colors = overunder_colors
+        self.overunder_colors = overunder_colors # to specify colors instead of a colormap
         self.ylabel = 'Northing'
         self.xlabel = 'Easting'
         self.cb_label = colorbar_label
@@ -364,13 +368,13 @@ class SpatialPlot(ScatterPlot):
         # order of priority is default, then keywords entered for whole plot,
         # then keywords supplied for individual group
         self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', 'lw': 0, 'edgecolor': None,
-                'antialiased': True}
+                     'antialiased': True, 'zorder': 10}
         self.kwds.update(kwds)
 
         self.lg_kwds = {'title': 'Explanation', 'loc': 'best',
                         'borderaxespad': 0,
                         'borderpad': 1,
-                        'framealpha': 0.5,
+                        'framealpha': 0.8,
                         'scatterpoints': 1,
                         'labelspacing': 1,
                         'ncol': 1}
@@ -388,6 +392,57 @@ class SpatialPlot(ScatterPlot):
         #size = 2 + 0.75 * value
         return scaled + self.minimum_marker_size
 
+    def add_shapefile(self, shp,
+                      s=20, fc='0.8', ec='k', lw=1, alpha=1,
+                      zorder=0,
+                      convert_coordinates=1,
+                      **kwargs):
+        """Add points, lines or polygons from a shapefile to the map
+        """
+        df = read_shapefile(shp)
+
+        if convert_coordinates != 1:
+            df['geometry'] = [transform(lambda x, y, z=None: (x * convert_coordinates,
+                                                              y * convert_coordinates), g)
+                              for g in df.geometry]
+
+        if 'Polygon' in df.geometry[0].type:
+            print "building PatchCollection..."
+            patches = []
+            for i, g in enumerate(df.geometry.tolist()):
+                patches.append(PolygonPatch(g, fc=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs))
+
+            pc = PatchCollection(patches, match_original=True)
+            self.ax.add_collection(pc)
+            return pc
+
+        elif 'LineString' in df.geometry[0].type:
+            print "building LineCollection..."
+            lines = []
+            for i, g in enumerate(df.geometry.tolist()):
+                if 'Multi' not in g.type:
+                    x, y = g.xy
+                    lines.append(zip(x, y))
+                # plot each line in a multilinestring
+                else:
+                    for l in g:
+                        x, y = l.xy
+                        lines.append(zip(x, y))
+
+            lc = LineCollection(lines, colors=ec, linewidths=lw, alpha=alpha, zorder=zorder, **kwargs)
+            #lc.set_edgecolor(ec)
+            #lc.set_alpha(alpha)
+            #lc.set_lw(lw)
+            self.ax.add_collection(lc)
+            return lc
+
+        else:
+            print "plotting points..."
+            x = np.array([g.x for g in df.geometry])
+            y = np.array([g.y for g in df.geometry])
+
+            points = self.ax.scatter(x, y, s=s, c=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs)
+            return points
 
     def _make_plot(self):
 
@@ -398,9 +453,9 @@ class SpatialPlot(ScatterPlot):
         if self.colorby == 'graduated':
             colors = self.scatter_df[self.color_values]
             cb = True
-        elif self.colorby == 'overunder':
-            colors = [self.overunder_colors[0] if v > 0 else self.overunder_colors[1]
-                      for v in self.scatter_df[self.values].tolist()]
+        elif self.colorby == 'binary':
+            colors = np.sign(self.scatter_df[self.color_values])
+            self.cmap = ListedColormap([self.overunder_colors[1], self.overunder_colors[0]])
         elif self.colorby == 'pct_diff':
             colors = [self.scatter_df['pct_diff']]
             cb = True
@@ -408,7 +463,7 @@ class SpatialPlot(ScatterPlot):
         else:
             colors = self.colorby
 
-        self.adjusted_cmap = Normalized_cmap(self.cmap, self.scatter_df[self.color_values])
+        self.adjusted_cmap = Normalized_cmap(self.cmap, colors)
 
         self.scatter_df.plot(kind='scatter',
                              x=self.x, y=self.y, c=colors, s=sizes,
@@ -434,11 +489,12 @@ class SpatialPlot(ScatterPlot):
             lg_colors = (lg_values - lg_values[0])/float(lg_values[-1] - lg_values[0])
             lg_colors = [self.adjusted_cmap.cm(c) for c in lg_colors]
         elif self.colorby == 'pct_diff':
+            lg_values = np.sort(lg_values[lg_values > 0])[::-1]
+            lg_sizes = lg_sizes[lg_values > 0]
             lg_colors = ['k' for k in lg_values]
             lg_prefix = '+/-'
-        elif self.colorby == 'overunder':
-            lg_colors = [self.overunder_colors[0] if v > 0 else self.overunder_colors[1]
-                         for v in lg_values]
+        elif self.colorby == 'binary':
+            lg_colors = [self.adjusted_cmap.cm(c) for c in np.sign(lg_values)]
         else:
             lg_colors = [self.colorby for k in lg_values]
 
