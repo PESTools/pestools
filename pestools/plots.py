@@ -5,7 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
+from matplotlib.colors import ListedColormap
+from matplotlib.collections import PatchCollection, LineCollection
+from shapely.ops import transform
+from descartes import PolygonPatch
 import operator
+from Mapping import read_shapefile
 #from pst import *
 
 
@@ -22,7 +27,7 @@ class Plot(object):
     """
     def __init__(self, df, kind=None, by=None, subplots=None, sharex=True,
                  sharey=False, use_index=True,
-                 figsize=None, grid=None, legend=True, legend_title='',
+                 figsize=(11, 8.5), grid=None, legend=True, legend_title='',
                  ax=None, fig=None, title=None, xlim=None, ylim=None,
                  xticks=None, yticks=None, xlabel=None, ylabel=None, units=None,
                  sort_columns=False, fontsize=None,
@@ -80,8 +85,8 @@ class Plot(object):
             self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.iteritems())
             self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
 
-        # list of group names supplied
-        elif isinstance(self.groupinfo, list):
+        # list or array of group names supplied
+        elif isinstance(self.groupinfo, list) or isinstance(self.groupinfo, np.ndarray):
             self.groupinfo = [g.lower() for g in self.groupinfo]
             self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
             self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
@@ -137,7 +142,7 @@ class Plot(object):
         else:
             if self.ax is None:
                 # this will need to be extended to accommodate subplots
-                fig = plt.figure()
+                fig = plt.figure(figsize=self.figsize)
                 ax = fig.add_subplot(111)
             else:
                 fig = self.ax.get_figures()
@@ -223,7 +228,7 @@ class Hist(Plot):
 class ScatterPlot(Plot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-    def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
+    def __init__(self, df, x, y, groupinfo, line_kwds={}, legend_kwds={}, **kwds):
 
         Plot.__init__(self, df, **kwds)
         """
@@ -276,6 +281,7 @@ class ScatterPlot(Plot):
         self.groupinfo = groupinfo
         self.groups = np.unique(self.df.Group)
         self.line_kwds = line_kwds
+        self.legend_kwds = legend_kwds
         self._legend_order = {}
         self.max, self.min = -999999.9, 999999.9
 
@@ -292,12 +298,230 @@ class ScatterPlot(Plot):
         self._parse_groups()
 
 
+class SpatialPlot(ScatterPlot):
+    """Plots residuals in plan view.
+    """
+
+    def __init__(self, df, x, y, values, groupinfo,
+                 colorby=None,
+                 color_values=None,
+                 overunder_colors=('Red', 'Navy'),
+                 colorbar_label=None,
+                 minimum_marker_size=10,
+                 marker_scale=1,
+                 legend_values=None,
+                 units='',
+                 legend_kwds={}, **kwds):
+
+        ScatterPlot.__init__(self, df, x, y, groupinfo, legend_kwds=legend_kwds, **kwds)
+        """
+        df : DataFrame,
+            Pandas DataFrame
+
+        values: string or int
+            Column in df containing values to plot spatially
+
+        by: string
+            Column in dataframe containing grouping criteria for subplots
+            (one group per subplot)
+
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list. A dictionary can be used to
+            specify a title and subplot number for each group.
+
+        layout: tuple of ints
+            Specifies the layout for subplots (rows, columns).
+
+        **kwds:
+            Keyword arguments to matplotlib.pyplot.hist
+        """
+        self.values = values
+        if color_values is None:
+            self.color_values = self.values
+        else:
+            self.color_values = color_values
+
+        self.scatter_df = self.df.ix[self.df.Group.isin(self.groups)]
+
+        self.colorby = colorby
+        self.overunder_colors = overunder_colors # to specify colors instead of a colormap
+        self.ylabel = 'Northing'
+        self.xlabel = 'Easting'
+        self.cb_label = colorbar_label
+
+        self.minimum_marker_size = minimum_marker_size
+        self.marker_scale = marker_scale
+
+        self.lg_values = np.array([])
+        if legend_values is None:
+            for arr in [np.array([int(np.min(self.scatter_df[self.values]))]),
+                        self.scatter_df[self.values].quantile(q=[0.002, 0.023, .159, .841, .977, 0.998]).values,
+                        np.array([int(np.max(self.scatter_df[self.values]))])]:
+                self.lg_values = np.append(self.lg_values, arr)
+        else:
+            self.lg_values = np.array(legend_values)
+        self.units = units
+
+
+        # default keyword settings, which can be overriden by submitted keywords
+        # order of priority is default, then keywords entered for whole plot,
+        # then keywords supplied for individual group
+        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', 'lw': 0, 'edgecolor': None,
+                     'antialiased': True, 'zorder': 10}
+        self.kwds.update(kwds)
+
+        self.lg_kwds = {'title': 'Explanation', 'loc': 'best',
+                        'borderaxespad': 0,
+                        'borderpad': 1,
+                        'framealpha': 0.8,
+                        'scatterpoints': 1,
+                        'labelspacing': 1,
+                        'ncol': 1}
+
+        self.lg_kwds.update(self.legend_kwds)
+
+        self.cmap = cm.get_cmap(self.kwds.pop('cmap'))
+
+    def scale_markers(self, values):
+
+        max = np.max(np.abs(self.scatter_df[self.values]))
+        scale = self.marker_scale * 200 / max
+        scaled = np.abs(values) * scale
+
+        #size = 2 + 0.75 * value
+        return scaled + self.minimum_marker_size
+
+    def add_shapefile(self, shp,
+                      s=20, fc='0.8', ec='k', lw=1, alpha=1,
+                      zorder=0,
+                      convert_coordinates=1,
+                      **kwargs):
+        """Add points, lines or polygons from a shapefile to the map
+        """
+        df = read_shapefile(shp)
+
+        if convert_coordinates != 1:
+            df['geometry'] = [transform(lambda x, y, z=None: (x * convert_coordinates,
+                                                              y * convert_coordinates), g)
+                              for g in df.geometry]
+
+        if 'Polygon' in df.geometry[0].type:
+            print "building PatchCollection..."
+            patches = []
+            for i, g in enumerate(df.geometry.tolist()):
+                patches.append(PolygonPatch(g, fc=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs))
+
+            pc = PatchCollection(patches, match_original=True)
+            self.ax.add_collection(pc)
+            return pc
+
+        elif 'LineString' in df.geometry[0].type:
+            print "building LineCollection..."
+            lines = []
+            for i, g in enumerate(df.geometry.tolist()):
+                if 'Multi' not in g.type:
+                    x, y = g.xy
+                    lines.append(zip(x, y))
+                # plot each line in a multilinestring
+                else:
+                    for l in g:
+                        x, y = l.xy
+                        lines.append(zip(x, y))
+
+            lc = LineCollection(lines, colors=ec, linewidths=lw, alpha=alpha, zorder=zorder, **kwargs)
+            #lc.set_edgecolor(ec)
+            #lc.set_alpha(alpha)
+            #lc.set_lw(lw)
+            self.ax.add_collection(lc)
+            return lc
+
+        else:
+            print "plotting points..."
+            x = np.array([g.x for g in df.geometry])
+            y = np.array([g.y for g in df.geometry])
+
+            points = self.ax.scatter(x, y, s=s, c=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs)
+            return points
+
+    def _make_plot(self):
+
+        sizes = self.scale_markers(self.scatter_df[self.values])
+
+        # parse colorscheme
+        cb = False
+        if self.colorby == 'graduated':
+            colors = self.scatter_df[self.color_values]
+            cb = True
+        elif self.colorby == 'binary':
+            colors = np.sign(self.scatter_df[self.color_values])
+            self.cmap = ListedColormap([self.overunder_colors[1], self.overunder_colors[0]])
+        elif self.colorby == 'pct_diff':
+            colors = [self.scatter_df['pct_diff']]
+            cb = True
+            self.cb_label = 'Percent Difference'
+        else:
+            colors = self.colorby
+
+        self.adjusted_cmap = Normalized_cmap(self.cmap, colors)
+
+        self.scatter_df.plot(kind='scatter',
+                             x=self.x, y=self.y, c=colors, s=sizes,
+                             cmap=self.adjusted_cmap.cm, colorbar=cb, ax=self.ax,
+                             layout=self.layout, **self.kwds)
+
+        # set the colorbar label
+        if self.colorby == 'graduated' or self.colorby == 'pct_diff':
+            self.ax.figure.axes[1].set_ylabel(self.cb_label)
+
+    def _make_legend(self):
+
+        # turn off autoscaling by setting the x and ylim
+        self.ax.set_xlim(self.ax.get_xlim())
+        self.ax.set_ylim(self.ax.get_ylim())
+
+
+        lg_values = self.lg_values
+        lg_sizes = self.scale_markers(lg_values)
+        lg_prefix = ''
+
+        if self.colorby == 'graduated':
+            lg_colors = (lg_values - lg_values[0])/float(lg_values[-1] - lg_values[0])
+            lg_colors = [self.adjusted_cmap.cm(c) for c in lg_colors]
+        elif self.colorby == 'pct_diff':
+            lg_values = np.sort(lg_values[lg_values > 0])[::-1]
+            lg_sizes = lg_sizes[lg_values > 0]
+            lg_colors = ['k' for k in lg_values]
+            lg_prefix = '+/-'
+        elif self.colorby == 'binary':
+            lg_colors = [self.adjusted_cmap.cm(c) for c in np.sign(lg_values)]
+        else:
+            lg_colors = [self.colorby for k in lg_values]
+
+        lg_labels = ['{} {:,.0f} {}'.format(lg_prefix, lg_values[0], self.units)] + \
+                    ['{} {:,.0f}'.format(lg_prefix, v) for v in lg_values[1:]]
+
+        for s in range(len(lg_sizes)):
+            self.ax.scatter([-1000], [-1000], s=lg_sizes[s],
+                            c=lg_colors[s],
+                            marker=self.kwds['marker'], edgecolor=None, lw=0.25,
+                            alpha=self.kwds['alpha'], label=lg_labels[s])
+
+        handles, labels = self.ax.get_legend_handles_labels()
+
+        self.lg = self.ax.legend(handles, labels, **self.lg_kwds)
+
+        plt.setp(self.lg.get_title(), fontsize=12, fontweight='bold')
+
+        plt.tight_layout()
+
+
 class One2onePlot(ScatterPlot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
     def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
 
-        ScatterPlot.__init__(self, df, x, y, groupinfo, line_kwds={}, **kwds)
+        ScatterPlot.__init__(self, df, x, y, groupinfo, line_kwds=line_kwds, **kwds)
 
     def _make_plot(self):
 
@@ -617,3 +841,86 @@ class IdentBar(Plot):
         cb.set_ticklabels(cb_axis)
         cb.set_label('Number of singular values considered')
 
+
+class Normalized_cmap:
+
+    def __init__(self, cmap, values):
+
+        self.values = values
+        self.cmap = cmap
+
+        self.normalize_cmap()
+        self.start = 0
+        self.start = 1
+        self.cm = self.shiftedColorMap(self.cmap, 0, self.midpoint, 1)
+
+    def normalize_cmap(self):
+        """Computes start, midpoint, and end values (between 0 and 1), to make
+        a colormap using shiftedColorMap(), which will be
+        * centered on zero
+        * if the midpoint is > 0.5, start = 0, end is < 1
+        * if the midpoint is < 0.5, the start is between 0 and 0.5, end = 1.
+
+        Could not get this to produce a consistent midpoint color with the shiftedColorMap fn
+        Using 0 and 1 for the start, stop produces a consistent midpoint color, at the cost of
+        having outliers with same color intensity, regardless of their magnitudes
+        """
+        vmax, vmin = np.max(self.values), np.min(self.values)
+        self.midpoint = 1 - vmax/(vmax + abs(vmin))
+        if self.midpoint > 0.5:
+            self.start, self.stop = 0, 0.5 + (1-self.midpoint)
+        else:
+            self.start, self.stop = 0.5 - self.midpoint, 1
+
+    def shiftedColorMap(self, cmap, start=0, midpoint=0.5, stop=1.0, name='shiftedcmap'):
+        '''
+        Function to offset the "center" of a colormap. Useful for
+        data with a negative min and positive max and you want the
+        middle of the colormap's dynamic range to be at zero. From:
+        http://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib
+
+        Input
+        -----
+          cmap : The matplotlib colormap to be altered
+          start : Offset from lowest point in the colormap's range.
+              Defaults to 0.0 (no lower ofset). Should be between
+              0.0 and `midpoint`.
+          midpoint : The new center of the colormap. Defaults to
+              0.5 (no shift). Should be between 0.0 and 1.0. In
+              general, this should be  1 - vmax/(vmax + abs(vmin))
+              For example if your data range from -15.0 to +5.0 and
+              you want the center of the colormap at 0.0, `midpoint`
+              should be set to  1 - 5/(5 + 15)) or 0.75
+          stop : Offset from highets point in the colormap's range.
+              Defaults to 1.0 (no upper ofset). Should be between
+              `midpoint` and 1.0.
+        '''
+
+        cdict = {
+            'red': [],
+            'green': [],
+            'blue': [],
+            'alpha': []
+        }
+
+        # regular index to compute the colors
+        reg_index = np.linspace(start, stop, 257)
+
+        # shifted index to match the data
+        shift_index = np.hstack([
+            np.linspace(0.0, midpoint, 128, endpoint=False),
+            np.linspace(midpoint, 1.0, 129, endpoint=True)
+        ])
+
+        for ri, si in zip(reg_index, shift_index):
+            r, g, b, a = cmap(ri)
+
+            cdict['red'].append((si, r, r))
+            cdict['green'].append((si, g, g))
+            cdict['blue'].append((si, b, b))
+            cdict['alpha'].append((si, a, a))
+
+        newcmap = mpl.colors.LinearSegmentedColormap(name, cdict)
+        plt.register_cmap(cmap=newcmap)
+
+        return newcmap

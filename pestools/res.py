@@ -733,6 +733,48 @@ class Res(object):
 
 
         return plot_obj.fig, plot_obj.ax
-        
 
+
+    def plot_spatial(self, groupinfo={},
+                     colorby='graduated',
+                     overunder_colors=('Red', 'Navy'),
+                     colorbar_label='Residual',
+                     minimum_marker_size=10,
+                     marker_scale=1,
+                     legend_values=None,
+                     units='',
+                     legend_kwds={}, **kwds):
+        """
+        Makes a histogram of a dataframe column
+
+        Parameters
+        ----------
+
+
+        Notes
+        ------
+
+        """
+        kwds.update({
+                     })
+
+        df = self.df[['Group', 'Residual', 'Measured']].join(self.obsinfo, rsuffix='_obsinfo')
+
+        if colorby == 'pct_diff':
+            df['pct_diff'] = 100 * df.Residual/df.Measured
+
+        plot_obj = plots.SpatialPlot(df, 'X', 'Y', 'Residual', groupinfo,
+                                     colorby=colorby,
+                                     overunder_colors=overunder_colors,
+                                     colorbar_label=colorbar_label,
+                                     minimum_marker_size=minimum_marker_size,
+                                     marker_scale=marker_scale,
+                                     legend_values=legend_values,
+                                     units=units,
+                                     legend_kwds=legend_kwds, **kwds)
+        plot_obj.generate()
+        plot_obj.draw()
+
+
+        return plot_obj
     
