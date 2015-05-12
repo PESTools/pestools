@@ -129,6 +129,7 @@ class Plot(object):
             self.fig = plt.figure(1, (4., 4.))
             self.axes = ImageGrid(self.fig, 111, nrows_ncols=self.layout, axes_pad=0.1)
 
+
         elif self.subplots is not None:
             raise AssertionError('Subplots not implemented yet.')
             # This needs some work. The main reason to use subplots instead of axes_grid1 seems to be
@@ -330,7 +331,8 @@ class One2onePlot(ScatterPlot):
         line_kwds = {'color': 'r', 'zorder': 0}
         line_kwds.update(self.line_kwds)
         plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), **line_kwds)
-
+        plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
+        plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
         self.ax.set_ylim(self.min, self.max)
         self.ax.set_xlim(self.min, self.max)
 

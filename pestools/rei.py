@@ -1,8 +1,9 @@
 __author__ = 'aleaf'
 
 import sys
-sys.path.append('../pst_tools')
-from pst import *
+#sys.path.append('../pst_tools')
+import pest as Pest
+import os
 from res import *
 from matplotlib.backends.backend_pdf import PdfPages
 
