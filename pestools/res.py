@@ -625,7 +625,7 @@ class Res(object):
 
 
     def plot_one2one(self, groupinfo, title=None, print_stats=[], print_format='.2f',
-                     exclude_zero_stats=True,
+                     exclude_zero_stats=True, error_bars_obs=False,
                      line_kwds={}, **kwds):
         """
         Makes one-to-one plot of two dataframe columns, using pyplot.scatter
@@ -637,6 +637,9 @@ class Res(object):
             in "Group" column of df can be specified using a list. A dictionary
             can be supplied to indicate the groups to plot (as keys), with item consisting of
             a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
+
+        error_bar_obs: flag
+            True means plot error bars on the observed values. They are in the Error column of observation information
 
         line_kwds: dict, optional
             Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
@@ -653,8 +656,15 @@ class Res(object):
         ------
 
         """
-        plot_obj = plots.One2onePlot(self.df, 'Measured', 'Modelled', groupinfo, title=title,
-                                     line_kwds=line_kwds, **kwds)
+
+        # join in the obsinfo stuff if going to need error bars
+        if error_bars_obs:
+            df = self.df[['Measured', 'Modelled', 'Group']].join(self.obsinfo, rsuffix='_obsinfo')
+        else:
+            df = self.df
+
+        plot_obj = plots.One2onePlot(df, 'Measured', 'Modelled', groupinfo, title=title,
+                                     error_bars_obs=error_bars_obs, line_kwds=line_kwds, **kwds)
 
         plot_obj.generate()
 
