@@ -95,6 +95,10 @@ class Plot(object):
             self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
             self.groupinfo = {self.groupinfo: {}}
 
+        elif isinstance(self.groupinfo, int):
+            self.groupinfo = self.groupinfo
+            self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
+            self.groupinfo = {self.groupinfo: {}}
         else:
             raise ValueError('Invalid input for groupinfo.')
 
@@ -228,7 +232,7 @@ class Hist(Plot):
 class ScatterPlot(Plot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-    def __init__(self, df, x, y, groupinfo, line_kwds={}, legend_kwds={}, **kwds):
+    def __init__(self, df, x, y, groupinfo, group_col='Group', line_kwds={}, legend_kwds={}, **kwds):
 
         Plot.__init__(self, df, **kwds)
         """
@@ -278,8 +282,9 @@ class ScatterPlot(Plot):
 
         self.x = x
         self.y = y
+        self.group_col = group_col
         self.groupinfo = groupinfo
-        self.groups = np.unique(self.df.Group)
+        self.groups = np.unique(self.df[group_col])
         self.line_kwds = line_kwds
         self.legend_kwds = legend_kwds
         self._legend_order = {}
@@ -303,6 +308,7 @@ class SpatialPlot(ScatterPlot):
     """
 
     def __init__(self, df, x, y, values, groupinfo,
+                 group_col='Group',
                  colorby=None,
                  color_values=None,
                  overunder_colors=('Red', 'Navy'),
@@ -313,7 +319,7 @@ class SpatialPlot(ScatterPlot):
                  units='',
                  legend_kwds={}, **kwds):
 
-        ScatterPlot.__init__(self, df, x, y, groupinfo, legend_kwds=legend_kwds, **kwds)
+        ScatterPlot.__init__(self, df, x, y, groupinfo, group_col, legend_kwds, **kwds)
         """
         df : DataFrame,
             Pandas DataFrame
@@ -342,7 +348,7 @@ class SpatialPlot(ScatterPlot):
         else:
             self.color_values = color_values
 
-        self.scatter_df = self.df.ix[self.df.Group.isin(self.groups)]
+        self.scatter_df = self.df.ix[self.df[self.group_col].isin(self.groups)]
 
         self.colorby = colorby
         self.overunder_colors = overunder_colors # to specify colors instead of a colormap
@@ -396,7 +402,7 @@ class SpatialPlot(ScatterPlot):
 
     def add_shapefile(self, shp,
                       s=20, fc='0.8', ec='k', lw=1, alpha=1,
-                      zorder=0,
+                      zorder=5,
                       convert_coordinates=1,
                       reset_extent=False,
                       **kwargs):
@@ -479,7 +485,8 @@ class SpatialPlot(ScatterPlot):
             cb = True
             self.cb_label = 'Percent Difference'
         else:
-            colors = self.colorby
+            colors = np.ones(len(self.scatter_df[self.color_values]))
+            self.cmap = ListedColormap(self.colorby)
 
         self.adjusted_cmap = Normalized_cmap(self.cmap, colors)
 
@@ -516,8 +523,8 @@ class SpatialPlot(ScatterPlot):
         else:
             lg_colors = [self.colorby for k in lg_values]
 
-        lg_labels = ['{} {:,.0f} {}'.format(lg_prefix, lg_values[0], self.units)] + \
-                    ['{} {:,.0f}'.format(lg_prefix, v) for v in lg_values[1:]]
+        lg_labels = ['{} {:,.1f} {}'.format(lg_prefix, lg_values[0], self.units)] + \
+                    ['{} {:,.1f}'.format(lg_prefix, v) for v in lg_values[1:]]
 
         lg_handles = []
         for s in range(len(lg_sizes)):
