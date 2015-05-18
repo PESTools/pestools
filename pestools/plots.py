@@ -134,6 +134,7 @@ class Plot(object):
             self.fig = plt.figure(1, (4., 4.))
             self.axes = ImageGrid(self.fig, 111, nrows_ncols=self.layout, axes_pad=0.1)
 
+
         elif self.subplots is not None:
             raise AssertionError('Subplots not implemented yet.')
             # This needs some work. The main reason to use subplots instead of axes_grid1 seems to be
@@ -145,7 +146,7 @@ class Plot(object):
                 fig = plt.figure(figsize=self.figsize)
                 ax = fig.add_subplot(111)
             else:
-                fig = self.ax.get_figures()
+                fig = self.ax.get_figure()
                 if self.figsize is not None:
                     fig.set_size_inches(self.figsize)
 
@@ -465,6 +466,7 @@ class SpatialPlot(ScatterPlot):
 
         self.adjusted_cmap = Normalized_cmap(self.cmap, colors)
 
+
         self.scatter_df.plot(kind='scatter',
                              x=self.x, y=self.y, c=colors, s=sizes,
                              cmap=self.adjusted_cmap.cm, colorbar=cb, ax=self.ax,
@@ -519,14 +521,16 @@ class SpatialPlot(ScatterPlot):
 class One2onePlot(ScatterPlot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-    def __init__(self, df, x, y, groupinfo, line_kwds={}, **kwds):
+    def __init__(self, df, x, y, groupinfo, error_bars_obs=False, line_kwds={}, **kwds):
 
         ScatterPlot.__init__(self, df, x, y, groupinfo, line_kwds=line_kwds, **kwds)
+        self.error_bars_obs = error_bars_obs
 
     def _make_plot(self):
 
         # use matplotlib's color cycle to plot each group as a different color by default
         color_cycle = self.ax._get_lines.color_cycle
+
         for grp in self.groups:
 
             # default keyword settings, which can be overriden by submitted keywords
@@ -541,7 +545,11 @@ class One2onePlot(ScatterPlot):
 
             x, y = g[self.x], g[self.y]
 
-            s = self.ax.scatter(x, y, **kwds)
+            if self.error_bars_obs:
+                s = self.ax.scatter(x, y, **kwds)
+                serr = self.ax.errorbar(x,y, yerr=g.Error, ls='none',**kwds)
+            else:
+                s = self.ax.scatter(x, y, **kwds)
             self._legend_order[label] = s.get_zorder()
 
             # keep track of min/max for one2one line
@@ -551,12 +559,17 @@ class One2onePlot(ScatterPlot):
                 self.min = np.min([g.Measured, g.Modelled])
 
         #plot one2one line
+        data_range = self.max-self.min
         line_kwds = {'color': 'r', 'zorder': 0}
         line_kwds.update(self.line_kwds)
-        plt.plot(np.arange(self.min, self.max+1), np.arange(self.min, self.max+1), **line_kwds)
+        plt.plot(np.arange(self.min-.05*data_range, self.max+.05*data_range+1),
+                 np.arange(self.min-.05*data_range, self.max+.05*data_range+1), **line_kwds)
+        plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
+        plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
 
-        self.ax.set_ylim(self.min, self.max)
-        self.ax.set_xlim(self.min, self.max)
+
+        self.ax.set_ylim(self.min-.05*data_range, self.max+.05*data_range)
+        self.ax.set_xlim(self.min-.05*data_range, self.max+.05*data_range)
 
     def _make_legend(self):
 
