@@ -205,7 +205,7 @@ class ParSen(object):
         '''
         for index, row in self._obs_data.iterrows():    
             # Set weights for obs in groups to zero
-            if row['OBGNME'].lower in drop_groups:
+            if row['OBGNME'].lower() in drop_groups:
                 self._obs_data.set_value(index, 'ParSen_Weight', 0.0)
         if calc_sensitivity is True:
             self.df = self.calc_sensitivity()
