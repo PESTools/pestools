@@ -7,10 +7,9 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import PatchCollection, LineCollection
-from shapely.ops import transform
-from descartes import PolygonPatch
+
 import operator
-from Mapping import read_shapefile
+
 #from pst import *
 
 
@@ -398,6 +397,9 @@ class SpatialPlot(ScatterPlot):
                       zorder=0,
                       convert_coordinates=1,
                       **kwargs):
+        from shapely.ops import transform
+        from descartes import PolygonPatch
+        from Mapping import read_shapefile
         """Add points, lines or polygons from a shapefile to the map
         """
         df = read_shapefile(shp)
