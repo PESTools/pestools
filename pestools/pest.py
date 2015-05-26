@@ -10,7 +10,6 @@ import pandas as pd
 from mat_handler import jco as Jco
 from mat_handler import cov as Cov
 from pst_handler import pst as Pst
-from parsen import ParSen
 from Cor import Cor
 
 
@@ -50,6 +49,16 @@ class Pest(object):
         else:
             self.parinfo = pd.DataFrame()
 
+    def IdentPar(self, jco=None, par_info_file=None):
+        '''
+        IdentPar class
+        '''
+        from identpar import IdentPar
+        if jco is None:
+            jco = self.pstfile.strip('pst')+'jco'
+        identpar = IdentPar(jco, par_info_file)
+        return identpar
+    
     @property    
     def _jco(self):
         '''
@@ -75,10 +84,11 @@ class Pest(object):
         return pst
         
 
-    def parsen(self, **kwargs):
+    def ParSen(self, **kwargs):
         '''
         ParSen class
         '''
+        from parsen import ParSen
         parsen = ParSen(basename=self.pstfile, jco_df = self.jco_df,
                         res_df = self.res_df, 
                         parameter_data = self.parameter_data, **kwargs)
@@ -97,7 +107,6 @@ class Pest(object):
         '''
         from res import Res
         #res_file = self.pstfile.rstrip('pst')+res_extension
-        print res_file, obs_info_file
         res = Res(res_file, obs_info_file)
 
         return res
@@ -160,14 +169,14 @@ class Pest(object):
         return Cor(self._cov)
 
     def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
-                            basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
+                            error_col='Error', basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
             """Bring in ancillary observation information from csv file such as location and measurement type
             """
             self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **kwds)
             self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
     
             # remap observation info columns to default names
-            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', 'foo': 'foo'}, inplace=True)
+            self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', error_col: 'Error'}, inplace=True)
     
             # make a dataframe of observation type for each group
             if 'Type' in self.obsinfo.columns:
