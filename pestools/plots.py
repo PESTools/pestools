@@ -412,7 +412,7 @@ class SpatialPlot(ScatterPlot):
         try:
             from shapely.ops import transform
             from descartes import PolygonPatch
-            from Mapping import read_shapefile
+            from maps import read_shapefile
         except:
             raise Exception("add_shapefile() method requires shapely, descartes, and fiona."
                             "\nSee the readme file for installation instructions.")

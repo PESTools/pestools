@@ -632,19 +632,41 @@ class Res(object):
 
         Parameters
         ----------
-        groupinfo: dict, list, or string
+        groupinfo : dict, list, or string
             If string, name of group in "Group" column of df to plot. Multiple groups
             in "Group" column of df can be specified using a list. A dictionary
             can be supplied to indicate the groups to plot (as keys), with item consisting of
             a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
-
-        error_bar_obs: flag
+        title : str, optional
+            Adds a title
+        print_stats : list of strings
+            Print summary statistics for values included in plot. Accepts an statistic returned by describe_groups:
+                - 'n'
+                - 'Range'
+                - 'Max'
+                - 'Min'
+                - 'Mean'
+                - 'Standard deviation'
+                - 'Varience'
+                - '25%'
+                - '50%'
+                - '75%'
+                - 'Max (absolute)'
+                - 'Min (absolute)'
+                - 'MAE'
+                - 'RMSE'
+                - 'RMSE/range'
+                - 'Normally Distributed'
+                - 'p-value'
+        print_format : format string, default '.2f'
+            Specifies how summary statistics will be printed
+        exclude_zero_stats : boolean, default True
+            Exclude any zero-weighted observations from the summary statistics
+        error_bar_obs: boolean, default False
             True means plot error bars on the observed values. They are in the Error column of observation information
-
         line_kwds: dict, optional
             Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
             See http://matplotlib.org/api/pyplot_api.html
-
         **kwds:
             Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
             for controlling appearance scatter or hexbin plot. Order of priority for keywords is:
@@ -685,23 +707,45 @@ class Res(object):
 
         Parameters
         ----------
-        groupinfo: dict, list, or string
+        groupinfo : dict, list, or string
             If string, name of group in "Group" column of df to plot. Multiple groups
             in "Group" column of df can be specified using a list. A dictionary
             can be supplied to indicate the groups to plot (as keys), with item consisting of
             a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.
-
-        title:
-            not sure if we need to specify arguments like this one if we are already using kwds. Need to look into it more.
-
+        title : str, optional
+            Adds a title
+        print_stats : list of strings
+            Print summary statistics for values included in plot. Accepts an statistic returned by describe_groups:
+                - 'n'
+                - 'Range'
+                - 'Max'
+                - 'Min'
+                - 'Mean'
+                - 'Standard deviation'
+                - 'Varience'
+                - '25%'
+                - '50%'
+                - '75%'
+                - 'Max (absolute)'
+                - 'Min (absolute)'
+                - 'MAE'
+                - 'RMSE'
+                - 'RMSE/range'
+                - 'Normally Distributed'
+                - 'p-value'
+        print_format : format string, default '.2f'
+            Specifies how summary statistics will be printed
+        exclude_zero_stats : boolean, default True
+            Exclude any zero-weighted observations from the summary statistics
         line_kwds: dict, optional
             Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
             See http://matplotlib.org/api/pyplot_api.html
-
         **kwds:
-            Additional keyword arguments to Matplotlib.pyplot.hexbin, for controlling appearance hexbin plot.
-            (need to figure out how to differentiate documentation with inheritance!)
-            See http://matplotlib.org/api/pyplot_api.html
+            Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
+            for controlling appearance scatter or hexbin plot. Order of priority for keywords is:
+                * keywords supplied in groupinfo for individual groups
+                * **kwds entered for whole plot
+                * default settings
 
         Notes
         ------
@@ -728,8 +772,20 @@ class Res(object):
 
         Parameters
         ----------
-
-
+        df : dataframe, default is res.df attribute
+            Dataframe from which to make histogram(s)
+        col : str, default is 'Residual'
+            Dataframe column with histogram values
+        by : str, default is 'Group'
+            Dataframe column with groupings for histogram values.
+        groupinfo: dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list. A dictionary can be used to
+            specify a title and subplot number for each group.
+        layout : tuple (optional)
+            (rows, columns) for the layout of subplots
+        **kwds:
+            Keyword arguments to matplotlib.pyplot.hist
         Notes
         ------
 
@@ -739,7 +795,7 @@ class Res(object):
         if df is None:
             df = self.df
 
-        plot_obj = plots.Hist(df, col, by, groupinfo, layout=None, **kwds)
+        plot_obj = plots.Hist(df, col, by, groupinfo, layout=layout, **kwds)
         plot_obj._make_plot() # bypass the other generation methods because we're using pandas
         plot_obj.draw()
 
@@ -757,15 +813,52 @@ class Res(object):
                      units='',
                      legend_kwds={}, **kwds):
         """
-        Makes a histogram of a dataframe column
+        Make a spatial scatter plot of residuals information.
+        Requires calling the res class with an observation information file.
+        (e.g. ```obs_info_file='observation_locations.csv```)
 
         Parameters
         ----------
+        groupinfo : dict, list, or string
+            If string, name of group in "Group" column of df to plot. Multiple groups
+            in "Group" column of df can be specified using a list.
+        colorby : str
+            - 'graduated' : Size markers by absolute value of residual;
+            color markers by value of residual (default)
+            - 'binary' : Size markers by absolute value of residual;
+            color markers as either negative or positive
+            - 'pct_diff' : Size markers by absolute value of residual;
+            color markers by value of residual relative to observed value
+            - Alternatively a single color can be specified
+            (e.g. 'k' for black)
+        overunder_colors : tuple, optional
+            specifies the colors assigned to (pos, neg) values, default ('Red', 'Navy')
+        colorbar_label : str
+            label for colorbar axis
+        minimum_marker_size : numeric, default 10
+            minimum size of markers in points
+        marker_scale : numeric, default 1
+            arbitrary scale applied to markers. A value of 1 is intended to work well for
+            a typical range of head residuals in a regional groundwater model
+            with length units of feet (e.g. 0 - +/- 200)
+        legend_values : list, optional
+            values that will be displayed in legend. Otherwise the minimum, maximum, and percentiles
+            equivilant to 1, 2, and 3 standard deviations from the mean will be displayed.
+        units : str, optional
+            prints the units of the residual values in the legend.
+        legend_kwds : dict
+            keywords to matplotlib.pyplot.legend
+        kwds : dict
+            keywords to matplotlib.pyplot.scatter
 
+        Returns
+        -------
+        plot_obj :
+            instance of the plots.SpatialPlot() class. The figure and axis handles can be accessed
+            as attributes (plot_obj.fig, plot_obj.ax). See the documentation for the SpatialPlot() class.
 
         Notes
         ------
-
         """
         kwds.update({
                      })

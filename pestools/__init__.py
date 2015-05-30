@@ -1,6 +1,6 @@
 """
-Utilities for working with PEST output.
- 
+This is a work in progress!
+
 Modules:
 
 * ``pest`` - Base class
@@ -8,8 +8,9 @@ Modules:
 * ``rei`` - Aggregates information from multiple interim residuals (.rei) files
 * ``parsen`` - Class for working with parameter sensitivities
 * ``plots`` - Classes for generating plots
+* ``maps`` - Classes for generating maps
  
-Base and PEST control file classes
+PEST class
 **********************************
  
 .. automodule:: pst
@@ -21,8 +22,6 @@ Residuals Class
 
 .. autosummary::
 
-	
-
 REI Class
 *********
  
@@ -33,15 +32,22 @@ Parameter Sensitivity Class
  
 .. automodule:: parsen
 
-Plotting Classes
+Plotting Class
 ****************
  
-.. automodule:: rei
+.. automodule:: plots
+
+Mapping Class
+****************
+ 
+.. automodule:: maps
 
 """
 from pest import Pest
 from parsen import ParSen
 from Cor import Cor
 from res import Res
-#from identpar import IdentPar
+from identpar import IdentPar
+import plots
+import maps
 

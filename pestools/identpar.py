@@ -5,8 +5,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pyemu import errvar
 from pest import Pest
-from mat_handler import jco as Jco
-from pst_handler import pst as Pst
 import plots
 
 class IdentPar:
