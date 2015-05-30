@@ -14,9 +14,6 @@ Contents:
    :maxdepth: 2
    
    source_doc
-   
-   includeme
-
 
 
 Indices and tables
