@@ -8,11 +8,10 @@ PESTools
 
 Contents:
 
-.. include:: ../README.md
-
 .. toctree::
    :maxdepth: 2
    
+   about
    source_doc
 
 
