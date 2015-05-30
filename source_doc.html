@@ -24,6 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="pestools 1 documentation" href="index.html" />
+    <link rel="next" title="&lt;no title&gt;" href="includeme.html" />
     <link rel="prev" title="PESTools" href="index.html" /> 
   </head>
   <body>
@@ -36,6 +37,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="includeme.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="PESTools"
              accesskey="P">previous</a> |</li>
@@ -124,53 +128,6 @@ type (&#8216;observation&#8217;) is assigned in the absence of type information<
 </tbody>
 </table>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.describe_data" title="res.Res.describe_data"><tt class="xref py py-obj docutils literal"><span class="pre">describe_data</span></tt></a>(data[,&nbsp;ddof])</td>
-<td>Basic desription of np array</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.describe_groups" title="res.Res.describe_groups"><tt class="xref py py-obj docutils literal"><span class="pre">describe_groups</span></tt></a>(groups[,&nbsp;exclude_zero,&nbsp;ddof])</td>
-<td>Calculate summary statistics for residuals</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.group" title="res.Res.group"><tt class="xref py py-obj docutils literal"><span class="pre">group</span></tt></a>(group)</td>
-<td>Get pandas DataFrame for a single group</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.objective_contrib" title="res.Res.objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">objective_contrib</span></tt></a>([df,&nbsp;return_data])</td>
-<td>Print out the contribution of each observation group to the</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_hexbin" title="res.Res.plot_hexbin"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hexbin</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;print_stats,&nbsp;...])</td>
-<td>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_hist" title="res.Res.plot_hist"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hist</span></tt></a>([df,&nbsp;col,&nbsp;by,&nbsp;groupinfo,&nbsp;layout])</td>
-<td>Makes a histogram of a dataframe column</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_measure_vs_model" title="res.Res.plot_measure_vs_model"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measure_vs_model</span></tt></a>([groups,&nbsp;plot_type])</td>
-<td>Plot measured vs.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_measured_vs_residual" title="res.Res.plot_measured_vs_residual"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measured_vs_residual</span></tt></a>([groups,&nbsp;...])</td>
-<td>Plot measured vs.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_objective_contrib" title="res.Res.plot_objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">plot_objective_contrib</span></tt></a>([df,&nbsp;drop_regul])</td>
-<td>Plot the contribution of each group to the objective function  as a pie chart.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_one2one" title="res.Res.plot_one2one"><tt class="xref py py-obj docutils literal"><span class="pre">plot_one2one</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;...])</td>
-<td>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_spatial" title="res.Res.plot_spatial"><tt class="xref py py-obj docutils literal"><span class="pre">plot_spatial</span></tt></a>([groupinfo,&nbsp;colorby,&nbsp;...])</td>
-<td>Make a spatial scatter plot of residuals information.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#res.Res.print_stats" title="res.Res.print_stats"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats</span></tt></a>(group)</td>
-<td>Return stats for single group</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#res.Res.print_stats_all" title="res.Res.print_stats_all"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats_all</span></tt></a>()</td>
-<td>Return stats for each observation group</td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="res.Res.group">
 <tt class="descname">group</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.group" title="Permalink to this definition">¶</a></dt>
@@ -668,14 +625,6 @@ as attributes (plot_obj.fig, plot_obj.ax). See the documentation for the Spatial
 
 </dd></dl>
 
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-</tbody>
-</table>
 </div>
 <div class="section" id="module-rei">
 <span id="rei-class"></span><h2>REI Class<a class="headerlink" href="#module-rei" title="Permalink to this headline">¶</a></h2>
@@ -827,23 +776,6 @@ to complicated for our needs, and we may want add additional functionality and s
 as needed. But hopefully it will provide a starting point to work off of.</p>
 <p>The overall goal is to centralize plotting code for consistency and to maximize extensibility</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="class">
@@ -852,23 +784,6 @@ as needed. But hopefully it will provide a starting point to work off of.</p>
 <dd><p>Bases: <a class="reference internal" href="#plots.Plot" title="plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">plots.Plot</span></tt></a></p>
 <p>Makes a grid of histograms</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="class">
@@ -877,23 +792,6 @@ as needed. But hopefully it will provide a starting point to work off of.</p>
 <dd><p>Bases: <a class="reference internal" href="#plots.Plot" title="plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">plots.Plot</span></tt></a></p>
 <p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="class">
@@ -902,29 +800,6 @@ as needed. But hopefully it will provide a starting point to work off of.</p>
 <dd><p>Bases: <a class="reference internal" href="#plots.ScatterPlot" title="plots.ScatterPlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.ScatterPlot</span></tt></a></p>
 <p>Plots residuals in plan view.</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#plots.SpatialPlot.add_shapefile" title="plots.SpatialPlot.add_shapefile"><tt class="xref py py-obj docutils literal"><span class="pre">add_shapefile</span></tt></a>(shp[,&nbsp;s,&nbsp;fc,&nbsp;ec,&nbsp;lw,&nbsp;alpha,&nbsp;...])</td>
-<td>Add points, lines or polygons from a shapefile to the map</td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">scale_markers</span></tt>(values)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="plots.SpatialPlot.add_shapefile">
 <tt class="descname">add_shapefile</tt><big>(</big><em>shp</em>, <em>s=20</em>, <em>fc='0.8'</em>, <em>ec='k'</em>, <em>lw=1</em>, <em>alpha=1</em>, <em>zorder=5</em>, <em>convert_coordinates=1</em>, <em>reset_extent=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/plots.html#SpatialPlot.add_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.SpatialPlot.add_shapefile" title="Permalink to this definition">¶</a></dt>
@@ -939,23 +814,6 @@ as needed. But hopefully it will provide a starting point to work off of.</p>
 <dd><p>Bases: <a class="reference internal" href="#plots.ScatterPlot" title="plots.ScatterPlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.ScatterPlot</span></tt></a></p>
 <p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="class">
@@ -964,23 +822,6 @@ as needed. But hopefully it will provide a starting point to work off of.</p>
 <dd><p>Bases: <a class="reference internal" href="#plots.One2onePlot" title="plots.One2onePlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.One2onePlot</span></tt></a></p>
 <p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </div>
@@ -1015,9 +856,7 @@ from shapefile into dataframe column &#8220;geometry&#8221;</p>
 <li><a class="reference internal" href="#module-res">Residuals Class</a></li>
 <li><a class="reference internal" href="#module-rei">REI Class</a></li>
 <li><a class="reference internal" href="#module-parsen">Parameter Sensitivity Class</a></li>
-<li><a class="reference internal" href="#module-plots">Plotting Class</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-plots">Plotting Class</a></li>
 <li><a class="reference internal" href="#module-maps">Mapping Class</a></li>
 </ul>
 </li>
@@ -1026,6 +865,9 @@ from shapefile into dataframe column &#8220;geometry&#8221;</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">PESTools</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="includeme.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/source_doc.txt"
@@ -1057,6 +899,9 @@ from shapefile into dataframe column &#8220;geometry&#8221;</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="includeme.html" title="&lt;no title&gt;"
+             >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="PESTools"
              >previous</a> |</li>
