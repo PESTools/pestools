@@ -1,0 +1,1057 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>plots &mdash; pestools 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pestools 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pestools 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for plots</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;aleaf&#39;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="kn">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="kn">as</span> <span class="nn">cm</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">ListedColormap</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PatchCollection</span><span class="p">,</span> <span class="n">LineCollection</span>
+<span class="kn">import</span> <span class="nn">matplotlib.lines</span> <span class="kn">as</span> <span class="nn">mlines</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="c">#from pst import *</span>
+
+
+<div class="viewcode-block" id="Plot"><a class="viewcode-back" href="../source_doc.html#plots.Plot">[docs]</a><span class="k">class</span> <span class="nc">Plot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for assembling a plot using matplotlib</span>
+
+<span class="sd">    This plotting structure is loosely based on pandas (albeit greatly simplified). Some of the structure may be</span>
+<span class="sd">    to complicated for our needs, and we may want add additional functionality and shift parts of it around</span>
+<span class="sd">    as needed. But hopefully it will provide a starting point to work off of.</span>
+
+<span class="sd">    The overall goal is to centralize plotting code for consistency and to maximize extensibility</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subplots</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">sharey</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">use_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">8.5</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">legend_title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">xticks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yticks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">sort_columns</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">secondary_y</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">layout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">by</span> <span class="o">=</span> <span class="n">by</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_columns</span> <span class="o">=</span> <span class="n">sort_columns</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">imagegrid</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subplots</span> <span class="o">=</span> <span class="n">subplots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sharex</span> <span class="o">=</span> <span class="n">sharex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sharey</span> <span class="o">=</span> <span class="n">sharey</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="n">figsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">layout</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xticks</span> <span class="o">=</span> <span class="n">xticks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yticks</span> <span class="o">=</span> <span class="n">yticks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlim</span> <span class="o">=</span> <span class="n">xlim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylim</span> <span class="o">=</span> <span class="n">ylim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">=</span> <span class="n">xlabel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">=</span> <span class="n">ylabel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_index</span> <span class="o">=</span> <span class="n">use_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fontsize</span> <span class="o">=</span> <span class="n">fontsize</span>
+
+
+        <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="bp">False</span> <span class="k">if</span> <span class="n">secondary_y</span> <span class="k">else</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend</span> <span class="o">=</span> <span class="n">legend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_title</span> <span class="o">=</span> <span class="n">legend_title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">layout</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="n">kwds</span>
+
+    <span class="k">def</span> <span class="nf">_parse_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># dictionary supplied for groupinfo</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c"># only attempt to plot groups that are in Res dataframe</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)))</span>
+
+        <span class="c"># list or array of group names supplied</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="p">[{}]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">)))</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">:</span> <span class="p">{}}</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Invalid input for groupinfo.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&#39;Specified groups not found in residuals file.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_adorn_subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">to_adorn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log_trans</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="c"># Reformat tick labels out of log space</span>
+        <span class="c"># x : value</span>
+        <span class="c"># pos : position</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw_if_interactive</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_plot</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adorn_subplots</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_legend</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imagegrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">ImageGrid</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mf">4.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">ImageGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span> <span class="n">nrows_ncols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="n">axes_pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">subplots</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&#39;Subplots not implemented yet.&#39;</span><span class="p">)</span>
+            <span class="c"># This needs some work. The main reason to use subplots instead of axes_grid1 seems to be</span>
+            <span class="c"># the ability to have different y-scales (e.g. for histograms, for example)</span>
+            <span class="c"># otherwise spatial plots and images are easier with axes_grid1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># this will need to be extended to accommodate subplots</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">figsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figsize</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+</div>
+<div class="viewcode-block" id="Hist"><a class="viewcode-back" href="../source_doc.html#plots.Hist">[docs]</a><span class="k">class</span> <span class="nc">Hist</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Makes a grid of histograms</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">by</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="n">Plot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        df : DataFrame,</span>
+<span class="sd">            Pandas DataFrame</span>
+
+<span class="sd">        values: string or int</span>
+<span class="sd">            Column in df containing values for histogram</span>
+
+<span class="sd">        groupinfo: dict, list, or string</span>
+<span class="sd">            If string, name of group in &quot;Group&quot; column of df to plot. Multiple groups</span>
+<span class="sd">            in &quot;Group&quot; column of df can be specified using a list. A dictionary can be used to</span>
+<span class="sd">            specify a title and subplot number for each group.</span>
+
+<span class="sd">        **kwds:</span>
+<span class="sd">            Keyword arguments to matplotlib.pyplot.hist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">by</span> <span class="o">=</span> <span class="n">by</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="n">groupinfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">Group</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">layout</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_groups</span><span class="p">()</span>
+
+        <span class="c"># need to expand this to support arbitrary labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()]</span>
+
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># default keyword settings, which can be overriden by submitted keywords</span>
+        <span class="c"># order of priority is default, then keywords entered for whole plot,</span>
+        <span class="c"># then keywords supplied for individual group</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bins&#39;</span><span class="p">:</span> <span class="mf">100.</span><span class="p">,</span> <span class="s">&#39;sharex&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+        <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="n">hist_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">Group</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">),</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">by</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">hist_df</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">by</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+
+        <span class="c">#for i, ax in enumerate(self.axes.ravel()):</span>
+        <span class="c">#    ax.set_title(self.titles[i], loc=&#39;Left&#39;, fontsize=&#39;9&#39;)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="s">&#39;Error&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">&#39;Number of Observations&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">)</span>
+        <span class="c">#self.fig.tight_layout()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        for i, sp in enumerate(self.subplots):</span>
+
+<span class="sd">            # get the groups for each subplot from the groupinfo dictionary</span>
+<span class="sd">            groups = [k for k, v in self.groupinfo.iteritems() if v[&#39;subplot&#39;] ==self.subplots[i]]</span>
+<span class="sd">            inds = [True if g in groups else False for g in self.df.Group]</span>
+<span class="sd">            g = self.df.ix[inds, self.values]</span>
+
+<span class="sd">            g.hist(ax=self.axes[i], **kwds)</span>
+
+<span class="sd">            self.axes[i].set_title(sp)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="ScatterPlot"><a class="viewcode-back" href="../source_doc.html#plots.ScatterPlot">[docs]</a><span class="k">class</span> <span class="nc">ScatterPlot</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Makes one-to-one plot of two dataframe columns, using pyplot.scatter&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span> <span class="n">group_col</span><span class="o">=</span><span class="s">&#39;Group&#39;</span><span class="p">,</span> <span class="n">line_kwds</span><span class="o">=</span><span class="p">{},</span> <span class="n">legend_kwds</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="n">Plot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : DataFrame,</span>
+<span class="sd">            Pandas DataFrame</span>
+
+<span class="sd">        x: string or int</span>
+<span class="sd">            Column in df containing values to plot on the x-axis</span>
+
+<span class="sd">        y: string or int</span>
+<span class="sd">            Column in df containing values to plot on the y-axis</span>
+
+<span class="sd">        groupinfo: dict, list, or string</span>
+<span class="sd">            If string, name of group in &quot;Group&quot; column of df to plot. Multiple groups</span>
+<span class="sd">            in &quot;Group&quot; column of df can be specified using a list. A dictionary</span>
+<span class="sd">            can be supplied to indicate the groups to plot (as keys), with item consisting of</span>
+<span class="sd">            a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.</span>
+
+<span class="sd">        line_kwds: dict, optional</span>
+<span class="sd">            Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.</span>
+<span class="sd">            See http://matplotlib.org/api/pyplot_api.html</span>
+
+<span class="sd">        **kwds:</span>
+<span class="sd">            Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,</span>
+<span class="sd">            for controlling appearance scatter or hexbin plot. Order of priority for keywords is:</span>
+<span class="sd">                * keywords supplied in groupinfo for individual groups</span>
+<span class="sd">                * **kwds entered for whole plot</span>
+<span class="sd">                * default settings</span>
+
+<span class="sd">            (need to figure out how to differentiate documentation with inheritance,</span>
+<span class="sd">            and how to duplicate it in the plotting method!)</span>
+<span class="sd">            See http://matplotlib.org/api/pyplot_api.html</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        ------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">y</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s">&#39;scatter requires and x and y column&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">is_integer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">holds_integer</span><span class="p">():</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">is_integer</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">holds_integer</span><span class="p">():</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_col</span> <span class="o">=</span> <span class="n">group_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span> <span class="o">=</span> <span class="n">groupinfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">group_col</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_kwds</span> <span class="o">=</span> <span class="n">line_kwds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legend_kwds</span> <span class="o">=</span> <span class="n">legend_kwds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_legend_order</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">999999.9</span><span class="p">,</span> <span class="mf">999999.9</span>
+
+        <span class="c"># format x and y labels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">+=</span> <span class="s">&#39;, {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">+=</span> <span class="s">&#39;, {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+
+        <span class="c"># get information on groups to plot from supplied string, list, or dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_groups</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="SpatialPlot"><a class="viewcode-back" href="../source_doc.html#plots.SpatialPlot">[docs]</a><span class="k">class</span> <span class="nc">SpatialPlot</span><span class="p">(</span><span class="n">ScatterPlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots residuals in plan view.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span>
+                 <span class="n">group_col</span><span class="o">=</span><span class="s">&#39;Group&#39;</span><span class="p">,</span>
+                 <span class="n">colorby</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">color_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">overunder_colors</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;Red&#39;</span><span class="p">,</span> <span class="s">&#39;Navy&#39;</span><span class="p">),</span>
+                 <span class="n">colorbar_label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">minimum_marker_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">marker_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">legend_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">units</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+                 <span class="n">legend_kwds</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="n">ScatterPlot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span> <span class="n">group_col</span><span class="p">,</span> <span class="n">legend_kwds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        df : DataFrame,</span>
+<span class="sd">            Pandas DataFrame</span>
+
+<span class="sd">        values: string or int</span>
+<span class="sd">            Column in df containing values to plot spatially</span>
+
+<span class="sd">        by: string</span>
+<span class="sd">            Column in dataframe containing grouping criteria for subplots</span>
+<span class="sd">            (one group per subplot)</span>
+
+<span class="sd">        groupinfo: dict, list, or string</span>
+<span class="sd">            If string, name of group in &quot;Group&quot; column of df to plot. Multiple groups</span>
+<span class="sd">            in &quot;Group&quot; column of df can be specified using a list. A dictionary can be used to</span>
+<span class="sd">            specify a title and subplot number for each group.</span>
+
+<span class="sd">        layout: tuple of ints</span>
+<span class="sd">            Specifies the layout for subplots (rows, columns).</span>
+
+<span class="sd">        **kwds:</span>
+<span class="sd">            Keyword arguments to matplotlib.pyplot.hist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="k">if</span> <span class="n">color_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">color_values</span> <span class="o">=</span> <span class="n">color_values</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group_col</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">=</span> <span class="n">colorby</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overunder_colors</span> <span class="o">=</span> <span class="n">overunder_colors</span> <span class="c"># to specify colors instead of a colormap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">=</span> <span class="s">&#39;Northing&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">=</span> <span class="s">&#39;Easting&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb_label</span> <span class="o">=</span> <span class="n">colorbar_label</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimum_marker_size</span> <span class="o">=</span> <span class="n">minimum_marker_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marker_scale</span> <span class="o">=</span> <span class="n">marker_scale</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lg_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="n">legend_values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">]))]),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.002</span><span class="p">,</span> <span class="mf">0.023</span><span class="p">,</span> <span class="o">.</span><span class="mi">159</span><span class="p">,</span> <span class="o">.</span><span class="mi">841</span><span class="p">,</span> <span class="o">.</span><span class="mi">977</span><span class="p">,</span> <span class="mf">0.998</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">]))])]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lg_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lg_values</span><span class="p">,</span> <span class="n">arr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lg_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">legend_values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+
+
+        <span class="c"># default keyword settings, which can be overriden by submitted keywords</span>
+        <span class="c"># order of priority is default, then keywords entered for whole plot,</span>
+        <span class="c"># then keywords supplied for individual group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;marker&#39;</span><span class="p">:</span> <span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s">&#39;cmap&#39;</span><span class="p">:</span> <span class="s">&#39;coolwarm&#39;</span><span class="p">,</span> <span class="c">#&#39;lw&#39;: 0,</span>
+                     <span class="s">&#39;edgecolor&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;linewidths&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="s">&#39;antialiased&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s">&#39;zorder&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lg_kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;Explanation&#39;</span><span class="p">,</span> <span class="s">&#39;loc&#39;</span><span class="p">:</span> <span class="s">&#39;best&#39;</span><span class="p">,</span>
+                        <span class="s">&#39;borderaxespad&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="s">&#39;borderpad&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s">&#39;framealpha&#39;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+                        <span class="s">&#39;scatterpoints&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s">&#39;labelspacing&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s">&#39;ncol&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s">&#39;numpoints&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lg_kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legend_kwds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;cmap&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">scale_markers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">]))</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marker_scale</span> <span class="o">*</span> <span class="mi">200</span> <span class="o">/</span> <span class="nb">max</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span>
+
+        <span class="c">#size = 2 + 0.75 * value</span>
+        <span class="k">return</span> <span class="n">scaled</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimum_marker_size</span>
+
+<div class="viewcode-block" id="SpatialPlot.add_shapefile"><a class="viewcode-back" href="../source_doc.html#plots.SpatialPlot.add_shapefile">[docs]</a>    <span class="k">def</span> <span class="nf">add_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shp</span><span class="p">,</span>
+                      <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s">&#39;0.8&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                      <span class="n">convert_coordinates</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="n">reset_extent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add points, lines or polygons from a shapefile to the map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="kn">import</span> <span class="n">transform</span>
+            <span class="kn">from</span> <span class="nn">descartes</span> <span class="kn">import</span> <span class="n">PolygonPatch</span>
+            <span class="kn">from</span> <span class="nn">maps</span> <span class="kn">import</span> <span class="n">read_shapefile</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;add_shapefile() method requires shapely, descartes, and fiona.&quot;</span>
+                            <span class="s">&quot;</span><span class="se">\n</span><span class="s">See the readme file for installation instructions.&quot;</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_shapefile</span><span class="p">(</span><span class="n">shp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">convert_coordinates</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">convert_coordinates</span><span class="p">,</span>
+                                                              <span class="n">y</span> <span class="o">*</span> <span class="n">convert_coordinates</span><span class="p">),</span> <span class="n">g</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s">&#39;Polygon&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;building PatchCollection...&quot;</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()):</span>
+                <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PolygonPatch</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">fc</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">ec</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">PatchCollection</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">match_original</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="s">&#39;LineString&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;building LineCollection...&quot;</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="s">&#39;Multi&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">xy</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+                <span class="c"># plot each line in a multilinestring</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">xy</span>
+                        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+            <span class="n">collection</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">ec</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c">#lc.set_edgecolor(ec)</span>
+            <span class="c">#lc.set_alpha(alpha)</span>
+            <span class="c">#lc.set_lw(lw)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;plotting points...&quot;</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+
+            <span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">fc</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">ec</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reset_extent</span><span class="p">:</span>
+            <span class="n">xmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">collection</span>
+</div>
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_markers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">])</span>
+
+        <span class="c"># parse colorscheme</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;graduated&#39;</span><span class="p">:</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">color_values</span><span class="p">]</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">color_values</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">overunder_colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">overunder_colors</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;pct_diff&#39;</span><span class="p">:</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="s">&#39;pct_diff&#39;</span><span class="p">]]</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cb_label</span> <span class="o">=</span> <span class="s">&#39;Percent Difference&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">color_values</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">ListedColormap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colorby</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjusted_cmap</span> <span class="o">=</span> <span class="n">Normalized_cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span> <span class="n">colors</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scatter_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s">&#39;scatter&#39;</span><span class="p">,</span>
+                             <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">sizes</span><span class="p">,</span>
+                             <span class="n">cmap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">adjusted_cmap</span><span class="o">.</span><span class="n">cm</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="n">cb</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span>
+                             <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="c"># set the colorbar label</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;graduated&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;pct_diff&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cb_label</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># turn off autoscaling by setting the x and ylim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span>
+
+
+        <span class="n">lg_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lg_values</span>
+        <span class="n">lg_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_markers</span><span class="p">(</span><span class="n">lg_values</span><span class="p">))</span> <span class="c"># plt.scatter sizes are points**2</span>
+        <span class="n">lg_prefix</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;graduated&#39;</span><span class="p">:</span>
+            <span class="n">lg_colors</span> <span class="o">=</span> <span class="p">(</span><span class="n">lg_values</span> <span class="o">-</span> <span class="n">lg_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">lg_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lg_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">lg_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adjusted_cmap</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">lg_colors</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;pct_diff&#39;</span><span class="p">:</span>
+            <span class="n">lg_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">lg_values</span><span class="p">[</span><span class="n">lg_values</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">lg_sizes</span> <span class="o">=</span> <span class="n">lg_sizes</span><span class="p">[</span><span class="n">lg_values</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">lg_colors</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;k&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">lg_values</span><span class="p">]</span>
+            <span class="n">lg_prefix</span> <span class="o">=</span> <span class="s">&#39;+/-&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="o">==</span> <span class="s">&#39;binary&#39;</span><span class="p">:</span>
+            <span class="n">lg_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adjusted_cmap</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">lg_values</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lg_colors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">colorby</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">lg_values</span><span class="p">]</span>
+
+        <span class="n">lg_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;{} {:,.1f} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lg_prefix</span><span class="p">,</span> <span class="n">lg_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">)]</span> <span class="o">+</span> \
+                    <span class="p">[</span><span class="s">&#39;{} {:,.1f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lg_prefix</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lg_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+        <span class="n">lg_handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lg_sizes</span><span class="p">)):</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">mlines</span><span class="o">.</span><span class="n">Line2D</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">marker</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;marker&#39;</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="n">lg_sizes</span><span class="p">[</span><span class="n">s</span><span class="p">],</span>
+                            <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">lg_colors</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">],</span>
+                            <span class="n">markeredgecolor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markeredgewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                            <span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">lg_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">lg_handles</span><span class="p">,</span> <span class="n">lg_labels</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lg_kwds</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lg</span><span class="o">.</span><span class="n">get_title</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lg</span><span class="o">.</span><span class="n">set_zorder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;zorder&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="One2onePlot"><a class="viewcode-back" href="../source_doc.html#plots.One2onePlot">[docs]</a><span class="k">class</span> <span class="nc">One2onePlot</span><span class="p">(</span><span class="n">ScatterPlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Makes one-to-one plot of two dataframe columns, using pyplot.scatter&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span> <span class="n">error_bars_obs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">line_kwds</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+
+        <span class="n">ScatterPlot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">groupinfo</span><span class="p">,</span> <span class="n">line_kwds</span><span class="o">=</span><span class="n">line_kwds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_bars_obs</span> <span class="o">=</span> <span class="n">error_bars_obs</span>
+
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># use matplotlib&#39;s color cycle to plot each group as a different color by default</span>
+        <span class="n">color_cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">_get_lines</span><span class="o">.</span><span class="n">color_cycle</span>
+
+        <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+
+            <span class="c"># default keyword settings, which can be overriden by submitted keywords</span>
+            <span class="c"># order of priority is default, then keywords entered for whole plot,</span>
+            <span class="c"># then keywords supplied for individual group</span>
+            <span class="n">kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="n">grp</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span><span class="n">color_cycle</span><span class="p">),</span> <span class="s">&#39;linewidth&#39;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">}</span>
+            <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groupinfo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="p">{}))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">,</span> <span class="n">grp</span><span class="p">)</span>
+
+            <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">Group</span> <span class="o">==</span> <span class="n">grp</span><span class="p">]</span>
+
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_bars_obs</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+                <span class="n">serr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">Error</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s">&#39;none&#39;</span><span class="p">,</span><span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend_order</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">get_zorder</span><span class="p">()</span>
+
+            <span class="c"># keep track of min/max for one2one line</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">Measured</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">Modelled</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">g</span><span class="o">.</span><span class="n">Measured</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">Modelled</span><span class="p">])</span>
+
+        <span class="c">#plot one2one line</span>
+        <span class="n">data_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span>
+        <span class="n">line_kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;color&#39;</span><span class="p">:</span> <span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="s">&#39;zorder&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">line_kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_kwds</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="o">-.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="o">-.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">line_kwds</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_xaxis</span><span class="p">()</span><span class="o">.</span><span class="n">get_major_formatter</span><span class="p">()</span><span class="o">.</span><span class="n">set_useOffset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">get_major_formatter</span><span class="p">()</span><span class="o">.</span><span class="n">set_useOffset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="o">-.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="o">-.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+.</span><span class="mo">05</span><span class="o">*</span><span class="n">data_range</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">:</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+
+            <span class="c"># weed out duplicate legend entries (from multiple PEST groups in single category)</span>
+            <span class="c"># enforce drawing order in legend</span>
+            <span class="n">u_handles</span><span class="p">,</span> <span class="n">u_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="n">legend_order</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_legend_order</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">legend_order</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">legend_order</span><span class="p">:</span>
+                <span class="n">u_handles</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">handles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="k">if</span> <span class="n">l</span><span class="o">==</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">u_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">lg</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">u_handles</span><span class="p">,</span> <span class="n">u_labels</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">legend_title</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s">&#39;lower right&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                            <span class="n">scatterpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labelspacing</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">columnspacing</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">lg</span><span class="o">.</span><span class="n">get_title</span><span class="p">(),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s">&#39;bold&#39;</span><span class="p">)</span>
+            <span class="n">lg</span><span class="o">.</span><span class="n">set_zorder</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="HexbinPlot"><a class="viewcode-back" href="../source_doc.html#plots.HexbinPlot">[docs]</a><span class="k">class</span> <span class="nc">HexbinPlot</span><span class="p">(</span><span class="n">One2onePlot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Makes a hexbin plot of two dataframe columns, pyplot.hexbin&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># overrides _make_plot() method in One2onePlot; inherits everything else</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s">&#39;Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)][</span><span class="s">&#39;Measured&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s">&#39;Group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)][</span><span class="s">&#39;Modelled&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+
+        <span class="c"># default keyword settings, which can be overriden by submitted keywords</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;bins&#39;</span><span class="p">:</span> <span class="s">&#39;log&#39;</span><span class="p">,</span> <span class="s">&#39;mincnt&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;extent&#39;</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">),</span>
+                <span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s">&#39;edgecolors&#39;</span><span class="p">:</span> <span class="s">&#39;none&#39;</span><span class="p">}</span>
+        <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="n">kwds</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">hexbin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+
+        <span class="c">#plot one2one line</span>
+        <span class="n">line_kwds</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">line_kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_kwds</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="o">**</span><span class="n">line_kwds</span><span class="p">)</span>
+
+        <span class="c">#self.ax.set_ylim(np.min(y), np.max(y))</span>
+        <span class="c">#self.ax.set_xlim(self.min, self.max)</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">:</span>
+            <span class="c"># put this here for now, may want to restructure later</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;bins&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;log&#39;</span><span class="p">:</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">FuncFormatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_trans</span><span class="p">)</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">update_ticks</span><span class="p">()</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;Bin counts&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;Bin counts&#39;</span><span class="p">)</span>
+
+</div>
+<span class="k">class</span> <span class="nc">BarPloth</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">values_col</span><span class="p">,</span> <span class="n">group_col</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">color_dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">alt_labels</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Plot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Make horizontal bar graph</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : DataFrame,</span>
+<span class="sd">            Pandas DataFrame</span>
+
+<span class="sd">        values_col: string</span>
+<span class="sd">            Column in df containing values to plot as the length of the bars</span>
+<span class="sd">            the &#39;width&#39; parameter for matplotlib.pyplot.barh</span>
+<span class="sd">            </span>
+<span class="sd">        group_col : string, optional</span>
+<span class="sd">            Column in df containing group for each value.  Will be used to color</span>
+<span class="sd">            bars based on groups</span>
+<span class="sd">            </span>
+<span class="sd">        color_dict : dict, optional</span>
+<span class="sd">            Dictionary of alternate colors for groups.  Keys are groups and values</span>
+<span class="sd">            are colors.  Can be tuple such as (0.8, 0.1, 0.1, 1.0), or other</span>
+<span class="sd">            standard matplotlib recognized color</span>
+<span class="sd">            </span>
+<span class="sd">        alt_labels : dict, optional</span>
+<span class="sd">            Dictionary of alternative labels to use. Keys are raw PEST names.</span>
+<span class="sd">            Values are preferred lables or descriptions</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_col</span> <span class="o">=</span> <span class="n">values_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_col</span> <span class="o">=</span> <span class="n">group_col</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_dict</span> <span class="o">=</span> <span class="n">color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span> <span class="o">=</span> <span class="n">alt_labels</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values_col</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">values_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+        
+        <span class="c"># Assign colors for each group</span>
+        <span class="c"># Will be overriden by kwds if provoded for color</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_col</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>            
+            <span class="c"># Use provided colormap or use Set1 as default</span>
+            <span class="k">if</span> <span class="s">&#39;cmap&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">:</span>
+                <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">])</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#Default of jet is ugly</span>
+                <span class="c">#cmap = plt.get_cmap()</span>
+                <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s">&#39;Set2&#39;</span><span class="p">)</span>
+            <span class="n">_color_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">unique_par_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_col</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">group_col</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_par_groups</span><span class="p">)):</span>
+                <span class="c"># If color is provied for paragroup in color_dict parameter than use it               </span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_color_dict</span><span class="p">[</span><span class="n">unique_par_groups</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color_dict</span><span class="p">[</span><span class="n">unique_par_groups</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="mf">1.</span><span class="o">*</span><span class="n">i</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_par_groups</span><span class="p">))</span>
+                    <span class="n">_color_dict</span><span class="p">[</span><span class="n">unique_par_groups</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">color</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">par_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group_col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>            
+                <span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_color_dict</span><span class="p">[</span><span class="n">par_group</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="bp">None</span>
+            
+        <span class="c"># default keyword settings, which can be overriden by submitted keywords</span>
+        <span class="n">kwds</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;align&#39;</span> <span class="p">:</span> <span class="s">&#39;center&#39;</span><span class="p">,</span> <span class="s">&#39;color&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="p">}</span>
+        <span class="n">kwds</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span> <span class="o">=</span> <span class="n">kwds</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bottom</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># Make sure all keys are lower</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span><span class="p">:</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt_labels</span><span class="p">[</span><span class="n">label</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)),</span> <span class="n">labels</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># This needs work, or maybe not needed?</span>
+        <span class="bp">None</span>
+
+
+<span class="k">class</span> <span class="nc">HeatMap</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span>  <span class="n">vmin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label_rows</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">label_cols</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">square</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Plot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Heatmap of values in DataFram that represent a matrix (Cov, Cor, Eig)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : DataFrame,</span>
+<span class="sd">            Pandas DataFrame</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_rows</span> <span class="o">=</span> <span class="n">label_rows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_cols</span> <span class="o">=</span> <span class="n">label_cols</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span>
+        <span class="c"># Reverse the rows so the plot looks like the matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ix</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">square</span> <span class="o">=</span> <span class="n">square</span>
+        <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vmin</span> <span class="o">=</span> <span class="n">vmin</span>
+        <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vmax</span> <span class="o">=</span> <span class="n">vmax</span>
+        
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ylabel</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabel</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        
+        <span class="k">if</span> <span class="s">&#39;cmap&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">])</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">[</span><span class="s">&#39;cmap&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="s">&quot;RdBu_r&quot;</span>
+                   
+        <span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vmax</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="c"># Set ticks</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row_labels</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span><span class="mf">0.5</span>      
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span>
+     
+        <span class="c"># Remove tick marks</span>
+        <span class="k">for</span> <span class="n">mark</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xticklines</span><span class="p">()</span> <span class="o">+</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_yticklines</span><span class="p">():</span>
+            <span class="n">mark</span><span class="o">.</span><span class="n">set_markersize</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>        
+        
+        <span class="c"># Set x lables</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s">&#39;top&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_cols</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">col_labels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s">&quot;vertical&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_rows</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row_labels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+      
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="c"># Set the axis limits</span>
+        <span class="c">#ax.set(xlim=(0, self.data.shape[1]), ylim=(0, self.data.shape[0]))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">square</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s">&quot;equal&quot;</span><span class="p">)</span>
+        
+        <span class="c"># Set up so pars and cor value show in lower left as mouse moved</span>
+        <span class="k">def</span> <span class="nf">_format_coord</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="c">#x = int(x + 0.5)</span>
+            <span class="c">#y = int(y + 0.5)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">label_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_labels</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+                <span class="n">label_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_labels</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+                <span class="k">return</span> <span class="s">&quot;</span><span class="si">%.3f</span><span class="s"> </span><span class="si">%s</span><span class="s"> | </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_data</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">label_row</span><span class="p">,</span> <span class="n">label_col</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s">&quot;&quot;</span>
+       
+        <span class="n">ax</span><span class="o">.</span><span class="n">format_coord</span> <span class="o">=</span> <span class="n">_format_coord</span>  
+        
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">legend</span><span class="p">:</span>
+            <span class="c"># put this here for now, may want to restructure later</span>
+            <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+            <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;Parameter Correlation &#39;</span><span class="p">)</span>
+
+ 
+<span class="k">class</span> <span class="nc">IdentBar</span><span class="p">(</span><span class="n">Plot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident_df</span><span class="p">,</span> <span class="n">nsingular</span><span class="p">,</span> <span class="n">nbars</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Plot</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ident_df</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">nsingular</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbars</span> <span class="o">=</span> <span class="n">nbars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span><span class="p">[</span><span class="s">&#39;ident&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;ident&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># need to come up with a way to meaningfully plot out parameters with highest identifiabilities</span>
+        <span class="c"># this line plots the nbars most identifiable parameters, using eigenvectors 1 through nbars</span>
+
+        <span class="n">axmain</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">20</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_df_Nvalues</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axmain</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s">&#39;jet_r&#39;</span><span class="p">)</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">legend_</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">axmain</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Identifiability&#39;</span><span class="p">)</span>
+        <span class="n">axmain</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># make colorbar from scratch (Mike&#39;s code)</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">cb_bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">cb_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="o">/</span><span class="mf">10.0</span><span class="p">))</span>
+        <span class="n">cb_axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">jet_r</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">=</span><span class="n">cb_bounds</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s">&#39;vertical&#39;</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">(</span><span class="n">cb_axis</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span><span class="n">cb_axis</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s">&#39;Number of singular values considered&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Normalized_cmap</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmap</span> <span class="o">=</span> <span class="n">cmap</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_cmap</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shiftedColorMap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">midpoint</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">normalize_cmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes start, midpoint, and end values (between 0 and 1), to make</span>
+<span class="sd">        a colormap using shiftedColorMap(), which will be</span>
+<span class="sd">        * centered on zero</span>
+<span class="sd">        * if the midpoint is &gt; 0.5, start = 0, end is &lt; 1</span>
+<span class="sd">        * if the midpoint is &lt; 0.5, the start is between 0 and 0.5, end = 1.</span>
+
+<span class="sd">        Could not get this to produce a consistent midpoint color with the shiftedColorMap fn</span>
+<span class="sd">        Using 0 and 1 for the start, stop produces a consistent midpoint color, at the cost of</span>
+<span class="sd">        having outliers with same color intensity, regardless of their magnitudes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vmax</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">midpoint</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">vmax</span><span class="o">/</span><span class="p">(</span><span class="n">vmax</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vmin</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">midpoint</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">midpoint</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">midpoint</span><span class="p">,</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">shiftedColorMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">midpoint</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;shiftedcmap&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function to offset the &quot;center&quot; of a colormap. Useful for</span>
+<span class="sd">        data with a negative min and positive max and you want the</span>
+<span class="sd">        middle of the colormap&#39;s dynamic range to be at zero. From:</span>
+<span class="sd">        http://stackoverflow.com/questions/7404116/defining-the-midpoint-of-a-colormap-in-matplotlib</span>
+
+<span class="sd">        Input</span>
+<span class="sd">        -----</span>
+<span class="sd">          cmap : The matplotlib colormap to be altered</span>
+<span class="sd">          start : Offset from lowest point in the colormap&#39;s range.</span>
+<span class="sd">              Defaults to 0.0 (no lower ofset). Should be between</span>
+<span class="sd">              0.0 and `midpoint`.</span>
+<span class="sd">          midpoint : The new center of the colormap. Defaults to</span>
+<span class="sd">              0.5 (no shift). Should be between 0.0 and 1.0. In</span>
+<span class="sd">              general, this should be  1 - vmax/(vmax + abs(vmin))</span>
+<span class="sd">              For example if your data range from -15.0 to +5.0 and</span>
+<span class="sd">              you want the center of the colormap at 0.0, `midpoint`</span>
+<span class="sd">              should be set to  1 - 5/(5 + 15)) or 0.75</span>
+<span class="sd">          stop : Offset from highets point in the colormap&#39;s range.</span>
+<span class="sd">              Defaults to 1.0 (no upper ofset). Should be between</span>
+<span class="sd">              `midpoint` and 1.0.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">cdict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;red&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">&#39;green&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">&#39;blue&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="c"># regular index to compute the colors</span>
+        <span class="n">reg_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="mi">257</span><span class="p">)</span>
+
+        <span class="c"># shifted index to match the data</span>
+        <span class="n">shift_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">midpoint</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">midpoint</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">ri</span><span class="p">,</span> <span class="n">si</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reg_index</span><span class="p">,</span> <span class="n">shift_index</span><span class="p">):</span>
+            <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">ri</span><span class="p">)</span>
+
+            <span class="n">cdict</span><span class="p">[</span><span class="s">&#39;red&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">si</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+            <span class="n">cdict</span><span class="p">[</span><span class="s">&#39;green&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">si</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">g</span><span class="p">))</span>
+            <span class="n">cdict</span><span class="p">[</span><span class="s">&#39;blue&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">si</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+            <span class="n">cdict</span><span class="p">[</span><span class="s">&#39;alpha&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">si</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+
+        <span class="n">newcmap</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">cdict</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">register_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">newcmap</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">newcmap</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pestools 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Evan Christianson, Andrew Leaf.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

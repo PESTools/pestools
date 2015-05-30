@@ -1,2 +1,0 @@
-columbia_svda.rec	      #name of the .rec file to read
-True                      #True if the .rec file includes regularization

@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>maps &mdash; pestools 1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pestools 1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pestools 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for maps</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;aleaf&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">fiona</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">Point</span>
+
+
+<span class="k">def</span> <span class="nf">point_shapefile</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">shpname</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">X</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="n">Y</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+
+    <span class="n">Shapefile</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">shpname</span><span class="p">,</span> <span class="n">prj</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_shapefile"><a class="viewcode-back" href="../source_doc.html#maps.read_shapefile">[docs]</a><span class="k">def</span> <span class="nf">read_shapefile</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">true_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">false_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> \
+           <span class="n">skip_empty_geom</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Read shapefile into Pandas dataframe</span>
+<span class="sd">    ``shplist`` = (string or list) of shapefile name(s)</span>
+<span class="sd">    ``index`` = (string) column to use as index for dataframe</span>
+<span class="sd">    ``geometry`` = (True/False) whether or not to read geometric information</span>
+<span class="sd">    ``clipto`` = (dataframe) limit what is brought in to items in index of clipto (requires index)</span>
+<span class="sd">    ``true_values`` = (list) same as argument for pandas read_csv</span>
+<span class="sd">    ``false_values`` = (list) same as argument for pandas read_csv</span>
+<span class="sd">    from shapefile into dataframe column &quot;geometry&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">reading {}...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
+    <span class="n">shp_obj</span> <span class="o">=</span> <span class="n">fiona</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># handle capitolization issues with index field name</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">shp_obj</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">attributes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">shp_obj</span><span class="p">:</span>
+
+        <span class="n">props</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">]</span>
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;geometry&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&#39;--&gt; building dataframe... (may take a while for large shapefiles)&#39;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+
+    <span class="c"># handle null geometries</span>
+    <span class="n">geoms</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">geoms</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">skip_empty_geom</span><span class="p">:</span>
+        <span class="n">null_geoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geoms</span><span class="p">)</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">null_geoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span>
+                              <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">]</span>
+
+    <span class="c"># set the dataframe index from the index column</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="c"># convert any t/f columns to numpy boolean data</span>
+    <span class="k">if</span> <span class="n">true_values</span> <span class="ow">or</span> <span class="n">false_values</span><span class="p">:</span>
+        <span class="n">replace_boolean</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">true_values</span><span class="p">:</span>
+            <span class="n">replace_boolean</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">false_values</span><span class="p">:</span>
+            <span class="n">replace_boolean</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># only remap columns that have values to be replaced</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">])</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">true_values</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">replace_boolean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+</div>
+<span class="k">class</span> <span class="nc">Shapefile</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">shpname</span><span class="p">,</span> <span class="n">geo_column</span><span class="o">=</span><span class="s">&#39;geometry&#39;</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shpname</span> <span class="o">=</span> <span class="n">shpname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geo_column</span> <span class="o">=</span> <span class="n">geo_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prj</span> <span class="o">=</span> <span class="n">prj</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">geomtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">geo_column</span><span class="p">]</span><span class="o">.</span><span class="n">type</span>
+
+        <span class="c"># make the shapefile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit_fieldnames</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert_dtypes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_projection</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">convert_dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;convert data-types and data-type names to comply with shapefile format</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dictionary of {columns (str) : properties (str)}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">dtypes</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;float64&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="c"># not sure if this is needed</span>
+            <span class="c">#elif &#39;float&#39; in dtype.name:</span>
+            <span class="c">#    df[df.columns[i]] = df[df.columns[i]].astype(&#39;float64&#39;)</span>
+            <span class="c"># convert 64-bit integers to 32-bit for shapefile format</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;int64&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="c"># convert boolean values to strings</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;bool&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;str&#39;</span><span class="p">)</span>
+
+        <span class="c"># strip dtype names just down to &#39;float&#39; or &#39;int&#39;</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)]</span>
+
+        <span class="c"># also exchange any &#39;object&#39; dtype for &#39;str&#39;</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="s">&#39;str&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dtypes</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">dtypes</span><span class="p">))</span>
+
+        <span class="c"># delete the geometry column</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">geo_column</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">limit_fieldnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;limit field names to ESRI 10-character maximum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="c"># convert columns to strings in case some are ints</span>
+        <span class="n">overtheline</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="s">&#39;{}{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">[:</span><span class="mi">8</span><span class="p">],</span> <span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">]</span>
+
+        <span class="n">newcolumns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">overtheline</span><span class="p">:</span>
+            <span class="n">newcolumns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">newcolumns</span>
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;save dataframe with column of shapely geometry objects to shapefile</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;writing {}...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shpname</span><span class="p">)</span>
+
+        <span class="c"># sort the dataframe columns (so that properties coincide)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+        <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;geometry&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geomtype</span><span class="p">,</span> <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">}</span>
+        <span class="n">knt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">problem_cols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="n">fiona</span><span class="o">.</span><span class="n">collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shpname</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">,</span> <span class="s">&quot;ESRI Shapefile&quot;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+                <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">geo_column</span><span class="p">]</span>
+
+                <span class="c"># convert numpy ints to python ints (tedious!)</span>
+                <span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">c</span><span class="p">]</span>
+                    <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+                    <span class="c">#print i,c,col,value</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span>
+                    <span class="c">#dtype = self.df.iloc[c].dtype.name</span>
+                    <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">geo_column</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s">&#39;int&#39;</span> <span class="ow">in</span> <span class="n">dtype</span><span class="p">:</span>
+                                <span class="n">props</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="c">#elif &#39;float&#39; in dtype:</span>
+                                <span class="c">#props[col] = np.float64(value)</span>
+                            <span class="k">elif</span> <span class="n">schema</span><span class="p">[</span><span class="s">&#39;properties&#39;</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;str&#39;</span> <span class="ow">and</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s">&#39;object&#39;</span><span class="p">:</span>
+                                <span class="n">props</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">props</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="c"># if field is &#39;NoneType&#39;</span>
+                            <span class="n">problem_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+                            <span class="n">props</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+                <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">({</span><span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">props</span><span class="p">,</span>
+                              <span class="s">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">mapping</span><span class="p">(</span><span class="n">geo</span><span class="p">)})</span>
+                <span class="n">knt</span> <span class="o">+=</span><span class="mi">1</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\r</span><span class="s">{:d}%&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">knt</span><span class="o">/</span><span class="n">length</span><span class="p">),</span>
+
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">problem_cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Warning: Had problems writing these DataFrame columns: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">problem_cols</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;Check their dtypes.&#39;</span>
+
+    <span class="k">def</span> <span class="nf">set_projection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;epsg&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">epsg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getPRJwkt</span><span class="p">()</span>
+                <span class="n">ofp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;{}.prj&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shpname</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]),</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+                <span class="n">ofp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prettywkt</span><span class="p">)</span>
+                <span class="n">ofp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prj</span><span class="p">,</span> <span class="s">&quot;{}.prj&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shpname</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]))</span>
+                <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&#39;Warning: could not find specified prj file. shp will not be projected.&#39;</span>
+
+    <span class="k">def</span> <span class="nf">getPRJwkt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        from: https://code.google.com/p/pyshp/wiki/CreatePRJfiles</span>
+
+<span class="sd">        Grabs a WKT version of an EPSG code</span>
+<span class="sd">        usage getPRJwkt(4326)</span>
+
+<span class="sd">        This makes use of links like http://spatialreference.org/ref/epsg/4326/prettywkt/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">urllib</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s">&quot;http://spatialreference.org/ref/epsg/{0}/prettywkt/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prettywkt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="c"># get rid of any EOL</span>
+
+
+<span class="k">class</span> <span class="nc">PyShpfile</span><span class="p">(</span><span class="n">Shapefile</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">shpname</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">Shapefile</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">shpname</span><span class="p">,</span> <span class="n">prj</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">])</span>
+
+    <span class="c"># function to write out results to csv file</span>
+    <span class="k">def</span> <span class="nf">writeout_shp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cshp</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">cname</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span><span class="n">resplot</span><span class="p">,</span><span class="n">meas</span><span class="p">,</span><span class="n">mod</span><span class="p">,</span><span class="n">c_rpd</span><span class="p">):</span>
+        <span class="n">cshp</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">cshp</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">cname</span><span class="p">,</span><span class="n">residual</span><span class="o">=</span><span class="n">res</span><span class="p">,</span><span class="n">plot_res</span><span class="o">=</span><span class="n">resplot</span><span class="p">,</span><span class="n">meas</span><span class="o">=</span><span class="n">meas</span><span class="p">,</span><span class="n">modeled</span><span class="o">=</span><span class="n">mod</span><span class="p">,</span><span class="n">rpd</span><span class="o">=</span><span class="n">c_rpd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cshp</span>
+
+    <span class="c"># initialize the shapefile object with fields</span>
+    <span class="k">def</span> <span class="nf">init_shp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="c"># make the name field of character type</span>
+            <span class="k">if</span> <span class="s">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">cf</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">cshp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">cf</span><span class="p">)</span>
+            <span class="c"># the other fields should be numeric</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cshp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span><span class="n">fieldType</span><span class="o">=</span><span class="s">&#39;N&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="s">&#39;50&#39;</span><span class="p">,</span><span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cshp</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pestools 1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Evan Christianson, Andrew Leaf.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

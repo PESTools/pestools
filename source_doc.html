@@ -1,0 +1,1071 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pestools source documentation &mdash; pestools 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pestools 1 documentation" href="index.html" />
+    <link rel="prev" title="PESTools" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PESTools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pestools 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pestools">
+<span id="pestools-source-documentation"></span><h1>pestools source documentation<a class="headerlink" href="#module-pestools" title="Permalink to this headline">¶</a></h1>
+<p>Utilities for working with PEST output.</p>
+<p>Modules:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">pest</span></tt> - Base class</li>
+<li><tt class="docutils literal"><span class="pre">res</span></tt> - Class for working with PEST residuals files</li>
+<li><tt class="docutils literal"><span class="pre">rei</span></tt> - Aggregates information from multiple interim residuals (.rei) files</li>
+<li><tt class="docutils literal"><span class="pre">parsen</span></tt> - Class for working with parameter sensitivities</li>
+<li><tt class="docutils literal"><span class="pre">plots</span></tt> - Classes for generating plots</li>
+<li><tt class="docutils literal"><span class="pre">maps</span></tt> - Classes for generating maps</li>
+</ul>
+<div class="section" id="base-and-pest-control-file-classes">
+<h2>Base and PEST control file classes<a class="headerlink" href="#base-and-pest-control-file-classes" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-res">
+<span id="residuals-class"></span><h2>Residuals Class<a class="headerlink" href="#module-res" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="res.Res">
+<em class="property">class </em><tt class="descclassname">res.</tt><tt class="descname">Res</tt><big>(</big><em>res_file</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/res.html#Res"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Res Class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>res_file</strong> : str</p>
+<blockquote>
+<div><p>Path to .res or .rei file from PEST</p>
+</div></blockquote>
+<p><strong>obs_info_file</strong> : str, optional</p>
+<blockquote>
+<div><p>csv file containing observation locations and/or observation type.</p>
+</div></blockquote>
+<p><strong>name_col</strong> : str, default &#8216;Name&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation names</p>
+</div></blockquote>
+<p><strong>x_col</strong> : str, default &#8216;X&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation x locations</p>
+</div></blockquote>
+<p><strong>y_col</strong> : str, default &#8216;Y&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation y locations</p>
+</div></blockquote>
+<p><strong>type_col</strong> : str, default &#8216;Type&#8217;</p>
+<blockquote class="last">
+<div><p>column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+type (&#8216;observation&#8217;) is assigned in the absence of type information</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Column names in the observation information file are remapped to their default values after import</p>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="93%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>df</td>
+<td>(DataFrame) contains all of the information from the res or rei file; is used to build phi dataframe</td>
+</tr>
+<tr class="row-even"><td>phi</td>
+<td>(DataFrame) contains phi contribution by group, and also a column with observation type</td>
+</tr>
+<tr class="row-odd"><td>obsinfo</td>
+<td>(DataFrame) contains information from observation information file, and also observation groups</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.describe_data" title="res.Res.describe_data"><tt class="xref py py-obj docutils literal"><span class="pre">describe_data</span></tt></a>(data[,&nbsp;ddof])</td>
+<td>Basic desription of np array</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.describe_groups" title="res.Res.describe_groups"><tt class="xref py py-obj docutils literal"><span class="pre">describe_groups</span></tt></a>(groups[,&nbsp;exclude_zero,&nbsp;ddof])</td>
+<td>Calculate summary statistics for residuals</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.group" title="res.Res.group"><tt class="xref py py-obj docutils literal"><span class="pre">group</span></tt></a>(group)</td>
+<td>Get pandas DataFrame for a single group</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.objective_contrib" title="res.Res.objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">objective_contrib</span></tt></a>([df,&nbsp;return_data])</td>
+<td>Print out the contribution of each observation group to the</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_hexbin" title="res.Res.plot_hexbin"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hexbin</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;print_stats,&nbsp;...])</td>
+<td>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_hist" title="res.Res.plot_hist"><tt class="xref py py-obj docutils literal"><span class="pre">plot_hist</span></tt></a>([df,&nbsp;col,&nbsp;by,&nbsp;groupinfo,&nbsp;layout])</td>
+<td>Makes a histogram of a dataframe column</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_measure_vs_model" title="res.Res.plot_measure_vs_model"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measure_vs_model</span></tt></a>([groups,&nbsp;plot_type])</td>
+<td>Plot measured vs.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_measured_vs_residual" title="res.Res.plot_measured_vs_residual"><tt class="xref py py-obj docutils literal"><span class="pre">plot_measured_vs_residual</span></tt></a>([groups,&nbsp;...])</td>
+<td>Plot measured vs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_objective_contrib" title="res.Res.plot_objective_contrib"><tt class="xref py py-obj docutils literal"><span class="pre">plot_objective_contrib</span></tt></a>([df,&nbsp;drop_regul])</td>
+<td>Plot the contribution of each group to the objective function  as a pie chart.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.plot_one2one" title="res.Res.plot_one2one"><tt class="xref py py-obj docutils literal"><span class="pre">plot_one2one</span></tt></a>(groupinfo[,&nbsp;title,&nbsp;...])</td>
+<td>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.plot_spatial" title="res.Res.plot_spatial"><tt class="xref py py-obj docutils literal"><span class="pre">plot_spatial</span></tt></a>([groupinfo,&nbsp;colorby,&nbsp;...])</td>
+<td>Make a spatial scatter plot of residuals information.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#res.Res.print_stats" title="res.Res.print_stats"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats</span></tt></a>(group)</td>
+<td>Return stats for single group</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#res.Res.print_stats_all" title="res.Res.print_stats_all"><tt class="xref py py-obj docutils literal"><span class="pre">print_stats_all</span></tt></a>()</td>
+<td>Return stats for each observation group</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="res.Res.group">
+<tt class="descname">group</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pandas DataFrame for a single group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group</strong> : str</p>
+<blockquote>
+<div><p>Observation group to get</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame of residuals for group</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.describe_data">
+<tt class="descname">describe_data</tt><big>(</big><em>data</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.describe_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.describe_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic desription of np array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : arr</p>
+<blockquote>
+<div><p>Numpy array</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame of residuals for group</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.describe_groups">
+<tt class="descname">describe_groups</tt><big>(</big><em>groups</em>, <em>exclude_zero=True</em>, <em>ddof=1</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.describe_groups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.describe_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate summary statistics for residuals</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groups</strong> : list</p>
+<blockquote>
+<div><p>groups to include. If no groups submitted, calculate stats for all residuals.</p>
+</div></blockquote>
+<p><strong>ddof</strong> : int (optional)</p>
+<blockquote>
+<div><p>delta degrees of freedom argument to np.std and np.var (see numpy documentation)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Series of summary statistics for group</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="res.Res.description">
+<tt class="descname">description</tt><a class="reference internal" href="_modules/res.html#Res.description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to summarize stats for each group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.print_stats">
+<tt class="descname">print_stats</tt><big>(</big><em>group</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.print_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.print_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return stats for single group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>group: str</strong></p>
+<blockquote>
+<div><p>Observation group to get stats for</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pandas DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame of statistics</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.print_stats_all">
+<tt class="descname">print_stats_all</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/res.html#Res.print_stats_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.print_stats_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return stats for each observation group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Stats for each group printed to screen</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_objective_contrib">
+<tt class="descname">plot_objective_contrib</tt><big>(</big><em>df=None</em>, <em>drop_regul=False</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_objective_contrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_objective_contrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the contribution of each group to the objective function 
+as a pie chart.
+drop_regul: If True, ignores regularization groups
+Returns
+&#8212;&#8212;-
+metplotlib pie chart</p>
+<p class="rubric">Notes</p>
+<p>Does not plot observation group is contribution is less than 1%.  This
+is to make the plot easier to read.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.objective_contrib">
+<tt class="descname">objective_contrib</tt><big>(</big><em>df=None</em>, <em>return_data=False</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.objective_contrib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.objective_contrib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out the contribution of each observation group to the 
+objective function as a percent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>return_data</strong> : {False, True}, optional</p>
+<blockquote>
+<div><p>if True return data as a numpy structured array</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None or Numpy array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_measure_vs_model">
+<tt class="descname">plot_measure_vs_model</tt><big>(</big><em>groups=None</em>, <em>plot_type='scatter'</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_measure_vs_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_measure_vs_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot measured vs. model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groups</strong> : {None, list}, optional</p>
+<blockquote>
+<div><p>list of observation groups to include</p>
+</div></blockquote>
+<p><strong>plot_type</strong> : {&#8216;scatter&#8217;, &#8216;hexbin&#8217;}, optional</p>
+<blockquote>
+<div><p>Default is a scatter plot.  Hexbin is list a 2D histogram, colors
+are log flooded.  hexbin is useful when points are numerous and
+bunched together where symbols overlap significantly on a 
+scatter plot</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">matplotlib plot</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_measured_vs_residual">
+<tt class="descname">plot_measured_vs_residual</tt><big>(</big><em>groups=None</em>, <em>weighted=False</em>, <em>plot_mean=True</em>, <em>plot_std=True</em>, <em>plot_type='scatter'</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_measured_vs_residual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_measured_vs_residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot measured vs. residual</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groups</strong> : {None, list}, optional</p>
+<blockquote>
+<div><p>list of observation groups to include</p>
+</div></blockquote>
+<p><strong>weighted</strong> : {False, True}, optional</p>
+<blockquote>
+<div><p>user weighted residuals</p>
+</div></blockquote>
+<p><strong>plot_mean</strong> : {True, False}, optional</p>
+<blockquote>
+<div><p>plot line for mean residual</p>
+</div></blockquote>
+<p><strong>plot_std</strong> : {True, False}, optional</p>
+<blockquote>
+<div><p>plot shaded area for std. dev. of residuals</p>
+</div></blockquote>
+<p><strong>plot_type</strong> : {&#8216;scatter&#8217;, &#8216;hexbin&#8217;}, optional</p>
+<blockquote>
+<div><p>Default is a scatter plot.  Hexbin is list a 2D histogram, colors
+are log flooded.  hexbin is useful when points are numerous and
+bunched together where symbols overlap significantly on a 
+scatter plot</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">matplotlib plot</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_one2one">
+<tt class="descname">plot_one2one</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>print_format='.2f'</em>, <em>exclude_zero_stats=True</em>, <em>error_bars_obs=False</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_one2one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_one2one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groupinfo</strong> : dict, list, or string</p>
+<blockquote>
+<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
+in &#8220;Group&#8221; column of df can be specified using a list. A dictionary
+can be supplied to indicate the groups to plot (as keys), with item consisting of
+a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.</p>
+</div></blockquote>
+<p><strong>title</strong> : str, optional</p>
+<blockquote>
+<div><p>Adds a title</p>
+</div></blockquote>
+<p><strong>print_stats</strong> : list of strings</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Print summary statistics for values included in plot. Accepts an statistic returned by describe_groups:</dt>
+<dd><ul class="first last simple">
+<li>&#8216;n&#8217;</li>
+<li>&#8216;Range&#8217;</li>
+<li>&#8216;Max&#8217;</li>
+<li>&#8216;Min&#8217;</li>
+<li>&#8216;Mean&#8217;</li>
+<li>&#8216;Standard deviation&#8217;</li>
+<li>&#8216;Varience&#8217;</li>
+<li>&#8216;25%&#8217;</li>
+<li>&#8216;50%&#8217;</li>
+<li>&#8216;75%&#8217;</li>
+<li>&#8216;Max (absolute)&#8217;</li>
+<li>&#8216;Min (absolute)&#8217;</li>
+<li>&#8216;MAE&#8217;</li>
+<li>&#8216;RMSE&#8217;</li>
+<li>&#8216;RMSE/range&#8217;</li>
+<li>&#8216;Normally Distributed&#8217;</li>
+<li>&#8216;p-value&#8217;</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>print_format</strong> : format string, default &#8216;.2f&#8217;</p>
+<blockquote>
+<div><p>Specifies how summary statistics will be printed</p>
+</div></blockquote>
+<p><strong>exclude_zero_stats</strong> : boolean, default True</p>
+<blockquote>
+<div><p>Exclude any zero-weighted observations from the summary statistics</p>
+</div></blockquote>
+<p><strong>error_bar_obs: boolean, default False</strong></p>
+<blockquote>
+<div><p>True means plot error bars on the observed values. They are in the Error column of observation information</p>
+</div></blockquote>
+<p><strong>line_kwds: dict, optional</strong></p>
+<blockquote>
+<div><p>Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
+</div></blockquote>
+<p><strong>**kwds:</strong></p>
+<blockquote class="last">
+<div><p>Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
+for controlling appearance scatter or hexbin plot. Order of priority for keywords is:</p>
+<blockquote>
+<div><ul class="simple">
+<li>keywords supplied in groupinfo for individual groups</li>
+<li><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds entered for whole plot</li>
+<li>default settings</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_hexbin">
+<tt class="descname">plot_hexbin</tt><big>(</big><em>groupinfo</em>, <em>title=None</em>, <em>print_stats=[]</em>, <em>print_format='.2f'</em>, <em>exclude_zero_stats=True</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_hexbin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_hexbin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groupinfo</strong> : dict, list, or string</p>
+<blockquote>
+<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
+in &#8220;Group&#8221; column of df can be specified using a list. A dictionary
+can be supplied to indicate the groups to plot (as keys), with item consisting of
+a dictionary of keywork arguments to Matplotlib.pyplot to customize the plotting of each group.</p>
+</div></blockquote>
+<p><strong>title</strong> : str, optional</p>
+<blockquote>
+<div><p>Adds a title</p>
+</div></blockquote>
+<p><strong>print_stats</strong> : list of strings</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Print summary statistics for values included in plot. Accepts an statistic returned by describe_groups:</dt>
+<dd><ul class="first last simple">
+<li>&#8216;n&#8217;</li>
+<li>&#8216;Range&#8217;</li>
+<li>&#8216;Max&#8217;</li>
+<li>&#8216;Min&#8217;</li>
+<li>&#8216;Mean&#8217;</li>
+<li>&#8216;Standard deviation&#8217;</li>
+<li>&#8216;Varience&#8217;</li>
+<li>&#8216;25%&#8217;</li>
+<li>&#8216;50%&#8217;</li>
+<li>&#8216;75%&#8217;</li>
+<li>&#8216;Max (absolute)&#8217;</li>
+<li>&#8216;Min (absolute)&#8217;</li>
+<li>&#8216;MAE&#8217;</li>
+<li>&#8216;RMSE&#8217;</li>
+<li>&#8216;RMSE/range&#8217;</li>
+<li>&#8216;Normally Distributed&#8217;</li>
+<li>&#8216;p-value&#8217;</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>print_format</strong> : format string, default &#8216;.2f&#8217;</p>
+<blockquote>
+<div><p>Specifies how summary statistics will be printed</p>
+</div></blockquote>
+<p><strong>exclude_zero_stats</strong> : boolean, default True</p>
+<blockquote>
+<div><p>Exclude any zero-weighted observations from the summary statistics</p>
+</div></blockquote>
+<p><strong>line_kwds: dict, optional</strong></p>
+<blockquote>
+<div><p>Additional keyword arguments to Matplotlib.pyplot.plot, for controlling appearance of one-to-one line.
+See <a class="reference external" href="http://matplotlib.org/api/pyplot_api.html">http://matplotlib.org/api/pyplot_api.html</a></p>
+</div></blockquote>
+<p><strong>**kwds:</strong></p>
+<blockquote class="last">
+<div><p>Additional keyword arguments to Matplotlib.pyplot.scatter and Matplotlib.pyplot.hexbin,
+for controlling appearance scatter or hexbin plot. Order of priority for keywords is:</p>
+<blockquote>
+<div><ul class="simple">
+<li>keywords supplied in groupinfo for individual groups</li>
+<li><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds entered for whole plot</li>
+<li>default settings</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_hist">
+<tt class="descname">plot_hist</tt><big>(</big><em>df=None</em>, <em>col='Residual'</em>, <em>by='Group'</em>, <em>groupinfo={}</em>, <em>layout=None</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a histogram of a dataframe column</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>df</strong> : dataframe, default is res.df attribute</p>
+<blockquote>
+<div><p>Dataframe from which to make histogram(s)</p>
+</div></blockquote>
+<p><strong>col</strong> : str, default is &#8216;Residual&#8217;</p>
+<blockquote>
+<div><p>Dataframe column with histogram values</p>
+</div></blockquote>
+<p><strong>by</strong> : str, default is &#8216;Group&#8217;</p>
+<blockquote>
+<div><p>Dataframe column with groupings for histogram values.</p>
+</div></blockquote>
+<p><strong>groupinfo: dict, list, or string</strong></p>
+<blockquote>
+<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
+in &#8220;Group&#8221; column of df can be specified using a list. A dictionary can be used to
+specify a title and subplot number for each group.</p>
+</div></blockquote>
+<p><strong>layout</strong> : tuple (optional)</p>
+<blockquote>
+<div><p>(rows, columns) for the layout of subplots</p>
+</div></blockquote>
+<p><strong>**kwds:</strong></p>
+<blockquote>
+<div><p>Keyword arguments to matplotlib.pyplot.hist</p>
+</div></blockquote>
+<p><strong>Notes</strong></p>
+<p class="last"><strong>&#8212;&#8212;</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="res.Res.plot_spatial">
+<tt class="descname">plot_spatial</tt><big>(</big><em>groupinfo={}</em>, <em>colorby='graduated'</em>, <em>overunder_colors=('Red'</em>, <em>'Navy')</em>, <em>colorbar_label='Residual'</em>, <em>minimum_marker_size=10</em>, <em>marker_scale=1</em>, <em>legend_values=None</em>, <em>units=''</em>, <em>legend_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/res.html#Res.plot_spatial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#res.Res.plot_spatial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a spatial scatter plot of residuals information.
+Requires calling the res class with an observation information file.
+(e.g. <tt class="docutils literal"><span class="pre">`obs_info_file='observation_locations.csv`</span></tt>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>groupinfo</strong> : dict, list, or string</p>
+<blockquote>
+<div><p>If string, name of group in &#8220;Group&#8221; column of df to plot. Multiple groups
+in &#8220;Group&#8221; column of df can be specified using a list.</p>
+</div></blockquote>
+<p><strong>colorby</strong> : str</p>
+<blockquote>
+<div><ul class="simple">
+<li>&#8216;graduated&#8217; : Size markers by absolute value of residual;</li>
+</ul>
+<p>color markers by value of residual (default)
+- &#8216;binary&#8217; : Size markers by absolute value of residual;
+color markers as either negative or positive
+- &#8216;pct_diff&#8217; : Size markers by absolute value of residual;
+color markers by value of residual relative to observed value
+- Alternatively a single color can be specified
+(e.g. &#8216;k&#8217; for black)</p>
+</div></blockquote>
+<p><strong>overunder_colors</strong> : tuple, optional</p>
+<blockquote>
+<div><p>specifies the colors assigned to (pos, neg) values, default (&#8216;Red&#8217;, &#8216;Navy&#8217;)</p>
+</div></blockquote>
+<p><strong>colorbar_label</strong> : str</p>
+<blockquote>
+<div><p>label for colorbar axis</p>
+</div></blockquote>
+<p><strong>minimum_marker_size</strong> : numeric, default 10</p>
+<blockquote>
+<div><p>minimum size of markers in points</p>
+</div></blockquote>
+<p><strong>marker_scale</strong> : numeric, default 1</p>
+<blockquote>
+<div><p>arbitrary scale applied to markers. A value of 1 is intended to work well for
+a typical range of head residuals in a regional groundwater model
+with length units of feet (e.g. 0 - +/- 200)</p>
+</div></blockquote>
+<p><strong>legend_values</strong> : list, optional</p>
+<blockquote>
+<div><p>values that will be displayed in legend. Otherwise the minimum, maximum, and percentiles
+equivilant to 1, 2, and 3 standard deviations from the mean will be displayed.</p>
+</div></blockquote>
+<p><strong>units</strong> : str, optional</p>
+<blockquote>
+<div><p>prints the units of the residual values in the legend.</p>
+</div></blockquote>
+<p><strong>legend_kwds</strong> : dict</p>
+<blockquote>
+<div><p>keywords to matplotlib.pyplot.legend</p>
+</div></blockquote>
+<p><strong>kwds</strong> : dict</p>
+<blockquote>
+<div><p>keywords to matplotlib.pyplot.scatter</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">plot_obj :</p>
+<blockquote class="last">
+<div><p>instance of the plots.SpatialPlot() class. The figure and axis handles can be accessed
+as attributes (plot_obj.fig, plot_obj.ax). See the documentation for the SpatialPlot() class.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</div>
+<div class="section" id="module-rei">
+<span id="rei-class"></span><h2>REI Class<a class="headerlink" href="#module-rei" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rei.Rei">
+<em class="property">class </em><tt class="descclassname">rei.</tt><tt class="descname">Rei</tt><big>(</big><em>basename</em>, <em>obs_info_file=None</em>, <em>name_col='Name'</em>, <em>x_col='X'</em>, <em>y_col='Y'</em>, <em>type_col='Type'</em>, <em>basename_col='basename'</em>, <em>datetime_col='datetime'</em>, <em>group_cols=[]</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/rei.html#Rei"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rei.Rei" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pest.Pest</span></tt></p>
+<p>Rei Class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>basename</strong> : str</p>
+<blockquote>
+<div><p>basename for pest run (including path)</p>
+</div></blockquote>
+<p><strong>obs_info_file</strong> : str, optional</p>
+<blockquote>
+<div><p>csv file containing observation locations and/or observation type.</p>
+</div></blockquote>
+<p><strong>name_col</strong> : str, default &#8216;Name&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation names</p>
+</div></blockquote>
+<p><strong>x_col</strong> : str, default &#8216;X&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation x locations</p>
+</div></blockquote>
+<p><strong>y_col</strong> : str, default &#8216;Y&#8217;</p>
+<blockquote>
+<div><p>column in obs_info_file containing observation y locations</p>
+</div></blockquote>
+<p><strong>type_col</strong> : str, default &#8216;Type&#8217;</p>
+<blockquote class="last">
+<div><p>column in obs_info_file containing observation types (e.g. heads, fluxes, etc). A single
+type (&#8216;observation&#8217;) is assigned in the absence of type information</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="5%" />
+<col width="95%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>reifiles</td>
+<td>(dict) Dictionary of rei files (strings) produced from PEST run with residuals information saved every iteration (REISAVEITN). Integer keys represent iteration number.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="60%" />
+<col width="40%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>one2one_plots()</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="rei.Rei.IdentPar">
+<tt class="descname">IdentPar</tt><big>(</big><em>jco=None</em>, <em>par_info_file=None</em><big>)</big><a class="headerlink" href="#rei.Rei.IdentPar" title="Permalink to this definition">¶</a></dt>
+<dd><p>IdentPar class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rei.Rei.ParSen">
+<tt class="descname">ParSen</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#rei.Rei.ParSen" title="Permalink to this definition">¶</a></dt>
+<dd><p>ParSen class</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.jco_df">
+<tt class="descname">jco_df</tt><a class="headerlink" href="#rei.Rei.jco_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataFrame of jco</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.obs_groups">
+<tt class="descname">obs_groups</tt><a class="headerlink" href="#rei.Rei.obs_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of observation groups</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.observation_data">
+<tt class="descname">observation_data</tt><a class="headerlink" href="#rei.Rei.observation_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataFrame of observation data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.parameter_data">
+<tt class="descname">parameter_data</tt><a class="headerlink" href="#rei.Rei.parameter_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataFrame of parameter data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.pst">
+<tt class="descname">pst</tt><a class="headerlink" href="#rei.Rei.pst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pst Class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rei.Rei.res">
+<tt class="descname">res</tt><big>(</big><em>res_file</em>, <em>obs_info_file=None</em><big>)</big><a class="headerlink" href="#rei.Rei.res" title="Permalink to this definition">¶</a></dt>
+<dd><p>Res Class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>res_extension</strong> : str</p>
+<blockquote class="last">
+<div><p>The extension of the residual file to load.  Assumes basename
+from Pest.basename.  For exmaple &#8216;rei&#8217; or &#8216;res&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rei.Rei.res_df">
+<tt class="descname">res_df</tt><a class="headerlink" href="#rei.Rei.res_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Residual DataFrame</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-parsen">
+<span id="parameter-sensitivity-class"></span><h2>Parameter Sensitivity Class<a class="headerlink" href="#module-parsen" title="Permalink to this headline">¶</a></h2>
+<p>&#64;author: egc</p>
+</div>
+<div class="section" id="module-plots">
+<span id="plotting-class"></span><h2>Plotting Class<a class="headerlink" href="#module-plots" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="plots.Plot">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">Plot</tt><big>(</big><em>df</em>, <em>kind=None</em>, <em>by=None</em>, <em>subplots=None</em>, <em>sharex=True</em>, <em>sharey=False</em>, <em>use_index=True</em>, <em>figsize=(11</em>, <em>8.5)</em>, <em>grid=None</em>, <em>legend=True</em>, <em>legend_title=''</em>, <em>ax=None</em>, <em>fig=None</em>, <em>title=None</em>, <em>xlim=None</em>, <em>ylim=None</em>, <em>xticks=None</em>, <em>yticks=None</em>, <em>xlabel=None</em>, <em>ylabel=None</em>, <em>units=None</em>, <em>sort_columns=False</em>, <em>fontsize=None</em>, <em>secondary_y=False</em>, <em>layout=None</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#Plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.Plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Base class for assembling a plot using matplotlib</p>
+<p>This plotting structure is loosely based on pandas (albeit greatly simplified). Some of the structure may be
+to complicated for our needs, and we may want add additional functionality and shift parts of it around
+as needed. But hopefully it will provide a starting point to work off of.</p>
+<p>The overall goal is to centralize plotting code for consistency and to maximize extensibility</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="plots.Hist">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">Hist</tt><big>(</big><em>df</em>, <em>values</em>, <em>by</em>, <em>groupinfo</em>, <em>layout</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#Hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.Hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plots.Plot" title="plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">plots.Plot</span></tt></a></p>
+<p>Makes a grid of histograms</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="plots.ScatterPlot">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">ScatterPlot</tt><big>(</big><em>df</em>, <em>x</em>, <em>y</em>, <em>groupinfo</em>, <em>group_col='Group'</em>, <em>line_kwds={}</em>, <em>legend_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#ScatterPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.ScatterPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plots.Plot" title="plots.Plot"><tt class="xref py py-class docutils literal"><span class="pre">plots.Plot</span></tt></a></p>
+<p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="plots.SpatialPlot">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">SpatialPlot</tt><big>(</big><em>df</em>, <em>x</em>, <em>y</em>, <em>values</em>, <em>groupinfo</em>, <em>group_col='Group'</em>, <em>colorby=None</em>, <em>color_values=None</em>, <em>overunder_colors=('Red'</em>, <em>'Navy')</em>, <em>colorbar_label=None</em>, <em>minimum_marker_size=10</em>, <em>marker_scale=1</em>, <em>legend_values=None</em>, <em>units=''</em>, <em>legend_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#SpatialPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.SpatialPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plots.ScatterPlot" title="plots.ScatterPlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.ScatterPlot</span></tt></a></p>
+<p>Plots residuals in plan view.</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#plots.SpatialPlot.add_shapefile" title="plots.SpatialPlot.add_shapefile"><tt class="xref py py-obj docutils literal"><span class="pre">add_shapefile</span></tt></a>(shp[,&nbsp;s,&nbsp;fc,&nbsp;ec,&nbsp;lw,&nbsp;alpha,&nbsp;...])</td>
+<td>Add points, lines or polygons from a shapefile to the map</td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">scale_markers</span></tt>(values)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="plots.SpatialPlot.add_shapefile">
+<tt class="descname">add_shapefile</tt><big>(</big><em>shp</em>, <em>s=20</em>, <em>fc='0.8'</em>, <em>ec='k'</em>, <em>lw=1</em>, <em>alpha=1</em>, <em>zorder=5</em>, <em>convert_coordinates=1</em>, <em>reset_extent=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/plots.html#SpatialPlot.add_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.SpatialPlot.add_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add points, lines or polygons from a shapefile to the map</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="plots.One2onePlot">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">One2onePlot</tt><big>(</big><em>df</em>, <em>x</em>, <em>y</em>, <em>groupinfo</em>, <em>error_bars_obs=False</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#One2onePlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.One2onePlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plots.ScatterPlot" title="plots.ScatterPlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.ScatterPlot</span></tt></a></p>
+<p>Makes one-to-one plot of two dataframe columns, using pyplot.scatter</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="plots.HexbinPlot">
+<em class="property">class </em><tt class="descclassname">plots.</tt><tt class="descname">HexbinPlot</tt><big>(</big><em>df</em>, <em>x</em>, <em>y</em>, <em>groupinfo</em>, <em>error_bars_obs=False</em>, <em>line_kwds={}</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="_modules/plots.html#HexbinPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plots.HexbinPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#plots.One2onePlot" title="plots.One2onePlot"><tt class="xref py py-class docutils literal"><span class="pre">plots.One2onePlot</span></tt></a></p>
+<p>Makes a hexbin plot of two dataframe columns, pyplot.hexbin</p>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">draw</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><tt class="xref py py-obj docutils literal"><span class="pre">generate</span></tt>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">log_trans</span></tt>(x,&nbsp;pos)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-maps">
+<span id="mapping-class"></span><h2>Mapping Class<a class="headerlink" href="#module-maps" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="maps.read_shapefile">
+<tt class="descclassname">maps.</tt><tt class="descname">read_shapefile</tt><big>(</big><em>shapefile</em>, <em>index=None</em>, <em>true_values=None</em>, <em>false_values=None</em>, <em>skip_empty_geom=True</em><big>)</big><a class="reference internal" href="_modules/maps.html#read_shapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#maps.read_shapefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read shapefile into Pandas dataframe
+<tt class="docutils literal"><span class="pre">shplist</span></tt> = (string or list) of shapefile name(s)
+<tt class="docutils literal"><span class="pre">index</span></tt> = (string) column to use as index for dataframe
+<tt class="docutils literal"><span class="pre">geometry</span></tt> = (True/False) whether or not to read geometric information
+<tt class="docutils literal"><span class="pre">clipto</span></tt> = (dataframe) limit what is brought in to items in index of clipto (requires index)
+<tt class="docutils literal"><span class="pre">true_values</span></tt> = (list) same as argument for pandas read_csv
+<tt class="docutils literal"><span class="pre">false_values</span></tt> = (list) same as argument for pandas read_csv
+from shapefile into dataframe column &#8220;geometry&#8221;</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pestools source documentation</a><ul>
+<li><a class="reference internal" href="#base-and-pest-control-file-classes">Base and PEST control file classes</a></li>
+<li><a class="reference internal" href="#module-res">Residuals Class</a></li>
+<li><a class="reference internal" href="#module-rei">REI Class</a></li>
+<li><a class="reference internal" href="#module-parsen">Parameter Sensitivity Class</a></li>
+<li><a class="reference internal" href="#module-plots">Plotting Class</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-maps">Mapping Class</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PESTools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/source_doc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PESTools"
+             >previous</a> |</li>
+        <li><a href="index.html">pestools 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Evan Christianson, Andrew Leaf.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
