@@ -5,12 +5,12 @@ PESTools is a Python package for processing and visualizing information associat
 Currently PESTools runs in **Python 2.7**. The Anaconda Python distribution provides a free and easy way to install and maintain python and many popular python packages: (<https://store.continuum.io/cshop/anaconda/>).
 
 ####Package dependencies:
-**NumPy**  
-**pandas**  
-**matplotlib**
-**pyemu** (<https://github.com/jtwhite79/pyemu>)  
-**fiona** (only for shapefile methods)  
-**shapely** (only for shapefile methods)
+* **NumPy**  
+* **pandas**  
+* **matplotlib**
+* **pyemu** (<https://github.com/jtwhite79/pyemu>)  
+* **fiona** (only for shapefile methods)  
+* **shapely** (only for shapefile methods)
 
 ####To install PESTools from the GitHub repository:
 After cloning or downloading the repository, navigate to the root pestools folder and run **setup.py**, e.g.  
@@ -23,11 +23,11 @@ The PESToolsdocumentation is a work in progress, but can viewed here:
 <http://pestools.github.io/pestools/>
 
 
-####MODFLOW and More 2015 proceedings paper:
+###MODFLOW and More 2015 proceedings paper:
 
 <http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/MODFLOW%20and%20More%202015%20Paper.ipynb>
 
-####IPython Notebook examples:
+###IPython Notebook examples:
 
 **Working with residuals from a single PEST iteration using the Res class**: 
 <http://nbviewer.ipython.org/github/pestools/pestools/blob/master/examples/Res.ipynb>
