@@ -45,8 +45,36 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <p>#####Pestools - A Python toolkit for processing PEST-related information</p>
-<p>PESTools is an open-source Python package for processing and visualizing information associated with the parameter estimation software PEST and PEST++.  While PEST output can be reformatted for post-processing in spreadsheets or other menu-driven software packages, that approach can be error-prone and time-consuming. Managing information from highly parameterized models with thousands of parameters and observations presents additional challenges. PESTools consists of a set of Python object classes to facilitate efficient processing and visualization of PEST-related information. Processing and visualization of observation residuals, objective function contributions, parameter and observation sensitivities, parameter correlation and identifiability, and other common PEST outputs have been implemented. PESTools is integrated with the pyemu software package for linear-based computer model uncertainty analyses, allowing for efficient computations using the Jacobian Matrix without any external utilities or files. The use of dataframe objects (pandas Python package) facilitates rapid subsetting and querying of large datasets, as well as the incorporation of ancillary information such as observation locations, times, measurement types, and other associated information. PESTools&#8217; object methods can be easily scripted with concise code, or alternatively, the use of IPython notebooks allows for live interaction with the information. PESTools is designed to streamline workflows and provide deeper insight into model behavior, enhance troubleshooting, and improve transparency in the calibration process.</p>
+  <p>#PESTools
+PESTools is a Python package for processing and visualizing information associated with the parameter estimation software PEST and PEST++. PESTools consists of a set of Python object classes to facilitate efficient processing and visualization of PEST-related information. Processing and visualization of observation residuals, objective function contributions, parameter and observation sensitivities, parameter correlation and identifiability, and other common PEST outputs have been implemented. PESTools is integrated with the pyemu package (&lt;<a class="reference external" href="https://github.com/jtwhite79/pyemu">https://github.com/jtwhite79/pyemu</a>&gt;) package for linear-based computer model uncertainty analyses, allowing for efficient computations using the Jacobian Matrix without any external utilities or files. The use of dataframe objects (pandas Python package) facilitates rapid subsetting and querying of large datasets, as well as the incorporation of ancillary information such as observation locations, times, measurement types, and other associated information. PESTools’ object methods can be easily scripted with concise code, or alternatively, the use of IPython notebooks allows for live interaction with the information.</p>
+<p>##Installation
+Currently PESTools runs in <strong>Python 2.7</strong>. The Anaconda Python distribution provides a free and easy way to install and maintain python and many popular python packages: (&lt;<a class="reference external" href="https://store.continuum.io/cshop/anaconda/">https://store.continuum.io/cshop/anaconda/</a>&gt;).</p>
+<p>####Package dependencies:
+* <strong>NumPy</strong>
+* <strong>pandas</strong>
+* <strong>matplotlib</strong>
+* <strong>pyemu</strong> (&lt;<a class="reference external" href="https://github.com/jtwhite79/pyemu">https://github.com/jtwhite79/pyemu</a>&gt;)
+* <strong>fiona</strong> (only for shapefile methods)
+* <strong>shapely</strong> (only for shapefile methods)</p>
+<p>####To install PESTools from the GitHub repository:
+After cloning or downloading the repository, navigate to the root pestools folder and run <strong>setup.py</strong>, e.g.</p>
+<p><tt class="docutils literal"><span class="pre">`$</span> <span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install`</span></tt></p>
+<p>##Documentation
+The PESToolsdocumentation is a work in progress, but can viewed here:</p>
+<p>&lt;<a class="reference external" href="http://pestools.github.io/pestools/">http://pestools.github.io/pestools/</a>&gt;</p>
+<p>###MODFLOW and More 2015 proceedings paper:</p>
+<p>&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/MODFLOW%20and%20More%202015%20Paper.ipynb">http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/MODFLOW%20and%20More%202015%20Paper.ipynb</a>&gt;</p>
+<p>###IPython Notebook examples:</p>
+<p><strong>Working with residuals from a single PEST iteration using the Res class</strong>:
+&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/pestools/pestools/blob/master/examples/Res.ipynb">http://nbviewer.ipython.org/github/pestools/pestools/blob/master/examples/Res.ipynb</a>&gt;</p>
+<p><strong>Working with residuals from multiple iterations</strong>:
+&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/Rei.ipynb">http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/Rei.ipynb</a>&gt;</p>
+<p><strong>Parameter sensitivities class</strong>:
+&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/ParSen%20Examples.ipynb">http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/ParSen%20Examples.ipynb</a>&gt;</p>
+<p><strong>Making one-to-one plots of residuals</strong>:
+&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/One2onePlot.ipynb">http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/One2onePlot.ipynb</a>&gt;</p>
+<p><strong>Making maps of residuals</strong>:
+&lt;<a class="reference external" href="http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/SpatialPlots.ipynb">http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/SpatialPlots.ipynb</a>&gt;</p>
 
 
           </div>
