@@ -7,10 +7,9 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import PatchCollection, LineCollection
-from shapely.ops import transform
-from descartes import PolygonPatch
+import matplotlib.lines as mlines
 import operator
-from Mapping import read_shapefile
+
 #from pst import *
 
 
@@ -96,6 +95,10 @@ class Plot(object):
             self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
             self.groupinfo = {self.groupinfo: {}}
 
+        elif isinstance(self.groupinfo, int):
+            self.groupinfo = self.groupinfo
+            self.groups = list(set([self.groupinfo]).intersection(set(self.groups)))
+            self.groupinfo = {self.groupinfo: {}}
         else:
             raise ValueError('Invalid input for groupinfo.')
 
@@ -123,7 +126,8 @@ class Plot(object):
         self._initialize()
         self._make_plot()
         self._adorn_subplots()
-        self._make_legend()
+        if self.legend:
+            self._make_legend()
 
     def _initialize(self):
 
@@ -229,7 +233,7 @@ class Hist(Plot):
 class ScatterPlot(Plot):
     """Makes one-to-one plot of two dataframe columns, using pyplot.scatter"""
 
-    def __init__(self, df, x, y, groupinfo, line_kwds={}, legend_kwds={}, **kwds):
+    def __init__(self, df, x, y, groupinfo, group_col='Group', line_kwds={}, legend_kwds={}, **kwds):
 
         Plot.__init__(self, df, **kwds)
         """
@@ -279,8 +283,9 @@ class ScatterPlot(Plot):
 
         self.x = x
         self.y = y
+        self.group_col = group_col
         self.groupinfo = groupinfo
-        self.groups = np.unique(self.df.Group)
+        self.groups = np.unique(self.df[group_col])
         self.line_kwds = line_kwds
         self.legend_kwds = legend_kwds
         self._legend_order = {}
@@ -304,6 +309,7 @@ class SpatialPlot(ScatterPlot):
     """
 
     def __init__(self, df, x, y, values, groupinfo,
+                 group_col='Group',
                  colorby=None,
                  color_values=None,
                  overunder_colors=('Red', 'Navy'),
@@ -314,7 +320,7 @@ class SpatialPlot(ScatterPlot):
                  units='',
                  legend_kwds={}, **kwds):
 
-        ScatterPlot.__init__(self, df, x, y, groupinfo, legend_kwds=legend_kwds, **kwds)
+        ScatterPlot.__init__(self, df, x, y, groupinfo, group_col, legend_kwds, **kwds)
         """
         df : DataFrame,
             Pandas DataFrame
@@ -343,7 +349,7 @@ class SpatialPlot(ScatterPlot):
         else:
             self.color_values = color_values
 
-        self.scatter_df = self.df.ix[self.df.Group.isin(self.groups)]
+        self.scatter_df = self.df.ix[self.df[self.group_col].isin(self.groups)]
 
         self.colorby = colorby
         self.overunder_colors = overunder_colors # to specify colors instead of a colormap
@@ -368,7 +374,8 @@ class SpatialPlot(ScatterPlot):
         # default keyword settings, which can be overriden by submitted keywords
         # order of priority is default, then keywords entered for whole plot,
         # then keywords supplied for individual group
-        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', 'lw': 0, 'edgecolor': None,
+        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', #'lw': 0,
+                     'edgecolor': None, 'linewidths': 0,
                      'antialiased': True, 'zorder': 10}
         self.kwds.update(kwds)
 
@@ -378,7 +385,8 @@ class SpatialPlot(ScatterPlot):
                         'framealpha': 0.8,
                         'scatterpoints': 1,
                         'labelspacing': 1,
-                        'ncol': 1}
+                        'ncol': 1,
+                        'numpoints': 1}
 
         self.lg_kwds.update(self.legend_kwds)
 
@@ -395,11 +403,20 @@ class SpatialPlot(ScatterPlot):
 
     def add_shapefile(self, shp,
                       s=20, fc='0.8', ec='k', lw=1, alpha=1,
-                      zorder=0,
+                      zorder=5,
                       convert_coordinates=1,
+                      reset_extent=False,
                       **kwargs):
         """Add points, lines or polygons from a shapefile to the map
         """
+        try:
+            from shapely.ops import transform
+            from descartes import PolygonPatch
+            from maps import read_shapefile
+        except:
+            raise Exception("add_shapefile() method requires shapely, descartes, and fiona."
+                            "\nSee the readme file for installation instructions.")
+
         df = read_shapefile(shp)
 
         if convert_coordinates != 1:
@@ -413,9 +430,8 @@ class SpatialPlot(ScatterPlot):
             for i, g in enumerate(df.geometry.tolist()):
                 patches.append(PolygonPatch(g, fc=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs))
 
-            pc = PatchCollection(patches, match_original=True)
-            self.ax.add_collection(pc)
-            return pc
+            collection = PatchCollection(patches, match_original=True)
+            self.ax.add_collection(collection)
 
         elif 'LineString' in df.geometry[0].type:
             print "building LineCollection..."
@@ -430,20 +446,28 @@ class SpatialPlot(ScatterPlot):
                         x, y = l.xy
                         lines.append(zip(x, y))
 
-            lc = LineCollection(lines, colors=ec, linewidths=lw, alpha=alpha, zorder=zorder, **kwargs)
+            collection = LineCollection(lines, colors=ec, linewidths=lw, alpha=alpha, zorder=zorder, **kwargs)
             #lc.set_edgecolor(ec)
             #lc.set_alpha(alpha)
             #lc.set_lw(lw)
-            self.ax.add_collection(lc)
-            return lc
+            self.ax.add_collection(collection)
 
         else:
             print "plotting points..."
             x = np.array([g.x for g in df.geometry])
             y = np.array([g.y for g in df.geometry])
 
-            points = self.ax.scatter(x, y, s=s, c=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs)
-            return points
+            collection = self.ax.scatter(x, y, s=s, c=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs)
+
+        if reset_extent:
+            xmin = np.min([g.bounds[0] for g in df.geometry])
+            xmax = np.max([g.bounds[2] for g in df.geometry])
+            ymin = np.min([g.bounds[1] for g in df.geometry])
+            ymax = np.max([g.bounds[3] for g in df.geometry])
+            self.ax.set_xlim(xmin, xmax)
+            self.ax.set_ylim(ymin, ymax)
+
+        return collection
 
     def _make_plot(self):
 
@@ -462,7 +486,8 @@ class SpatialPlot(ScatterPlot):
             cb = True
             self.cb_label = 'Percent Difference'
         else:
-            colors = self.colorby
+            colors = np.ones(len(self.scatter_df[self.color_values]))
+            self.cmap = ListedColormap(self.colorby)
 
         self.adjusted_cmap = Normalized_cmap(self.cmap, colors)
 
@@ -484,7 +509,7 @@ class SpatialPlot(ScatterPlot):
 
 
         lg_values = self.lg_values
-        lg_sizes = self.scale_markers(lg_values)
+        lg_sizes = np.sqrt(self.scale_markers(lg_values)) # plt.scatter sizes are points**2
         lg_prefix = ''
 
         if self.colorby == 'graduated':
@@ -500,20 +525,21 @@ class SpatialPlot(ScatterPlot):
         else:
             lg_colors = [self.colorby for k in lg_values]
 
-        lg_labels = ['{} {:,.0f} {}'.format(lg_prefix, lg_values[0], self.units)] + \
-                    ['{} {:,.0f}'.format(lg_prefix, v) for v in lg_values[1:]]
+        lg_labels = ['{} {:,.1f} {}'.format(lg_prefix, lg_values[0], self.units)] + \
+                    ['{} {:,.1f}'.format(lg_prefix, v) for v in lg_values[1:]]
 
+        lg_handles = []
         for s in range(len(lg_sizes)):
-            self.ax.scatter([-1000], [-1000], s=lg_sizes[s],
-                            c=lg_colors[s],
-                            marker=self.kwds['marker'], edgecolor=None, lw=0.25,
-                            alpha=self.kwds['alpha'], label=lg_labels[s])
+            h = mlines.Line2D([], [], marker=self.kwds['marker'], markersize=lg_sizes[s],
+                            markerfacecolor=lg_colors[s], alpha=self.kwds['alpha'],
+                            markeredgecolor=None, markeredgewidth=0.25,
+                            linestyle='')
+            lg_handles.append(h)
 
-        handles, labels = self.ax.get_legend_handles_labels()
-
-        self.lg = self.ax.legend(handles, labels, **self.lg_kwds)
+        self.lg = self.ax.legend(lg_handles, lg_labels, **self.lg_kwds)
 
         plt.setp(self.lg.get_title(), fontsize=12, fontweight='bold')
+        self.lg.set_zorder(self.kwds.get('zorder', 20))
 
         plt.tight_layout()
 

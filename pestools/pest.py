@@ -27,7 +27,7 @@ class Pest(object):
     pest basename or pest control file (includes path)
     """
 
-    def __init__(self, basename, obs_info_file=None):
+    def __init__(self, basename, obs_info_file=None, par_info_file=None):
 
         self.basename = os.path.split(basename)[-1].split('.')[0]
         self.run_folder = os.path.split(basename)[0]
@@ -42,6 +42,13 @@ class Pest(object):
             self._read_obs_info_file(obs_info_file)
         else:
             self.obsinfo = pd.DataFrame()
+
+        self.par_info_file = par_info_file
+        if par_info_file is not None:
+            self._read_par_info_file(par_info_file)
+        else:
+            self.parinfo = pd.DataFrame()
+
     def IdentPar(self, jco=None, par_info_file=None):
         '''
         IdentPar class
@@ -181,6 +188,15 @@ class Pest(object):
                 self._obstypes.index = self._obstypes.Group
                 self._obstypes = self._obstypes.drop('Group', axis=1)
 
+    def _read_par_info_file(self, par_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
+                            basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
+            """Bring in ancillary parameter information from csv file such as location and parameter type
+            """
+            self.parinfo = pd.read_csv(par_info_file, index_col=name_col, **kwds)
+            self.parinfo.index = [n.lower() for n in self.parinfo.index]
+
+            # remap observation info columns to default names
+            self.parinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', 'foo': 'foo'}, inplace=True)
           
 if __name__ == '__main__':
     p = Pest(r'C:\Users\egc\Desktop\identpar_testing\ppestex\test')
