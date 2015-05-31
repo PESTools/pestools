@@ -18,7 +18,7 @@ After cloning or downloading the repository, navigate to the root pestools folde
 ```$ python setup.py install```  
 
 ##Documentation
-The PESToolsdocumentation is a work in progress, but can viewed here:  
+The PESTools documentation is a work in progress, but can viewed here:  
 
 <http://pestools.github.io/pestools/>
 
