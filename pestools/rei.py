@@ -4,7 +4,9 @@ import sys
 
 sys.path.append('../pst_tools')
 import os
-from res import *
+import pandas as pd
+from res import Res
+from pest import Pest
 from matplotlib.backends.backend_pdf import PdfPages
 
 
@@ -92,7 +94,8 @@ class Rei(Pest):
             self._read_obs_data()
             self.obsinfo = pd.DataFrame(self.obsdata.OBGNME)
 
-        self.phi = self.obsinfo.copy()
+        #self.phi = self.obsinfo.copy()
+        self.phi = pd.DataFrame()
         self.phi_by_group = pd.DataFrame(columns=self.obsgroups)
         self.phi_by_type = pd.DataFrame()
         self.phi_by_component = pd.DataFrame()
