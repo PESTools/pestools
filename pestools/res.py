@@ -51,12 +51,16 @@ class Res(object):
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
                  x_col='X', y_col='Y', type_col='Type',
                  basename_col='basename', datetime_col='datetime', group_cols=[],
+                 obs_info_kwds={},
                  **kwds):
 
         # Expose the Pest class for convience but not all attributes make sense
         # when dealing with the Res class alone so make private
-        self._Pest = Pest(res_file, obs_info_file=obs_info_file)
-
+        self._Pest = Pest(res_file)
+        self._Pest._read_obs_info_file(obs_info_file=obs_info_file, name_col=name_col,
+                                       x_col=x_col, y_col=y_col, type_col=type_col,
+                                       basename_col=basename_col, datetime_col=datetime_col,
+                                       group_cols=group_cols, obs_info_kwds=obs_info_kwds)
         self.obsinfo = self._Pest.obsinfo
         self.obs_groups = self._Pest.obs_groups
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
