@@ -888,7 +888,20 @@ class Res(object):
     def write_shapefile(self, shpname='Residuals.shp', obsinfo_columns=['X', 'Y'],
                         prj=None, epsg=None, proj4=None):
         """Writes Res dataframe to a shapefile, using location information from the obs_info_file.
+        Requires shapely and fiona.
 
+        Parameters
+        ==========
+        shpname : str
+            Name for output shapefile
+        obsinfo_columns : list
+            List of columns in observation information file to include. Default ['X', 'Y'].
+        prj : str
+            *.prj file defining projection of output shapefile
+        epsg : int
+            EPSG (European Petroleum Survey Group) number defining projection of output shapefile
+        proj4: str
+            Proj4 string defining projection of output shapefile
         """
         try:
             import fiona

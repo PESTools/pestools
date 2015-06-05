@@ -79,7 +79,24 @@ class Shapefile:
 
     def __init__(self, df, shpname, geo_column='geometry',
                  prj=None, epsg=None, proj4=None):
+        """Writes a dataframe to a shapefile, using geometries stored on a geometry column.
+        Requires shapely and fiona.
 
+        Parameters
+        ==========
+        df : dataframe
+            Dataframe to write to shapefile
+        shpname : str
+            Name for output shapefile
+        geo_column : list
+            List of shapely geometry objects
+        prj : str
+            *.prj file defining projection of output shapefile
+        epsg : int
+            EPSG (European Petroleum Survey Group) number defining projection of output shapefile
+        proj4: str
+            Proj4 string defining projection of output shapefile
+        """
         self.df = df
         self.shpname = shpname
         self.geo_column = geo_column
