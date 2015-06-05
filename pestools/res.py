@@ -883,7 +883,22 @@ class Res(object):
                                      legend_kwds=legend_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
-
-
         return plot_obj
-    
+
+    def write_shapefile(self, shpname='Residuals.shp', obsinfo_columns=['X', 'Y'],
+                        prj=None, epsg=None, proj4=None):
+        """Writes Res dataframe to a shapefile, using location information from the obs_info_file.
+
+        """
+        try:
+            import fiona
+            from shapely.geometry import Point
+        except:
+            raise Exception("write_shapefile() method requires shapely and fiona."
+                            "\nSee the readme file for installation instructions.")
+        df = self.obsinfo[obsinfo_columns].copy()
+        df['geometry'] = [Point(r.X, r.Y) for i, r in df.iterrows()]
+        df = df.join(self.df)
+
+        from maps import Shapefile
+        Shapefile(df, shpname, prj=prj, epsg=epsg, proj4=proj4)
