@@ -10,8 +10,6 @@ from matplotlib.collections import PatchCollection, LineCollection
 import matplotlib.lines as mlines
 import operator
 
-#from pst import *
-
 
 class Plot(object):
     """
@@ -202,7 +200,7 @@ class Hist(Plot):
         kwds.update(self.kwds)
 
         hist_df = self.df.ix[self.df.Group.isin(self.groups), [self.by, self.values]]
-        self.ax = hist_df.hist(by=self.by, layout=self.layout, **kwds)
+        self.ax = hist_df.hist(ax=self.ax, by=self.by, layout=self.layout, **kwds)
 
         self.fig = self.ax[0][0].get_figure()
 
@@ -412,7 +410,7 @@ class SpatialPlot(ScatterPlot):
         try:
             from shapely.ops import transform
             from descartes import PolygonPatch
-            from maps import read_shapefile
+            from pestools.maps import read_shapefile
         except:
             raise Exception("add_shapefile() method requires shapely, descartes, and fiona."
                             "\nSee the readme file for installation instructions.")
