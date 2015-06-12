@@ -1,4 +1,4 @@
-pestools source documentation
-=================================
+PESTools source documentation
+=============================
  
 .. automodule:: pestools
