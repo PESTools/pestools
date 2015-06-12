@@ -407,6 +407,9 @@ class SpatialPlot(ScatterPlot):
                       convert_coordinates=1,
                       reset_extent=False,
                       **kwargs):
+        from shapely.ops import transform
+        from descartes import PolygonPatch
+        from Mapping import read_shapefile
         """Add points, lines or polygons from a shapefile to the map
         """
         try:
@@ -866,7 +869,7 @@ class IdentBar(Plot):
         b = self._df_Nvalues.ix[0:20][self._df_Nvalues.columns[:-1]].plot(ax=axmain, kind='bar', stacked=True, width=0.8, colormap='jet_r')
         b.legend_ = None
         axmain.set_ylabel('Identifiability')
-        axmain.tick_params(axis='x', labelsize=6)
+        axmain.tick_params(axis='x')
 
     def _make_legend(self):
         # make colorbar from scratch (Mike's code)
