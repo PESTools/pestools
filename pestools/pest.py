@@ -43,7 +43,7 @@ class Pest(object):
         self.obs_info_file = obs_info_file
         if obs_info_file is not None:
             self._read_obs_info_file(obs_info_file, name_col=name_col,
-                                     x_col=x_col, ycol=y_col, type_col=type_col,
+                                     x_col=x_col, y_col=y_col, type_col=type_col,
                                      error_col=error_col, basename_col=basename_col,
                                      datetime_col=datetime_col, group_cols=group_cols,
                                      obs_info_kwds=obs_info_kwds)
