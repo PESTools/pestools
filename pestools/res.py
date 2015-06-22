@@ -56,12 +56,19 @@ class Res(object):
 
         # Expose the Pest class for convience but not all attributes make sense
         # when dealing with the Res class alone so make private
-        self._Pest = Pest(res_file)
-        self._Pest._read_obs_info_file(obs_info_file=obs_info_file, name_col=name_col,
-                                       x_col=x_col, y_col=y_col, type_col=type_col,
-                                       basename_col=basename_col, datetime_col=datetime_col,
-                                       group_cols=group_cols, obs_info_kwds=obs_info_kwds)
+        self._Pest = Pest(res_file, obs_info_file=obs_info_file, name_col=name_col,
+                                           x_col=x_col, y_col=y_col, type_col=type_col,
+                                           basename_col=basename_col, datetime_col=datetime_col,
+                                           group_cols=group_cols, obs_info_kwds=obs_info_kwds)
+        '''
+        if obs_info_file is not None:
+            self._Pest._read_obs_info_file(obs_info_file=obs_info_file, name_col=name_col,
+                                           x_col=x_col, y_col=y_col, type_col=type_col,
+                                           basename_col=basename_col, datetime_col=datetime_col,
+                                           group_cols=group_cols, obs_info_kwds=obs_info_kwds)
+        '''
         self.obsinfo = self._Pest.obsinfo
+
         self.obs_groups = self._Pest.obs_groups
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
@@ -629,7 +636,8 @@ class Res(object):
 
 
     def plot_one2one(self, groupinfo, title=None, print_stats=[], print_format='.2f',
-                     exclude_zero_stats=True, error_bars_obs=False,
+                     exclude_zero_stats=True, abbreviations=False,
+                     error_bars_obs=False,
                      line_kwds={}, **kwds):
         """
         Makes one-to-one plot of two dataframe columns, using pyplot.scatter
@@ -695,7 +703,12 @@ class Res(object):
         plot_obj.generate()
 
         if len(print_stats) > 0:
+
             stats = self.describe_groups(plot_obj.groups, exclude_zero=exclude_zero_stats).ix[print_stats]
+            if not abbreviations:
+                stats.rename(index={'Mean': 'Mean error',
+                                    'MAE': 'Mean absolute error',
+                                    'RMSE': 'Root mean squared error'}, inplace=True)
             text = ''.join(['{}: {:{fmt}}\n'.format(i, r['Group summary'], fmt=print_format) for i, r in stats.iterrows()])
             plot_obj.ax.text(0.05, 0.95, text, transform=plot_obj.ax.transAxes, va='top', ha='left')
 

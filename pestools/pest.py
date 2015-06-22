@@ -27,7 +27,10 @@ class Pest(object):
     pest basename or pest control file (includes path)
     """
 
-    def __init__(self, basename, obs_info_file=None, par_info_file=None):
+    def __init__(self, basename, obs_info_file=None, par_info_file=None,
+                 name_col='Name', x_col='X', y_col='Y', type_col='Type',
+                 error_col='Error', basename_col='basename', datetime_col='datetime', group_cols=[],
+                 obs_info_kwds={}):
 
         self.basename = os.path.split(basename)[-1].split('.')[0]
         self.run_folder = os.path.split(basename)[0]
@@ -39,7 +42,11 @@ class Pest(object):
         # Thinking this will get pass along later to the Res class or similar
         self.obs_info_file = obs_info_file
         if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file)
+            self._read_obs_info_file(obs_info_file, name_col=name_col,
+                                     x_col=x_col, ycol=y_col, type_col=type_col,
+                                     error_col=error_col, basename_col=basename_col,
+                                     datetime_col=datetime_col, group_cols=group_cols,
+                                     obs_info_kwds=obs_info_kwds)
         else:
             self.obsinfo = pd.DataFrame()
 
