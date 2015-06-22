@@ -169,11 +169,12 @@ class Pest(object):
         return Cor(self._cov)
 
     def _read_obs_info_file(self, obs_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
-                            error_col='Error', basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
+                            error_col='Error', basename_col='basename', datetime_col='datetime', group_cols=[],
+                            obs_info_kwds={}):
             """Bring in ancillary observation information from csv file such as location and measurement type
             """
-            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **kwds)
-            self.obsinfo.index = [n.lower() for n in self.obsinfo.index]
+            self.obsinfo = pd.read_csv(obs_info_file, index_col=name_col, **obs_info_kwds)
+            self.obsinfo.index = [n.strip().lower() for n in self.obsinfo.index]
     
             # remap observation info columns to default names
             self.obsinfo.rename(columns={x_col: 'X', y_col: 'Y', type_col: 'Type', error_col: 'Error'}, inplace=True)

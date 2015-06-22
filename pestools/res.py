@@ -51,12 +51,16 @@ class Res(object):
     def __init__(self, res_file, obs_info_file=None, name_col='Name',
                  x_col='X', y_col='Y', type_col='Type',
                  basename_col='basename', datetime_col='datetime', group_cols=[],
+                 obs_info_kwds={},
                  **kwds):
 
         # Expose the Pest class for convience but not all attributes make sense
         # when dealing with the Res class alone so make private
-        self._Pest = Pest(res_file, obs_info_file=obs_info_file)
-
+        self._Pest = Pest(res_file)
+        self._Pest._read_obs_info_file(obs_info_file=obs_info_file, name_col=name_col,
+                                       x_col=x_col, y_col=y_col, type_col=type_col,
+                                       basename_col=basename_col, datetime_col=datetime_col,
+                                       group_cols=group_cols, obs_info_kwds=obs_info_kwds)
         self.obsinfo = self._Pest.obsinfo
         self.obs_groups = self._Pest.obs_groups
         self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
@@ -879,7 +883,35 @@ class Res(object):
                                      legend_kwds=legend_kwds, **kwds)
         plot_obj.generate()
         plot_obj.draw()
-
-
         return plot_obj
-    
+
+    def write_shapefile(self, shpname='Residuals.shp', obsinfo_columns=['X', 'Y'],
+                        prj=None, epsg=None, proj4=None):
+        """Writes Res dataframe to a shapefile, using location information from the obs_info_file.
+        Requires shapely and fiona.
+
+        Parameters
+        ==========
+        shpname : str
+            Name for output shapefile
+        obsinfo_columns : list
+            List of columns in observation information file to include. Default ['X', 'Y'].
+        prj : str
+            *.prj file defining projection of output shapefile
+        epsg : int
+            EPSG (European Petroleum Survey Group) number defining projection of output shapefile
+        proj4: str
+            Proj4 string defining projection of output shapefile
+        """
+        try:
+            import fiona
+            from shapely.geometry import Point
+        except:
+            raise Exception("write_shapefile() method requires shapely and fiona."
+                            "\nSee the readme file for installation instructions.")
+        df = self.obsinfo[obsinfo_columns].copy()
+        df['geometry'] = [Point(r.X, r.Y) for i, r in df.iterrows()]
+        df = df.join(self.df)
+
+        from maps import Shapefile
+        Shapefile(df, shpname, prj=prj, epsg=epsg, proj4=proj4)

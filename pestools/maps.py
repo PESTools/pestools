@@ -77,20 +77,42 @@ def read_shapefile(shapefile, index=None, true_values=None, false_values=None, \
 
 class Shapefile:
 
-    def __init__(self, df, shpname, geo_column='geometry', prj=None):
+    def __init__(self, df, shpname, geo_column='geometry',
+                 prj=None, epsg=None, proj4=None):
+        """Writes a dataframe to a shapefile, using geometries stored on a geometry column.
+        Requires shapely and fiona.
 
+        Parameters
+        ==========
+        df : dataframe
+            Dataframe to write to shapefile
+        shpname : str
+            Name for output shapefile
+        geo_column : list
+            List of shapely geometry objects
+        prj : str
+            *.prj file defining projection of output shapefile
+        epsg : int
+            EPSG (European Petroleum Survey Group) number defining projection of output shapefile
+        proj4: str
+            Proj4 string defining projection of output shapefile
+        """
         self.df = df
         self.shpname = shpname
         self.geo_column = geo_column
         self.prj = prj
+        self.epsg = epsg
+        self.proj4 = proj4
+        self.crs = None
 
         self.geomtype = self.df.iloc[0][self.geo_column].type
 
         # make the shapefile
         self.limit_fieldnames()
         self.convert_dtypes()
-        self.write()
         self.set_projection()
+        self.write()
+
 
     def convert_dtypes(self):
         """convert data-types and data-type names to comply with shapefile format
@@ -149,7 +171,7 @@ class Shapefile:
         knt = 0
         length = len(self.df)
         problem_cols = []
-        with fiona.collection(self.shpname, "w", "ESRI Shapefile", schema) as output:
+        with fiona.collection(self.shpname, "w", "ESRI Shapefile", schema, crs=self.crs) as output:
             for i in range(length):
                 geo = self.df.iloc[i][self.geo_column]
 
@@ -188,18 +210,15 @@ class Shapefile:
             print 'Check their dtypes.'
 
     def set_projection(self):
-        if self.prj:
-            if 'epsg' in self.prj.lower():
-                self.epsg = int(self.prj.split(':')[1])
-                self.getPRJwkt()
-                ofp = open("{}.prj".format(self.shpname[:-4]), 'w')
-                ofp.write(self.prettywkt)
-                ofp.close()
-            else:
-                try:
-                    self.shutil.copyfile(self.prj, "{}.prj".format(self.shpname[:-4]))
-                except IOError:
-                    print 'Warning: could not find specified prj file. shp will not be projected.'
+        from fiona.crs import to_string, from_epsg, from_string
+        if self.prj is not None:
+            self.get_proj4()
+        if self.proj4 is not None:
+            self.crs = from_string(self.proj4)
+        elif self.epsg is not None:
+            self.crs = from_epsg(self.epsg)
+        else:
+            pass
 
     def getPRJwkt(self):
         """
@@ -214,6 +233,25 @@ class Shapefile:
         f = urllib.urlopen("http://spatialreference.org/ref/epsg/{0}/prettywkt/".format(self.epsg))
         self.prettywkt = f.read().replace('\n', '') # get rid of any EOL
 
+    def get_proj4(self):
+        """Get proj4 string for a projection file
+
+        Parameters
+        ----------
+        prj : string
+            Shapefile or projection file
+
+        Returns
+        -------
+        proj4 string (http://trac.osgeo.org/proj/)
+
+        """
+        from osgeo import osr
+        prjfile = self.prj[:-4] + '.prj' # allows shp or prj to be argued
+        prjtext = open(prjfile).read()
+        srs = osr.SpatialReference()
+        srs.ImportFromESRI([prjtext])
+        self.proj4 = srs.ExportToProj4()
 
 class PyShpfile(Shapefile):
 

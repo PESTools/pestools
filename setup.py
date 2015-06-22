@@ -5,32 +5,22 @@ try:
     from pypandoc import convert
     
     read_md = lambda f: convert(f, 'rst')
-    
+    long_descrip = read_md('README.md')
 except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r').read()
-
-read_rst = open('README.rst', 'w')
-read_rst.write(read_md('README.md').encode('utf-8')) # convert returns unicode
-read_rst.close()
-'''
-setup(
-    # name, version, ...
-    long_description=read_md('README.md'),
-    install_requires=[]
-)
-'''
+    long_descrip = open('README.md').readlines()
 
 def run():
     setup(name="PestTools",
         version="0.0.1",
         description="Python package for processing and visualizing information associated with the parameter estimation software PEST",
-        long_description=read_md('README.md'),
+        long_description=long_descrip,
         url="",
         license="MIT",
-        author="Evan Christianson, Andrew Leaf, Mike Fienen",
+        author="Evan Christianson, Andrew Leaf, Jeremy White, Mike Fienen",
         maintainer_email="",
         packages=["pestools"],
+        install_requires=["pyemu"],
+        dependency_links=["git+https://github.com/jtwhite79/pyemu.git#egg=pyemu"]
     )
 
 if __name__ == "__main__":
