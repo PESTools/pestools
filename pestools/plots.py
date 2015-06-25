@@ -409,7 +409,7 @@ class SpatialPlot(ScatterPlot):
                       **kwargs):
         from shapely.ops import transform
         from descartes import PolygonPatch
-        from Mapping import read_shapefile
+        from maps import read_shapefile
         """Add points, lines or polygons from a shapefile to the map
         """
         try:
