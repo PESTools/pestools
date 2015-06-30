@@ -417,7 +417,7 @@ class SpatialPlot(ScatterPlot):
 
         df = read_shapefile(shp)
 
-        if convert_coordinates != 1:
+        if convert_coordinates != 1 or df.iloc[0]['geometry'].has_z:
             df['geometry'] = [transform(lambda x, y, z=None: (x * convert_coordinates,
                                                               y * convert_coordinates), g)
                               for g in df.geometry]
