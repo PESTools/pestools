@@ -372,7 +372,7 @@ class SpatialPlot(ScatterPlot):
         # default keyword settings, which can be overriden by submitted keywords
         # order of priority is default, then keywords entered for whole plot,
         # then keywords supplied for individual group
-        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', #'lw': 0,
+        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', 'lw': 0.25,
                      'edgecolor': None, 'linewidths': 0,
                      'antialiased': True, 'zorder': 10}
         self.kwds.update(kwds)

@@ -47,6 +47,7 @@ from pest import Pest
 from parsen import ParSen
 from Cor import Cor
 from res import Res
+from rei import Rei
 from identpar import IdentPar
 import plots
 import maps
