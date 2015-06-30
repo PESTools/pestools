@@ -1,16 +1,14 @@
 __author__ = 'aleaf'
 
-import sys
-
-sys.path.append('../pst_tools')
 import os
+import numpy as np
 import pandas as pd
 from res import Res
 from pest import Pest
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-class Rei(Pest):
+class Rei(object):
     """
     Rei Class
 
@@ -80,28 +78,22 @@ class Rei(Pest):
                  basename_col='basename', datetime_col='datetime', group_cols=[],
                  **kwds):
 
-        Pest.__init__(self, basename)
-
-        self._read_obs_groups()
-
-        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obsgroups)}, index=self.obsgroups)
-
-        if obs_info_file is not None:
-            self._read_obs_info_file(obs_info_file, name_col=name_col, x_col=x_col, y_col=y_col, type_col=type_col,
-                                     basename_col=basename_col, datetime_col=datetime_col, group_cols=group_cols,
-                                     **kwds)
-        else:
-            self._read_obs_data()
-            self.obsinfo = pd.DataFrame(self.obsdata.OBGNME)
+        #Pest.__init__(self, basename, obs_info_file=obs_info_file)
+        self.basename = basename
+        self._Pest = Pest(basename, obs_info_file=obs_info_file)
+        self.obsinfo = self._Pest.obsinfo
+        self.obs_groups = self._Pest.obs_groups
+        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
         #self.phi = self.obsinfo.copy()
         self.phi = pd.DataFrame()
-        self.phi_by_group = pd.DataFrame(columns=self.obsgroups)
+        self.phi_by_group = pd.DataFrame(columns=self.obs_groups)
         self.phi_by_type = pd.DataFrame()
         self.phi_by_component = pd.DataFrame()
 
         # list rei files for run
-        reifiles = [f for f in os.listdir(self.run_folder) if self.basename + '.rei' in f]
+        reifiles = [f for f in os.listdir(os.path.split(basename)[0])
+                    if os.path.split(basename)[1] + '.rei' in f]
 
         # sort by iteration number (may not be the most elegant approach)
         self.reifiles = {}
