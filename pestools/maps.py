@@ -40,6 +40,7 @@ def read_shapefile(shapefile, index=None, true_values=None, false_values=None, \
         props = line['properties']
         props['geometry'] = line.get('geometry', None)
         attributes.append(props)
+    shp_obj.close()
 
     print '--> building dataframe... (may take a while for large shapefiles)'
     df = pd.DataFrame(attributes)

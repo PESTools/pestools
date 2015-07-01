@@ -10,8 +10,6 @@ from matplotlib.collections import PatchCollection, LineCollection
 import matplotlib.lines as mlines
 import operator
 
-#from pst import *
-
 
 class Plot(object):
     """
@@ -202,7 +200,7 @@ class Hist(Plot):
         kwds.update(self.kwds)
 
         hist_df = self.df.ix[self.df.Group.isin(self.groups), [self.by, self.values]]
-        self.ax = hist_df.hist(by=self.by, layout=self.layout, **kwds)
+        self.ax = hist_df.hist(ax=self.ax, by=self.by, layout=self.layout, **kwds)
 
         self.fig = plt.gcf()
         #for i, ax in enumerate(self.axes.ravel()):
@@ -373,7 +371,7 @@ class SpatialPlot(ScatterPlot):
         # default keyword settings, which can be overriden by submitted keywords
         # order of priority is default, then keywords entered for whole plot,
         # then keywords supplied for individual group
-        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', #'lw': 0,
+        self.kwds = {'marker': 'o', 'alpha': 0.8, 'cmap': 'coolwarm', 'lw': 0.25,
                      'edgecolor': None, 'linewidths': 0,
                      'antialiased': True, 'zorder': 10}
         self.kwds.update(kwds)
@@ -411,14 +409,14 @@ class SpatialPlot(ScatterPlot):
         try:
             from shapely.ops import transform
             from descartes import PolygonPatch
-            from maps import read_shapefile
+            from pestools.maps import read_shapefile
         except:
             raise Exception("add_shapefile() method requires shapely, descartes, and fiona."
                             "\nSee the readme file for installation instructions.")
 
         df = read_shapefile(shp)
 
-        if convert_coordinates != 1:
+        if convert_coordinates != 1 or df.iloc[0]['geometry'].has_z:
             df['geometry'] = [transform(lambda x, y, z=None: (x * convert_coordinates,
                                                               y * convert_coordinates), g)
                               for g in df.geometry]
