@@ -388,9 +388,9 @@ class ParSen(object):
                                            ascending=False).ix[self.df['Parameter Group'] == group].tail(n=n_head)
 
         if 'ylabel' not in kwds:
-            kwds['ylabel'] = 'Parameter'
+            kwds['ylabel'] = 'Parameter Sensitivity'
         if 'xlabel' not in kwds:
-            kwds['xlabel'] = 'Parameter Sensitivity'
+            kwds['xlabel'] = 'Parameter'
 
         plot_obj = plots.BarPloth(sensitivity, values_col='Sensitivity',
                                   group_col='Parameter Group',
@@ -414,9 +414,9 @@ class ParSen(object):
             .aggregate(np.mean).sort(columns='Sensitivity', ascending=False)
 
         if 'ylabel' not in kwds:
-            kwds['ylabel'] = 'Mean of Parameter Sensitivity'
+            kwds['ylabel'] = 'Parameter Group'
         if 'xlabel' not in kwds:
-            kwds['xlabel'] = 'Parameter Group'
+            kwds['xlabel'] = 'Mean of Parameter Sensitivity'
 
         plot_obj = plots.BarPloth(sen_grouped, values_col='Sensitivity',
                                   alt_labels=alt_labels, **kwds)
