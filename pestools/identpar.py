@@ -42,8 +42,8 @@ class IdentPar:
 
         self.ident_df = self.la.get_identifiability_dataframe(nsingular)
         if self.parinfo is not None:
-            self.ident_points = pd.DataFrame({'ident_sum': self.ident_df.sum(axis=1)}).join(self.parinfo)
-            self.ident_points.ident_sum = [i/2.0 for i in self.ident_points.ident_sum]
+            self.ident_points = pd.DataFrame({'ident_sum': self.ident_df.ident}).join(self.parinfo)
+
     def plot_bar(self, nsingular=None, nbars=20):
         """Computes a stacked bar chart showing the most identifiable parameters
         at a given number of singular values
