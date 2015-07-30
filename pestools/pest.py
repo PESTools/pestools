@@ -192,10 +192,11 @@ class Pest(object):
                 # join observation info to 'obsdata' so that the type and group for each observation are listed
                 self.obsinfo = self.obsinfo.join(self.observation_data['obgnme'], lsuffix='', rsuffix='1', how='inner')
                 self.obsinfo.rename(columns={'obgnme': 'Group'}, inplace=True)
+                '''
                 self._obstypes = self.obsinfo.drop_duplicates(subset='Group').ix[:, ['Group', 'Type']]
                 self._obstypes.index = self._obstypes.Group
                 self._obstypes = self._obstypes.drop('Group', axis=1)
-
+                '''
     def _read_par_info_file(self, par_info_file, name_col='Name', x_col='X', y_col='Y', type_col='Type',
                             basename_col='basename', datetime_col='datetime', group_cols=[], **kwds):
             """Bring in ancillary parameter information from csv file such as location and parameter type
