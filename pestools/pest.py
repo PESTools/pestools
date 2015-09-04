@@ -101,6 +101,16 @@ class Pest(object):
                         parameter_data = self.parameter_data, **kwargs)
         return parsen
         
+    def ObSen(self, **kwargs):
+        '''
+        ObSen class
+        '''
+        from obsen import ObSen
+        obsen = ObSen(basename=self.pstfile, jco_df = self.jco_df,
+                        res_df = self.res_df, 
+                        parameter_data = self.parameter_data, **kwargs)
+        return obsen
+        
     
     def res(self, res_file, obs_info_file = None):
         '''
