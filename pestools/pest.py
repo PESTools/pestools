@@ -137,9 +137,18 @@ class Pest(object):
         return res
 
     @property
+    def par(self, **kwargs):
+        from par import Par
+        '''
+        DataFrame of data from .par file
+        '''
+        par = Par(basename = self.pstfile)
+        return par
+
+    @property
     def parameter_data(self):
         '''
-        DataFrame of parameter data
+        DataFrame of parameter data in .pst file
         '''
         parameter_data = self.pst.parameter_data
         return parameter_data
