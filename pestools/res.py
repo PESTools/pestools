@@ -69,9 +69,7 @@ class Res(object):
         '''
         if obs_info_file is not None:
             self.obsinfo = self._Pest.obsinfo
-
             self.obs_groups = self._Pest.obs_groups
-            #self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
             self._obstypes = self._Pest._obstypes
         else:
             self.obsinfo = self._Pest.obsinfo
