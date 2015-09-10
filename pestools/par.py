@@ -14,7 +14,7 @@ class Par(object):
 
     def __init__(self, basename=None, par_set=None):
 
-        ''' Create Par class
+        ''' Create Par class that works with data from a .par file
 
         Parameters
         ----------
@@ -56,5 +56,9 @@ class Par(object):
                          sep="\s+")
         df.index = df.PARNME
         return df
+    def parval(self, parnme):
+        parval = self.df.ix[parnme]['PARVAL']
+        return parval
+        
             
             

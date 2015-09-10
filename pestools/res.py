@@ -67,10 +67,16 @@ class Res(object):
                                            basename_col=basename_col, datetime_col=datetime_col,
                                            group_cols=group_cols, obs_info_kwds=obs_info_kwds)
         '''
-        self.obsinfo = self._Pest.obsinfo
+        if obs_info_file is not None:
+            self.obsinfo = self._Pest.obsinfo
 
-        self.obs_groups = self._Pest.obs_groups
-        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
+            self.obs_groups = self._Pest.obs_groups
+            #self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
+            self._obstypes = self._Pest._obstypes
+        else:
+            self.obsinfo = self._Pest.obsinfo
+            self.obs_groups = self._Pest.obs_groups
+            self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
 
         check = open(res_file, 'r')
