@@ -110,6 +110,15 @@ class Pest(object):
                         res_df = self.res_df, 
                         parameter_data = self.parameter_data, **kwargs)
         return obsen
+    @property    
+    def rmr(self):
+        '''
+        rmr class
+        '''
+        from rmr import Rmr
+        rmr = Rmr(basename = self.pstfile)
+        
+        return rmr
         
     
     def res(self, res_file, obs_info_file = None):
