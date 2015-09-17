@@ -14,7 +14,11 @@ Currently PESTools runs in **Python 2.7**. The Anaconda Python distribution prov
 * **shapely** (only for shapefile methods)
 
 ####To install PESTools using pip:
-Pip needs to be installed first (e.g. using the Conda package manager in Anaconda):  
+Pip needs to be installed first (e.g. using the Conda package manager in Anaconda): 
+```
+$ conda install pip
+```
+then pestools can be installed: 
 ```
 $ pip install https://github.com/PESTools/pestools/archive/master.zip
 ``` 
