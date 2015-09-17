@@ -202,8 +202,7 @@ class Hist(Plot):
         hist_df = self.df.ix[self.df.Group.isin(self.groups), [self.by, self.values]]
         self.ax = hist_df.hist(ax=self.ax, by=self.by, layout=self.layout, **kwds)
 
-        self.fig = self.ax[0][0].get_figure()
-
+        self.fig = plt.gcf()
         #for i, ax in enumerate(self.axes.ravel()):
         #    ax.set_title(self.titles[i], loc='Left', fontsize='9')
 
