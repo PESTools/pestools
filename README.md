@@ -59,4 +59,6 @@ The PESTools documentation is a work in progress, but can viewed here:
 **Making maps of residuals**:  
 <http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/SpatialPlots.ipynb>
 
+**Visualizing parameter identifiabilities**: 
+<http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/Identifiability.ipynb>
   
