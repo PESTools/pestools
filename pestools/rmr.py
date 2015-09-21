@@ -67,7 +67,7 @@ class Rmr(object):
                 else:
                     time = datetime.datetime.strptime(time, '%d %b %H:%M:%S.%f')
                 time = time.replace(year = datetime.datetime.now().year)
-                node = int(line.strip().split('commencing on node ')[1].strip()[0])
+                node = int(line.strip().split('commencing on node ')[1].strip().split('.')[0])
                 run_starts[node_index[node]] = time
             if "completed on node" in line:
                 time = line.replace('; old run so results not needed.','').strip().split(':-')[0]
@@ -79,14 +79,17 @@ class Rmr(object):
                 else:
                     time = datetime.datetime.strptime(time, '%d %b %H:%M:%S.%f')
                 time = time.replace(year = datetime.datetime.now().year)
-                node = int(line.replace('; old run so results not needed.','').strip().split('completed on node ')[1].strip()[0])
+                node = int(line.replace('; old run so results not needed.','').strip().split('completed on node ')[1].strip(' .'))
                 start = run_starts[node_index[node]]
                 length_seconds = (time - start).total_seconds()
                 if node_index[node] in run_stats:        
                     run_stats[node_index[node]].append(length_seconds)
                 else:
                     run_stats[node_index[node]] = [length_seconds,]           
-                
+        
+        self._run_stats = run_stats        
+        self._node_index = node_index
+        self._run_starts = run_starts
         # Process Run Stats     
         self.node_list = []
         for node in run_stats:
