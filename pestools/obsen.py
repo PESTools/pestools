@@ -167,7 +167,7 @@ class ObSen(object):
         return self.df.sort(columns='Sensitivity', ascending=False)\
             .head(n=n_head)['Sensitivity']
 
-    def par(self, parameter):
+    def ob(self, parameter):
         '''Return the sensitivity of a single obsservation
 
         Parameters
