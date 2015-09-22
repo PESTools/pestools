@@ -7,6 +7,7 @@ Created on Sun Sep 13 10:06:30 2015
 
 import datetime
 import numpy as np
+import pandas as pd
 import os
 
 
@@ -91,18 +92,22 @@ class Rmr(object):
         self._node_index = node_index
         self._run_starts = run_starts
         # Process Run Stats     
-        self.node_list = []
+        self._node_list = []
         for node in run_stats:
-            self.node_list.append(node)
-        self.node_list.sort()
+            self._node_list.append(node)
+        self._node_list.sort()
+        self.nodes = pd.DataFrame(self._node_list)
+        self.nodes.columns = ['Node']
         
         self.data = []
         self.node_average = []
-        for node in self.node_list:
+        for node in self._node_list:
             self.data.append(run_stats[node])
             
             average = np.array(run_stats[node]).mean()
             self.node_average.append((node, average))
+        self.node_average = pd.DataFrame(self.node_average)
+        self.node_average.columns = ['Node', 'Average Runtime']
 
 # Need to move this to the plots class as some point            
     def boxplot(self):
@@ -115,7 +120,7 @@ class Rmr(object):
         '''        
         plt.boxplot(self.data)
         tick_locs, tick_labels = plt.xticks() 
-        plt.xticks(tick_locs, self.node_list, rotation = 90, fontsize = 'x-small')
+        plt.xticks(tick_locs, self._node_list, rotation = 90, fontsize = 'x-small')
         plt.ylabel('Run Time (seconds)')
         plt.grid(True)         
         plt.tight_layout() 
