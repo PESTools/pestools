@@ -44,6 +44,8 @@ class Res(object):
 
     Notes
     ------
+    A pest control (.pst) file with the same basename must be included in the folder with the residuals file.
+
     Column names in the observation information file are remapped to their default values after import
 
     """
