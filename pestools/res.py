@@ -44,6 +44,8 @@ class Res(object):
 
     Notes
     ------
+    A pest control (.pst) file with the same basename must be included in the folder with the residuals file.
+
     Column names in the observation information file are remapped to their default values after import
 
     """
@@ -331,6 +333,24 @@ class Res(object):
         print 'Range:     %10.4e' % (range_w_res)
         print ' '
         
+    def compute_pct_diff(self, df=None):
+        """Compute relative percent difference of residual compared to measured.
+
+        pct_diff = 100 * Residual / Measured
+
+        Notes:
+        Residuals for values Measured at zero are given arbitrary differences
+        of 100 (positive residuals) or -100 (negative residuals). Convention
+        follows PEST: Measured - Modelled
+        (negative residuals indicate higher modelled values).
+        """
+        if df is None:
+            df = self.df
+        pct_diff = 100 * df.Residual/df.Measured
+        pct_diff[(df.Measured == 0)] = -100
+        pct_diff[(df.Modelled == 0)] = 100
+        pct_diff[(df.Measured == 0) & (df.Modelled == 0)] = 0
+        return pct_diff
 
     def print_stats_all(self):
         ''' Return stats for each observation group
@@ -468,7 +488,7 @@ class Res(object):
         plt.pie(greater_1_values, labels=greater_1_groups, autopct='%1.1f%%', colors = colors, startangle=90)
         return retfig
         
-    def objective_contrib (self, df=None, return_data=False):
+    def objective_contrib(self, df=None, return_data=False):
         '''Print out the contribution of each observation group to the 
         objective function as a percent
         
@@ -885,10 +905,10 @@ class Res(object):
         kwds.update({
                      })
 
-        df = self.df[['Group', 'Residual', 'Measured']].join(self.obsinfo, rsuffix='_obsinfo')
+        df = self.df[['Group', 'Residual', 'Measured', 'Modelled']].join(self.obsinfo, rsuffix='_obsinfo').copy()
 
         if colorby == 'pct_diff':
-            df['pct_diff'] = 100 * df.Residual/df.Measured
+            df['pct_diff'] = self.compute_pct_diff(df)
 
         plot_obj = plots.SpatialPlot(df, 'X', 'Y', 'Residual', groupinfo,
                                      colorby=colorby,
@@ -927,9 +947,26 @@ class Res(object):
         except:
             raise Exception("write_shapefile() method requires shapely and fiona."
                             "\nSee the readme file for installation instructions.")
+
+        shp_cols = {'Name': 'Name',
+                    'Group': 'Group',
+                    'Measured': 'Measured',
+                    'Modelled': 'Modelled',
+                    'Residual': 'Residual',
+                    'Weight': 'Weight',
+                    'Absolute_Residual': 'Abs_resid',
+                    'Weighted_Sq_Residual': 'Phi',
+                    'pct_diff': 'pct_diff'}
+
+        if 'pct_diff' not in self.df.columns:
+            self.df['pct_diff'] = self.compute_pct_diff()
+        shpdf = self.df[['Name', 'Group', 'Measured', 'Modelled', 'Residual',
+                         'Weight', 'Absolute_Residual', 'Weighted_Sq_Residual',
+                         'pct_diff']].copy()
+        shpdf.rename(columns=shp_cols, inplace=True)
         df = self.obsinfo[obsinfo_columns].copy()
         df['geometry'] = [Point(r.X, r.Y) for i, r in df.iterrows()]
-        df = df.join(self.df)
+        df = df.join(shpdf)
 
         from maps import Shapefile
         Shapefile(df, shpname, prj=prj, epsg=epsg, proj4=proj4)

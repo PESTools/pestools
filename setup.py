@@ -18,10 +18,7 @@ def run():
         license="MIT",
         author="Evan Christianson, Andrew Leaf, Jeremy White, Mike Fienen",
         maintainer_email="",
-        packages=["pestools"],
-        install_requires=["pyemu"],
-        dependency_links=["git+https://github.com/jtwhite79/pyemu.git#egg=pyemu"]
-    )
+        packages=["pestools"])
 
 if __name__ == "__main__":
     run()
