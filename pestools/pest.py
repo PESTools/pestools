@@ -101,6 +101,25 @@ class Pest(object):
                         parameter_data = self.parameter_data, **kwargs)
         return parsen
         
+    def ObSen(self, **kwargs):
+        '''
+        ObSen class
+        '''
+        from obsen import ObSen
+        obsen = ObSen(basename=self.pstfile, jco_df = self.jco_df,
+                        res_df = self.res_df, 
+                        parameter_data = self.parameter_data, **kwargs)
+        return obsen
+    @property    
+    def rmr(self):
+        '''
+        rmr class
+        '''
+        from rmr import Rmr
+        rmr = Rmr(basename = self.pstfile)
+        
+        return rmr
+        
     
     def res(self, res_file, obs_info_file = None):
         '''
@@ -127,9 +146,18 @@ class Pest(object):
         return res
 
     @property
+    def par(self, **kwargs):
+        from par import Par
+        '''
+        DataFrame of data from .par file
+        '''
+        par = Par(basename = self.pstfile)
+        return par
+
+    @property
     def parameter_data(self):
         '''
-        DataFrame of parameter data
+        DataFrame of parameter data in .pst file
         '''
         parameter_data = self.pst.parameter_data
         return parameter_data
