@@ -846,7 +846,7 @@ class HeatMap(Plot):
 
  
 class IdentBar(Plot):
-    def __init__(self, ident_df, nsingular, nbars, **kwargs):
+    def __init__(self, ident_df, nsingular, nbars=20, **kwargs):
         Plot.__init__(self, ident_df, **kwargs)
 
         self.N = nsingular
