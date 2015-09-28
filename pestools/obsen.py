@@ -52,9 +52,8 @@ class ObSen(object):
         Attributes
         ----------
         df : Pandas DataFrame
-            DataFrame of parameter sensitivity.  Index entries of the DataFrame
-            are the parameter names.  The DataFrame has two columns:
-            1) Parameter Group and 2) Sensitivity
+            DataFrame of observation sensitivity.  Index entries of the DataFrame
+            are the observation names.  
 
         Methods
         -------
@@ -167,7 +166,7 @@ class ObSen(object):
         return self.df.sort(columns='Sensitivity', ascending=False)\
             .head(n=n_head)['Sensitivity']
 
-    def ob(self, parameter):
+    def ob(self, observation):
         '''Return the sensitivity of a single obsservation
 
         Parameters
@@ -180,7 +179,7 @@ class ObSen(object):
             sensitivity of obsservation
 
         '''
-        return self.df.xs(parameter)['Sensitivity']
+        return self.df.xs(observation)['Sensitivity']
 
     def group(self, group, n=None):
         '''Return the sensitivities of a observation group
@@ -293,10 +292,5 @@ class ObSen(object):
 
         return plot_obj.fig, plot_obj.ax        
         
-if __name__ == '__main__':
-    import pestools as pt
-    pest = pt.Pest(r'C:\Users\egc\Desktop\Calibration\PEST\TCAAP_TMR_1.pst')
-    obsen = pest.ObSen()
-    obsen.plot(n=10)
-    
+
     

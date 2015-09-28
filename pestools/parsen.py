@@ -450,6 +450,3 @@ class ParSen(object):
 
         return plot_obj.fig, plot_obj.ax
             
-if __name__ == '__main__':
-    #parsen = ParSen(basename = r'C:\Users\egc\Desktop\identpar_testing\ppestex\test')
-    parsen = ParSen(basename = r'C:\Users\egc\pest_tools-1\cc\columbia', drop_regul = True)
