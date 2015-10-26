@@ -13,10 +13,24 @@ Currently PESTools runs in **Python 2.7**. The Anaconda Python distribution prov
 * **fiona** (only for shapefile methods)  
 * **shapely** (only for shapefile methods)
 
+####To install PESTools using pip:
+Pip needs to be installed first (e.g. using the Conda package manager in Anaconda):  
+ 
+```
+$ conda install pip
+```
+then pestools can be installed:  
+ 
+```
+$ pip install https://github.com/PESTools/pestools/archive/master.zip
+``` 
+
 ####To install PESTools from the GitHub repository:
 After cloning or downloading the repository, navigate to the root pestools folder and run **setup.py**, e.g.  
 
-```$ python setup.py install```  
+```
+$ python setup.py install
+```  
 
 ##Documentation
 The PESTools documentation is a work in progress, but can viewed here:  
@@ -45,4 +59,6 @@ The PESTools documentation is a work in progress, but can viewed here:
 **Making maps of residuals**:  
 <http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/SpatialPlots.ipynb>
 
+**Visualizing parameter identifiabilities**: 
+<http://nbviewer.ipython.org/github/PESTools/pestools/blob/master/examples/Identifiability.ipynb>
   

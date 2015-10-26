@@ -860,7 +860,7 @@ class IdentBar(Plot):
         # this line plots the nbars most identifiable parameters, using eigenvectors 1 through nbars
 
         axmain = plt.subplot2grid((1, 15), (0, 0), colspan=13)
-        b = self._df_Nvalues.ix[0:20][self._df_Nvalues.columns[:-1]].plot(ax=axmain, kind='bar', stacked=True, width=0.8, colormap='jet_r')
+        b = self._df_Nvalues.ix[0:self.nbars][self._df_Nvalues.columns[:-1]].plot(ax=axmain, kind='bar', stacked=True, width=0.8, colormap='jet_r')
         b.legend_ = None
         axmain.set_ylabel('Identifiability')
         axmain.tick_params(axis='x')

@@ -227,7 +227,7 @@ class ParSen(object):
         '''
         for index, row in self._obs_data.iterrows():
             # Set weights for obs not in keep_obs to zero
-            if row['OBGNME'].lower() not in keep_obs:
+            if index.lower() not in keep_obs:
                 self._obs_data.set_value(index, 'ParSen_Weight', 0.0)
         if calc_sensitivity is True:
             self.df = self.calc_sensitivity()
@@ -238,7 +238,7 @@ class ParSen(object):
         '''
         for index, row in self._obs_data.iterrows():
             # Set weights for obs in obs to zero
-            if row['OBGNME'].lower() in remove_obs:
+            if index.lower() in remove_obs:
                 self._obs_data.set_value(index, 'ParSen_Weight', 0.0)
         if calc_sensitivity is True:
             self.df = self.calc_sensitivity()
@@ -450,6 +450,3 @@ class ParSen(object):
 
         return plot_obj.fig, plot_obj.ax
             
-if __name__ == '__main__':
-    #parsen = ParSen(basename = r'C:\Users\egc\Desktop\identpar_testing\ppestex\test')
-    parsen = ParSen(basename = r'C:\Users\egc\pest_tools-1\cc\columbia', drop_regul = True)

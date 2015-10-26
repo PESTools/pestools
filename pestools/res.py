@@ -44,6 +44,8 @@ class Res(object):
 
     Notes
     ------
+    A pest control (.pst) file with the same basename must be included in the folder with the residuals file.
+
     Column names in the observation information file are remapped to their default values after import
 
     """
@@ -67,10 +69,14 @@ class Res(object):
                                            basename_col=basename_col, datetime_col=datetime_col,
                                            group_cols=group_cols, obs_info_kwds=obs_info_kwds)
         '''
-        self.obsinfo = self._Pest.obsinfo
-
-        self.obs_groups = self._Pest.obs_groups
-        self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
+        if obs_info_file is not None:
+            self.obsinfo = self._Pest.obsinfo
+            self.obs_groups = self._Pest.obs_groups
+            self._obstypes = self._Pest._obstypes
+        else:
+            self.obsinfo = self._Pest.obsinfo
+            self.obs_groups = self._Pest.obs_groups
+            self._obstypes = pd.DataFrame({'Type': ['observation'] * len(self.obs_groups)}, index=self.obs_groups)
 
 
         check = open(res_file, 'r')
@@ -94,6 +100,7 @@ class Res(object):
         self.df['Weighted_Sq_Residual'] = self.df['Weighted_Residual']**2
         self.phi = self.df[['Weighted_Sq_Residual']].join(self.obsinfo)
         self.phi_by_group = self.df.groupby('Group').agg('sum')[['Weighted_Sq_Residual']]
+        self.phi_by_group['Percent'] = (self.phi_by_group['Weighted_Sq_Residual']/self.phi_by_group['Weighted_Sq_Residual'].sum())*100
         self.phi_by_group = self.phi_by_group.join(self._obstypes)
 
 
@@ -611,13 +618,13 @@ class Res(object):
             if weighted == False:
                 residual = self.df['Residual'].values
             if weighted == True:
-                residual = self.df['Weighted Residual'].values
+                residual = self.df['Weight*Residual'].values
         if groups != None:
             measured = self.df[self.df['Group'].isin(groups)]['Measured'].values
             if weighted == False:
                 residual = self.df[self.df['Group'].isin(groups)]['Residual'].values
             if weighted == True:
-                residual = self.df[self.df['Group'].isin(groups)]['Weighted Residual'].values
+                residual = self.df[self.df['Group'].isin(groups)]['Weight*Residual'].values
         
         # Make New Figure
         plt.figure()
