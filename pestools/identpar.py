@@ -3,7 +3,7 @@ __author__ = 'aleaf'
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pyemu import errvar
+from pyemu import ErrVar
 from pest import Pest
 import plots
 
@@ -11,13 +11,13 @@ class IdentPar:
 
     def __init__(self, jco, par_info_file=None):
         """Computes parameter identifiability for a PEST jco file,
-        using the errvar class in pyemu (https://github.com/jtwhite79/pyemu)
+        using the ErrVar class in pyemu (https://github.com/jtwhite79/pyemu)
         """
 
         self._Pest = Pest(jco, par_info_file=par_info_file)
         self.parinfo = self._Pest.parinfo
 
-        self.la = errvar(jco)
+        self.la = ErrVar(jco)
         self.parinfo = None
         if par_info_file is not None:
             self.parinfo = pd.read_csv(par_info_file, index_col='Name')
