@@ -3,21 +3,21 @@ __author__ = 'aleaf'
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pyemu import ev as errvar
-#import Pest
-#import plots
+from pyemu import ErrVar
+from pest import Pest
+import plots
 
 class IdentPar:
 
     def __init__(self, jco, par_info_file=None):
         """Computes parameter identifiability for a PEST jco file,
-        using the errvar class in pyemu (https://github.com/jtwhite79/pyemu)
+        using the ErrVar class in pyemu (https://github.com/jtwhite79/pyemu)
         """
 
         self._Pest = Pest(jco, par_info_file=par_info_file)
         self.parinfo = self._Pest.parinfo
 
-        self.la = errvar(jco)
+        self.la = ErrVar(jco)
         self.parinfo = None
         if par_info_file is not None:
             self.parinfo = pd.read_csv(par_info_file, index_col='Name')
@@ -44,6 +44,7 @@ class IdentPar:
         if self.parinfo is not None:
             self.ident_points = pd.DataFrame({'ident_sum': self.ident_df.sum(axis=1)}).join(self.parinfo)
             self.ident_points.ident_sum = [i/2.0 for i in self.ident_points.ident_sum]
+
 
     def plot_bar(self, nsingular=None, nbars=20):
         """Computes a stacked bar chart showing the most identifiable parameters
