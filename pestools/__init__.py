@@ -43,12 +43,14 @@ Mapping Class
 .. automodule:: maps
 
 """
-from pest import Pest
-from parsen import ParSen
-from Cor import Cor
-from res import Res
-from rei import Rei
-from identpar import IdentPar
-import plots
-import maps
+from .pest import Pest
+from .parsen import ParSen
+from .Cor import Cor
+from .res import Res
+from .rei import Rei
+from .identpar import IdentPar
+from . import plots
+from . import maps
+from . import mat_handler
+from . import pst_handler as phand
 

@@ -7,10 +7,10 @@ Created on Fri Jan 16 13:35:24 2015
 import os
 import numpy as np
 import pandas as pd
-from mat_handler import jco as Jco
-from mat_handler import cov as Cov
-from pst_handler import pst as Pst
-from Cor import Cor
+from .mat_handler import jco as Jco
+from .mat_handler import cov as Cov
+from .pst_handler import pst as Pst
+from .Cor import Cor
 
 
 

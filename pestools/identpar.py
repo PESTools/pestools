@@ -3,9 +3,9 @@ __author__ = 'aleaf'
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pyemu import errvar
-from pest import Pest
-import plots
+from pyemu import ev as errvar
+#import Pest
+#import plots
 
 class IdentPar:
 

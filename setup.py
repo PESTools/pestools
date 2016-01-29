@@ -1,6 +1,7 @@
 #from distutils.core import setup
 
 from setuptools import setup
+'''
 try:
     from pypandoc import convert
     
@@ -8,7 +9,8 @@ try:
     long_descrip = read_md('README.md')
 except ImportError:
     long_descrip = open('README.md').readlines()
-
+'''
+long_descrip = ''
 def run():
     setup(name="PestTools",
         version="0.0.1",

@@ -552,14 +552,14 @@ class One2onePlot(ScatterPlot):
     def _make_plot(self):
 
         # use matplotlib's color cycle to plot each group as a different color by default
-        color_cycle = self.ax._get_lines.color_cycle
+        colors = [plt.cm.cool(i) for i in np.linspace(0, 1, len(self.groups))]
 
-        for grp in self.groups:
+        for i, grp in enumerate(self.groups):
 
             # default keyword settings, which can be overriden by submitted keywords
             # order of priority is default, then keywords entered for whole plot,
             # then keywords supplied for individual group
-            kwds = {'label': grp, 'c': next(color_cycle), 'linewidth': 0.25}
+            kwds = {'label': grp, 'c': colors[i], 'linewidth': 0.25}
             kwds.update(self.kwds)
             kwds.update(self.groupinfo.get(grp, {}))
             label = kwds.get('label', grp)
