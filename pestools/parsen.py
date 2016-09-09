@@ -7,9 +7,9 @@
 import numpy as np
 import pandas as pd
 import os
-import plots
-from mat_handler import jco as Jco
-from pst_handler import pst as Pst
+from . import plots
+from .mat_handler import jco as Jco
+from .pst_handler import pst as Pst
 
 
 

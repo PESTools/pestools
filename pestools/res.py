@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import math
 import pandas as pd
-import plots
-from pest import Pest
+from . import plots
+from .pest import Pest
 import numpy as np
 #from pst_handler import pst as Pst
 
@@ -311,27 +311,27 @@ class Res(object):
         # RMSE/measured range
         rmse_over_range = rmse/float(range_measured)
         
-        print '-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
-        print 'Observation Group: %s' % (group)
-        print '-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
-        print 'Number of observations in group: %d' % (count)
-        print '-------Measured Stats------------------'
-        print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_measured, max_measured)
-        print 'Range:     %10.4e' % (range_measured)
-        print '-------Residual Stats------------------'
-        print 'Mean:      %10.4e  Std Dev:    %10.4e' % (mean_res, std_res)
-        print 'Minimum:   %10.4e  Maximum:    %10.4e' % (min_res, max_res)
-        print 'RMSE:      %10.4e  RMSE/Range: %10.4e' % (rmse, rmse_over_range)
-        print 'Range:     %10.4e' % (range_res)
-        print '-------Absolute Residual Stats---------'
-        print 'Mean:      %10.4e  Std Dev:   %10.4e' % (mean_abs_res, std_abs_res)
-        print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_abs_res, max_abs_res)
-        print 'Range:     %10.4e' % (range_abs_res)
-        print '-------Weighted Residual Stats---------'
-        print 'Mean:      %10.4e  Std Dev:   %10.4e' % (mean_w_res, std_w_res)
-        print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_w_res, max_w_res)
-        print 'Range:     %10.4e' % (range_w_res)
-        print ' '
+        print('-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+        print('Observation Group: %s' % (group))
+        print('-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+        print('Number of observations in group: %d' % (count))
+        print('-------Measured Stats------------------')
+        print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_measured, max_measured))
+        print('Range:     %10.4e' % (range_measured))
+        print('-------Residual Stats------------------')
+        print('Mean:      %10.4e  Std Dev:    %10.4e' % (mean_res, std_res))
+        print('Minimum:   %10.4e  Maximum:    %10.4e' % (min_res, max_res))
+        print('RMSE:      %10.4e  RMSE/Range: %10.4e' % (rmse, rmse_over_range))
+        print('Range:     %10.4e' % (range_res))
+        print('-------Absolute Residual Stats---------')
+        print('Mean:      %10.4e  Std Dev:   %10.4e' % (mean_abs_res, std_abs_res))
+        print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_abs_res, max_abs_res))
+        print('Range:     %10.4e' % (range_abs_res))
+        print('-------Weighted Residual Stats---------')
+        print('Mean:      %10.4e  Std Dev:   %10.4e' % (mean_w_res, std_w_res))
+        print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_w_res, max_w_res))
+        print('Range:     %10.4e' % (range_w_res))
+        print(' ')
         
     def compute_pct_diff(self, df=None):
         """Compute relative percent difference of residual compared to measured.
@@ -361,7 +361,7 @@ class Res(object):
         
         '''
         grouped = self.df.groupby('Group')
-        group_keys = grouped.groups.keys()
+        group_keys = list(grouped.groups.keys())
         for key in group_keys:
             group_df = self.df.ix[self.df['Group'] == key]
             # Basic info
@@ -403,27 +403,27 @@ class Res(object):
             else:
                 rmse_over_range = np.nan
             
-            print '-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
-            print 'Observation Group: %s' % (key)
-            print '-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
-            print 'Number of observations in group: %d' % (count)
-            print '-------Measured Stats------------------'
-            print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_measured, max_measured)
-            print 'Range:     %10.4e' % (range_measured)
-            print '-------Residual Stats------------------'
-            print 'Mean:      %10.4e  Std Dev:    %10.4e' % (mean_res, std_res)
-            print 'Minimum:   %10.4e  Maximum:    %10.4e' % (min_res, max_res)
-            print 'RMSE:      %10.4e  RMSE/Range: %10.4e' % (rmse, rmse_over_range)
-            print 'Range:     %10.4e' % (range_res)
-            print '-------Absolute Residual Stats---------'
-            print 'Mean:      %10.4e  Std Dev:   %10.4e' % (mean_abs_res, std_abs_res)
-            print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_abs_res, max_abs_res)
-            print 'Range:     %10.4e' % (range_abs_res)
-            print '-------Weighted Residual Stats---------'
-            print 'Mean:      %10.4e  Std Dev:   %10.4e' % (mean_w_res, std_w_res)
-            print 'Minimum:   %10.4e  Maximum:   %10.4e' % (min_w_res, max_w_res)
-            print 'Range:     %10.4e' % (range_w_res)
-            print ' '
+            print('-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+            print('Observation Group: %s' % (key))
+            print('-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*')
+            print('Number of observations in group: %d' % (count))
+            print('-------Measured Stats------------------')
+            print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_measured, max_measured))
+            print('Range:     %10.4e' % (range_measured))
+            print('-------Residual Stats------------------')
+            print('Mean:      %10.4e  Std Dev:    %10.4e' % (mean_res, std_res))
+            print('Minimum:   %10.4e  Maximum:    %10.4e' % (min_res, max_res))
+            print('RMSE:      %10.4e  RMSE/Range: %10.4e' % (rmse, rmse_over_range))
+            print('Range:     %10.4e' % (range_res))
+            print('-------Absolute Residual Stats---------')
+            print('Mean:      %10.4e  Std Dev:   %10.4e' % (mean_abs_res, std_abs_res))
+            print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_abs_res, max_abs_res))
+            print('Range:     %10.4e' % (range_abs_res))
+            print('-------Weighted Residual Stats---------')
+            print('Mean:      %10.4e  Std Dev:   %10.4e' % (mean_w_res, std_w_res))
+            print('Minimum:   %10.4e  Maximum:   %10.4e' % (min_w_res, max_w_res))
+            print('Range:     %10.4e' % (range_w_res))
+            print(' ')
 
 
     def plot_objective_contrib (self, df=None, drop_regul=False):
@@ -450,7 +450,7 @@ class Res(object):
         contributions = []
         groups = []
         grouped = df.groupby('Group')
-        group_keys = grouped.groups.keys()
+        group_keys = list(grouped.groups.keys())
         for key in group_keys:
             if drop_regul:
                 if key.lower().startswith('regul'):
@@ -508,7 +508,7 @@ class Res(object):
         contributions = []
         groups = []
         grouped = self.df.groupby('Group')
-        group_keys = grouped.groups.keys()
+        group_keys = list(grouped.groups.keys())
         for key in group_keys:
             contributions.append((grouped.get_group(key)['Weighted_Residual']**2).sum())
             groups.append(key)
@@ -523,7 +523,7 @@ class Res(object):
         #data = np.rec.fromarrays([percents, groups], dtype = [('Percent', float), ('Group', str)])
         data.sort()
         for item in data:
-            print '%.2f%%   %s' % (item[0], item[1])
+            print('%.2f%%   %s' % (item[0], item[1]))
         if return_data == True:
             return data
         else:
@@ -968,5 +968,5 @@ class Res(object):
         df['geometry'] = [Point(r.X, r.Y) for i, r in df.iterrows()]
         df = df.join(shpdf)
 
-        from maps import Shapefile
+        from .maps import Shapefile
         Shapefile(df, shpname, prj=prj, epsg=epsg, proj4=proj4)

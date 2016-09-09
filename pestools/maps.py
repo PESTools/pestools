@@ -26,12 +26,12 @@ def read_shapefile(shapefile, index=None, true_values=None, false_values=None, \
     from shapefile into dataframe column "geometry"
     '''
 
-    print "\nreading {}...".format(shapefile)
+    print("\nreading {}...".format(shapefile))
     shp_obj = fiona.open(shapefile, 'r')
 
     if index is not None:
         # handle capitolization issues with index field name
-        fields = shp_obj.schema['properties'].keys()
+        fields = list(shp_obj.schema['properties'].keys())
         index = [f for f in fields if index.lower() == f.lower()][0]
 
     attributes = []
@@ -42,7 +42,7 @@ def read_shapefile(shapefile, index=None, true_values=None, false_values=None, \
         attributes.append(props)
     shp_obj.close()
 
-    print '--> building dataframe... (may take a while for large shapefiles)'
+    print('--> building dataframe... (may take a while for large shapefiles)')
     df = pd.DataFrame(attributes)
 
     # handle null geometries
@@ -143,7 +143,7 @@ class Shapefile:
 
         # also exchange any 'object' dtype for 'str'
         dtypes = [d.replace('object', 'str') for d in dtypes]
-        self.properties = dict(zip(self.df.columns, dtypes))
+        self.properties = dict(list(zip(self.df.columns, dtypes)))
 
         # delete the geometry column
         del self.properties[self.geo_column]
@@ -151,7 +151,7 @@ class Shapefile:
     def limit_fieldnames(self):
         """limit field names to ESRI 10-character maximum
         """
-        self.df.columns = map(str, self.df.columns) # convert columns to strings in case some are ints
+        self.df.columns = list(map(str, self.df.columns)) # convert columns to strings in case some are ints
         overtheline = [(i, '{}{}'.format(c[:8], i)) for i, c in enumerate(self.df.columns) if len(c) > 10]
 
         newcolumns = list(self.df.columns)
@@ -162,7 +162,7 @@ class Shapefile:
     def write(self):
         '''save dataframe with column of shapely geometry objects to shapefile
         '''
-        print 'writing {}...'.format(self.shpname)
+        print('writing {}...'.format(self.shpname))
 
         # sort the dataframe columns (so that properties coincide)
         self.df = self.df.sort(axis=1)
@@ -203,12 +203,12 @@ class Shapefile:
                 output.write({'properties': props,
                               'geometry': mapping(geo)})
                 knt +=1
-                print '\r{:d}%'.format(100*knt/length),
+                print('\r{:d}%'.format(100*knt/length), end=' ')
 
 
         if len(problem_cols) > 0:
-            print 'Warning: Had problems writing these DataFrame columns: {}'.format(problem_cols)
-            print 'Check their dtypes.'
+            print('Warning: Had problems writing these DataFrame columns: {}'.format(problem_cols))
+            print('Check their dtypes.')
 
     def set_projection(self):
         from fiona.crs import to_string, from_epsg, from_string
@@ -230,8 +230,8 @@ class Shapefile:
 
         This makes use of links like http://spatialreference.org/ref/epsg/4326/prettywkt/
         """
-        import urllib
-        f = urllib.urlopen("http://spatialreference.org/ref/epsg/{0}/prettywkt/".format(self.epsg))
+        import urllib.request, urllib.parse, urllib.error
+        f = urllib.request.urlopen("http://spatialreference.org/ref/epsg/{0}/prettywkt/".format(self.epsg))
         self.prettywkt = f.read().replace('\n', '') # get rid of any EOL
 
     def get_proj4(self):

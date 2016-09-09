@@ -49,8 +49,8 @@ from .Cor import Cor
 from .res import Res
 from .rei import Rei
 from .identpar import IdentPar
-from . import plots
-from . import maps
-from . import mat_handler
-from . import pst_handler as phand
+from .plots import *
+from .maps import *
+from .mat_handler import *
+from .pst_handler import pst
 

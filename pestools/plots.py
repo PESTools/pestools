@@ -79,14 +79,14 @@ class Plot(object):
         # dictionary supplied for groupinfo
         if isinstance(self.groupinfo, dict):
             # only attempt to plot groups that are in Res dataframe
-            self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.iteritems())
+            self.groupinfo = dict((k.lower(), v) for k, v in self.groupinfo.items())
             self.groups = list(set(self.groupinfo.keys()).intersection(set(self.groups)))
 
         # list or array of group names supplied
         elif isinstance(self.groupinfo, list) or isinstance(self.groupinfo, np.ndarray):
             self.groupinfo = [g.lower() for g in self.groupinfo]
             self.groups = list(set(self.groupinfo).intersection(set(self.groups)))
-            self.groupinfo = dict(zip(self.groupinfo, [{}] * len(self.groupinfo)))
+            self.groupinfo = dict(list(zip(self.groupinfo, [{}] * len(self.groupinfo))))
 
         elif isinstance(self.groupinfo, str):
             self.groupinfo = self.groupinfo.lower()
@@ -189,7 +189,7 @@ class Hist(Plot):
         self._parse_groups()
 
         # need to expand this to support arbitrary labels
-        self.titles = [k for k in self.groupinfo.iterkeys()]
+        self.titles = [k for k in self.groupinfo.keys()]
 
     def _make_plot(self):
 
@@ -422,7 +422,7 @@ class SpatialPlot(ScatterPlot):
                               for g in df.geometry]
 
         if 'Polygon' in df.geometry[0].type:
-            print "building PatchCollection..."
+            print("building PatchCollection...")
             patches = []
             for i, g in enumerate(df.geometry.tolist()):
                 patches.append(PolygonPatch(g, fc=fc, ec=ec, lw=lw, alpha=alpha, zorder=zorder, **kwargs))
@@ -431,17 +431,17 @@ class SpatialPlot(ScatterPlot):
             self.ax.add_collection(collection)
 
         elif 'LineString' in df.geometry[0].type:
-            print "building LineCollection..."
+            print("building LineCollection...")
             lines = []
             for i, g in enumerate(df.geometry.tolist()):
                 if 'Multi' not in g.type:
                     x, y = g.xy
-                    lines.append(zip(x, y))
+                    lines.append(list(zip(x, y)))
                 # plot each line in a multilinestring
                 else:
                     for l in g:
                         x, y = l.xy
-                        lines.append(zip(x, y))
+                        lines.append(list(zip(x, y)))
 
             collection = LineCollection(lines, colors=ec, linewidths=lw, alpha=alpha, zorder=zorder, **kwargs)
             #lc.set_edgecolor(ec)
@@ -450,7 +450,7 @@ class SpatialPlot(ScatterPlot):
             self.ax.add_collection(collection)
 
         else:
-            print "plotting points..."
+            print("plotting points...")
             x = np.array([g.x for g in df.geometry])
             y = np.array([g.y for g in df.geometry])
 
@@ -602,7 +602,7 @@ class One2onePlot(ScatterPlot):
             # weed out duplicate legend entries (from multiple PEST groups in single category)
             # enforce drawing order in legend
             u_handles, u_labels = [], []
-            legend_order = sorted(self._legend_order.items(), key=operator.itemgetter(1))
+            legend_order = sorted(list(self._legend_order.items()), key=operator.itemgetter(1))
             legend_order.reverse()
 
             for item in legend_order:
@@ -737,7 +737,7 @@ class BarPloth(Plot):
             plt.yticks(np.arange(len(self.df.index)), self.df.index)
         else:
             # Make sure all keys are lower
-            self.alt_labels = dict((k.lower(), v) for k, v in self.alt_labels.iteritems())
+            self.alt_labels = dict((k.lower(), v) for k, v in self.alt_labels.items())
             labels = []
             for label in self.df.index:
                 if label in self.alt_labels:

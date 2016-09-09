@@ -7,9 +7,9 @@ Created on Sat Jan 17 22:54:50 2015
 import numpy as np
 import pandas as pd
 import os
-import plots
-from mat_handler import matrix as Matrix
-from pst_handler import pst as Pst
+from . import plots
+from .mat_handler import matrix as Matrix
+from .pst_handler import pst as Pst
 
 
 class Cor(object):

@@ -3,8 +3,8 @@ __author__ = 'aleaf'
 import os
 import numpy as np
 import pandas as pd
-from res import Res
-from pest import Pest
+from .res import Res
+from .pest import Pest
 from matplotlib.backends.backend_pdf import PdfPages
 
 
@@ -104,7 +104,7 @@ class Rei(object):
             except:
                 continue
         # for SVDA runs, may not have .0 (initial) rei file. Get rei file for base run.
-        if 0 not in self.reifiles.keys():
+        if 0 not in list(self.reifiles.keys()):
             self._read_svda()
             self.reifiles[0] = os.path.join(self.run_folder, self.BASEPESTFILE[:-4] + '.rei')
 
@@ -113,21 +113,21 @@ class Rei(object):
         if len(outpdf) == 0:
             outpdf = self.basename + '_reis.pdf'
 
-        print 'plotting...'
+        print('plotting...')
         pdf = PdfPages(outpdf)
-        for i in self.reifiles.iterkeys():
-            print '{}'.format(self.reifiles[i])
+        for i in self.reifiles.keys():
+            print('{}'.format(self.reifiles[i]))
             r = Res(self.reifiles[i])
             fig, ax = r.plot_one2one(groupinfo, title='Iteration {}'.format(i), **kwds)
 
             pdf.savefig(fig, **kwds)
-        print '\nsaved to {}'.format(outpdf)
+        print('\nsaved to {}'.format(outpdf))
         pdf.close()
 
     def get_phi(self):
-        print 'getting phi by group for each iteration...'
-        for i in self.reifiles.iterkeys():
-            print '{}'.format(self.reifiles[i])
+        print('getting phi by group for each iteration...')
+        for i in self.reifiles.keys():
+            print('{}'.format(self.reifiles[i]))
             r = Res(self.reifiles[i])
             phi = r.phi.Weighted_Sq_Residual
             #phi.name = i

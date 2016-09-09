@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pyemu import ErrVar
-from pest import Pest
-import plots
+from .pest import Pest
+from . import plots
 
 class IdentPar:
 

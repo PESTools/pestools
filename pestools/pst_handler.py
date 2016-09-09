@@ -61,7 +61,7 @@ class pst(object):
         """get the weighted total objective function
         """
         sum = 0.0
-        for grp,contrib in self.phi_components.iteritems():
+        for grp,contrib in self.phi_components.items():
             sum += contrib
         return sum
 
@@ -82,8 +82,8 @@ class pst(object):
         components = {}
         ogroups = self.observation_data.groupby("obgnme").groups
         rgroups = self.res.groupby("group").groups
-        for og in ogroups.keys():
-            assert og in rgroups.keys(),"pst.adjust_weights_res() obs group " +\
+        for og in list(ogroups.keys()):
+            assert og in list(rgroups.keys()),"pst.adjust_weights_res() obs group " +\
                 "not found: " + str(og)
             og_res_df = self.res.ix[rgroups[og]]
             og_res_df.index = og_res_df.name
@@ -168,7 +168,7 @@ class pst(object):
         """observation groups
         """
         pass
-        return self.observation_data.groupby("obgnme").groups.keys()
+        return list(self.observation_data.groupby("obgnme").groups.keys())
 
 
     @property
@@ -176,7 +176,7 @@ class pst(object):
         """parameter groups
         """
         pass
-        return self.parameter_data.groupby("pargp").groups.keys()
+        return list(self.parameter_data.groupby("pargp").groups.keys())
 
 
     @property
@@ -184,7 +184,7 @@ class pst(object):
         """prior info groups
         """
         pass
-        return self.prior_information.groupby("obgnme").groups.keys()
+        return list(self.prior_information.groupby("obgnme").groups.keys())
 
 
     @property
@@ -275,7 +275,7 @@ class pst(object):
                     raise Exception("EOF before prior information " +
                                     "section found")
                 if "* prior information" in line.lower():
-                    for iprior in xrange(nprior):
+                    for iprior in range(nprior):
                         line = f.readline()
                         if line == '':
                             raise Exception("EOF during prior information " +
@@ -310,7 +310,7 @@ class pst(object):
             "tied parameters not supported in pst.write()"
         f_in = open(self.filename, 'r')
         f_out = open(new_filename, 'w')
-        for _ in xrange(3):
+        for _ in range(3):
             f_out.write(f_in.readline())
         raw = f_in.readline().strip().split()
         npar_gp = len(self.par_groups)
@@ -486,8 +486,8 @@ class pst(object):
         #                     keep_idx.append(row[1].index)
         #         new_prior = new_prior.loc[keep_idx, :]
         if par_names is not None:
-            print "pst.get() warning: dropping all prior information in " + \
-                  " new pst instance"
+            print("pst.get() warning: dropping all prior information in " + \
+                  " new pst instance")
         new_pst.prior_information = self.null_prior
         new_pst.mode = self.mode
         new_pst.estimation = self.estimation
@@ -543,8 +543,8 @@ class pst(object):
                     weight = 1.0 / (ubnd - lbnd)
                 self.prior_information.loc[parnme, "weight"] = weight
             else:
-                print "prior information name does not correspond" +\
-                      " to a parameter: " + str(parnme)
+                print("prior information name does not correspond" +\
+                      " to a parameter: " + str(parnme))
 
 
     def parrep(self,parfile=None):
@@ -590,12 +590,12 @@ class pst(object):
             "pst.adjust_weights_recfile(): recfile not found: " +\
             str(recfile)
         iter_components = self.get_phi_components_from_recfile(recfile)
-        iters = iter_components.keys()
+        iters = list(iter_components.keys())
         iters.sort()
         obs = self.observation_data
         ogroups = obs.groupby("obgnme").groups
         last_complete_iter = None
-        for ogroup, idxs in ogroups.iteritems():
+        for ogroup, idxs in ogroups.items():
             for iiter in iters[::-1]:
                 incomplete = False
                 if ogroup not in iter_components[iiter]:
@@ -641,18 +641,18 @@ class pst(object):
         obs = self.observation_data
         nz_groups = obs.groupby(obs["weight"].map(lambda x: x == 0)).groups
         nzobs = 0
-        if False in nz_groups.keys():
+        if False in list(nz_groups.keys()):
             nzobs = len(nz_groups[False])
 
         ogroups = obs.groupby("obgnme").groups
-        for ogroup, idxs in ogroups.iteritems():
+        for ogroup, idxs in ogroups.items():
             if self.mode.startswith("regul") and "regul" in ogroup.lower():
                 continue
             og_phi = components[ogroup]
             odf = obs.loc[idxs, :]
             nz_groups = odf.groupby(odf["weight"].map(lambda x: x == 0)).groups
             og_nzobs = 0
-            if False in nz_groups.keys():
+            if False in list(nz_groups.keys()):
                 og_nzobs = len(nz_groups[False])
             if og_nzobs == 0 and og_phi > 0:
                 raise Exception("pst.adjust_weights_by_phi_components():"
@@ -707,11 +707,11 @@ class pst(object):
                 in the observation data dataframe
         """
         pass
-        for item in target_phis.keys():
-            assert item in res_idxs.keys(),\
+        for item in list(target_phis.keys()):
+            assert item in list(res_idxs.keys()),\
                 "pst.__reset_weights(): "  + str(item) +\
                 " not in residual group indices"
-            assert item in obs_idxs.keys(), \
+            assert item in list(obs_idxs.keys()), \
                 "pst.__reset_weights(): " + str(item) +\
                 " not in observation group indices"
             actual_phi = ((self.res.loc[res_idxs[item],"residual"] *
@@ -749,15 +749,15 @@ class pst(object):
             self.res.index = self.res.group
             self.observation_data.index = self.observation_data.obgnme
             res_idxs, obs_idxs = {}, {}
-            for suffix,phi in obsgrp_suffix_dict.iteritems():
+            for suffix,phi in obsgrp_suffix_dict.items():
                 res_groups = self.res.groupby(lambda x:
                                               x.endswith(suffix)).groups
-                assert True in res_groups.keys(),\
+                assert True in list(res_groups.keys()),\
                     "pst.adjust_weights_by_phi(): obs group suffix \'" +\
                     str(suffix)+"\' not found in res"
                 obs_groups = self.observation_data.groupby(
                     lambda x: x.endswith(suffix)).groups
-                assert True in obs_groups.keys(),\
+                assert True in list(obs_groups.keys()),\
                     "pst.adjust_weights_by_phi(): obs group suffix \'" +\
                     str(suffix) + "\' not found in observation_data"
                 res_idxs[suffix] = res_groups[True]
@@ -767,15 +767,15 @@ class pst(object):
             self.res.index = self.res.group
             self.observation_data.index = self.observation_data.obgnme
             res_idxs, obs_idxs = {}, {}
-            for prefix, phi in obsgrp_prefix_dict.iteritems():
+            for prefix, phi in obsgrp_prefix_dict.items():
                 res_groups = self.res.groupby(
                     lambda x: x.startswith(prefix)).groups
-                assert True in res_groups.keys(),\
+                assert True in list(res_groups.keys()),\
                     "pst.adjust_weights_by_phi(): obs group prefix \'" +\
                     str(prefix) + "\' not found in res"
                 obs_groups = self.observation_data.groupby(
                     lambda x:x.startswith(prefix)).groups
-                assert True in obs_groups.keys(),\
+                assert True in list(obs_groups.keys()),\
                     "pst.adjust_weights_by_phi(): obs group prefix \'" +\
                     str(prefix) + "\' not found in observation_data"
                 res_idxs[prefix] = res_groups[True]
@@ -788,7 +788,7 @@ class pst(object):
 if __name__ == "__main__":
     p = pst("pest.pst")
     pnew = p.get(p.par_names[:10],p.obs_names[-10:])
-    print pnew.res
+    print(pnew.res)
     pnew.write("test.pst")
     #p.adjust_phi_by_weights(obsgrp_dict={"head":10},obs_dict={"h_obs01_1":100})
     #p.adjust_phi_by_weights(obsgrp_prefix_dict={"he":10})
