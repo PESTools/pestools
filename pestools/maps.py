@@ -203,7 +203,7 @@ class Shapefile:
                 output.write({'properties': props,
                               'geometry': mapping(geo)})
                 knt +=1
-                print('\r{:d}%'.format(100*knt/length), end=' ')
+                print('\r{:.1f}%'.format(100*knt/length), end=' ')
 
 
         if len(problem_cols) > 0:
