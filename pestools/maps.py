@@ -2,9 +2,11 @@ __author__ = 'aleaf'
 
 import numpy as np
 import pandas as pd
-import fiona
-from shapely.geometry import mapping, shape, Point
-
+try:
+    import fiona
+    from shapely.geometry import mapping, shape, Point
+except:
+    print('\nGIS dependencies not installed. Please see readme for instructions on installation')
 
 def point_shapefile(df, X, Y, shpname, prj=None):
 
