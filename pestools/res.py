@@ -553,6 +553,8 @@ class Res(object):
             measured = self.df['Measured'].values
             modeled = self.df['Modelled'].values
         if groups != None:
+            if not isinstance(groups, list):
+                groups = [groups]
             measured = self.df[self.df['Group'].isin(groups)]['Measured'].values
             modeled = self.df[self.df['Group'].isin(groups)]['Modelled'].values
         
@@ -620,6 +622,8 @@ class Res(object):
             if weighted == True:
                 residual = self.df['Weight*Residual'].values
         if groups != None:
+            if not isinstance(groups,list):
+                groups = [groups]
             measured = self.df[self.df['Group'].isin(groups)]['Measured'].values
             if weighted == False:
                 residual = self.df[self.df['Group'].isin(groups)]['Residual'].values
