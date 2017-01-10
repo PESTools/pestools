@@ -120,6 +120,9 @@ class ParSen(object):
         else:
             self.res_df = res_df
         # Set index of res_df
+
+        if 'Name' in self.res_df.columns:
+            self.res_df.columns = [i.lower() for i in self.res_df.columns]
         self.res_df.set_index('name', drop=False, inplace = True)
 
         
@@ -257,7 +260,7 @@ class ParSen(object):
             Series of n_tail least sensitive parameters
 
         '''
-        return self.df.sort(columns='Sensitivity', ascending=False)\
+        return self.df.sort_values(by='Sensitivity', ascending=False)\
             .tail(n=n_tail)['Sensitivity']
 
     def head(self, n_head):
@@ -272,7 +275,7 @@ class ParSen(object):
         pandas Series
             Series of n_head most sensitive parameters
         '''
-        return self.df.sort(columns='Sensitivity', ascending=False)\
+        return self.df.sort_values(by='Sensitivity', ascending=False)\
             .head(n=n_head)['Sensitivity']
 
     def par(self, parameter):
@@ -315,11 +318,11 @@ class ParSen(object):
             n_head = n
 
         if n_head > 0:
-            sensitivity = self.df.sort(columns='Sensitivity',
+            sensitivity = self.df.sort_values(by='Sensitivity',
                                        ascending = False).ix[self.df['Parameter Group'] == group].head(n=n_head)
         if n_head < 0:
             n_head = abs(n_head)
-            sensitivity = self.df.sort(columns='Sensitivity',
+            sensitivity = self.df.sort_values(by='Sensitivity',
                                        ascending = False).ix[self.df['Parameter Group'] == group].tail(n=n_head)
 
         sensitivity.index.name = 'Parameter'
@@ -333,7 +336,7 @@ class ParSen(object):
         Pandas DataFrame
         '''
         sen_grouped = self.df.groupby(['Parameter Group'])\
-            .aggregate(np.sum).sort(columns='Sensitivity', ascending=False)
+            .aggregate(np.sum).sort_values(by='Sensitivity', ascending=False)
         return sen_grouped
 
     def plot(self, n=None, group=None, color_dict=None, alt_labels=None, **kwds):
@@ -370,21 +373,21 @@ class ParSen(object):
         if group is None:
 
             if n_head > 0:
-                sensitivity = self.df.sort(columns='Sensitivity',
+                sensitivity = self.df.sort_values(by='Sensitivity',
                                            ascending=False).head(n=n_head)
             if n_head < 0:
                 n_head = abs(n_head)
-                sensitivity = self.df.sort(columns='Sensitivity',
+                sensitivity = self.df.sort_values(by='Sensitivity',
                                            ascending=False).tail(n=n_head)
 
         if group is not None:
             group = group.lower()
             if n_head > 0:
-                sensitivity = self.df.sort(columns='Sensitivity',
+                sensitivity = self.df.sort_values(by='Sensitivity',
                                            ascending=False).ix[self.df['Parameter Group'] == group].head(n=n_head)         
             if n_head < 0:
                 n_head = abs(n_head)
-                sensitivity = self.df.sort(columns='Sensitivity',
+                sensitivity = self.df.sort_values(by='Sensitivity',
                                            ascending=False).ix[self.df['Parameter Group'] == group].tail(n=n_head)
 
         if 'ylabel' not in kwds:
@@ -411,7 +414,7 @@ class ParSen(object):
             Bar plot of mean of sensitivity by parameter group
         '''
         sen_grouped = self.df.groupby(['Parameter Group'])\
-            .aggregate(np.mean).sort(columns='Sensitivity', ascending=False)
+            .aggregate(np.mean).sort_values(by='Sensitivity', ascending=False)
 
         if 'ylabel' not in kwds:
             kwds['ylabel'] = 'Parameter Group'
@@ -436,7 +439,7 @@ class ParSen(object):
         '''
 
         sen_grouped = self.df.groupby(['Parameter Group'])\
-            .aggregate(np.sum).sort(columns='Sensitivity', ascending=False)
+            .aggregate(np.sum).sort_values(by='Sensitivity', ascending=False)
 
         if 'ylabel' not in kwds:
             kwds['ylabel'] = 'Parameter Group'
