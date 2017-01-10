@@ -2,9 +2,11 @@ __author__ = 'aleaf'
 
 import numpy as np
 import pandas as pd
-import fiona
-from shapely.geometry import mapping, shape, Point
-
+try:
+    import fiona
+    from shapely.geometry import mapping, shape, Point
+except:
+    print('\nGIS dependencies not installed. Please see readme for instructions on installation')
 
 def point_shapefile(df, X, Y, shpname, prj=None):
 
@@ -211,7 +213,10 @@ class Shapefile:
             print('Check their dtypes.')
 
     def set_projection(self):
-        from fiona.crs import to_string, from_epsg, from_string
+        try:
+            from fiona.crs import to_string, from_epsg, from_string
+        except:
+            print('\nGIS dependencies not installed. Please see readme for instructions on installation')
         if self.prj is not None:
             self.get_proj4()
         if self.proj4 is not None:
