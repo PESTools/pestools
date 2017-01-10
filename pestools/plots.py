@@ -853,7 +853,7 @@ class IdentBar(Plot):
         self.nbars = nbars
         self._df_Nvalues = self.df[self.df.columns[0:self.N]].copy()
         self._df_Nvalues['ident'] = self._df_Nvalues.sum(axis=1)
-        self._df_Nvalues = self._df_Nvalues.sort(columns=['ident'], ascending=False)
+        self._df_Nvalues = self._df_Nvalues.sort_values(by=['ident'], ascending=False)
 
     def _make_plot(self):
         # need to come up with a way to meaningfully plot out parameters with highest identifiabilities
